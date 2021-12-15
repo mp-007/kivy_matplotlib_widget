@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 19 11:39:26 2021
-
-@author: Manu
-"""
-
 #avoid conflict between mouse provider and touch (very importany with touch device)
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,disable_on_activity')
@@ -56,24 +49,17 @@ class Test(App):
         return self.screen
 
     def on_start(self, *args):
-#        self.figure_wgt = self.ids.figure_wgt
         mygraph = GraphGenerator()
         
         self.screen.figure_wgt.figure = mygraph.fig
         self.screen.figure_wgt.axes = mygraph.ax1
-#        self.screen.figure_wgt.xmin = mygraph.xmin
-#        self.screen.figure_wgt.xmax = mygraph.xmax
-#        self.screen.figure_wgt.ymin = mygraph.ymin
-#        self.screen.figure_wgt.ymax = mygraph.ymax
-
         self.screen.figure_wgt.xmin=0
         self.screen.figure_wgt.xmax = 2*np.pi
         self.screen.figure_wgt.ymin=-1.1
         self.screen.figure_wgt.ymax = 1.1
         self.screen.figure_wgt.line1=mygraph.line1
         self.home()
-
-        
+       
         Clock.schedule_interval(self.update_graph,1/60)
 
     def set_touch_mode(self,mode):
@@ -93,8 +79,7 @@ class Test(App):
                 else:
                     self.screen.figure_wgt.figure.canvas.draw_idle()
                     self.screen.figure_wgt.figure.canvas.flush_events() 
-#            print('plot')             +
-            
+           
             self.i+=1
         else:
             Clock.unschedule(self.update_graph)

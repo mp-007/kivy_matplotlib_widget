@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 19 11:39:26 2021
-
-@author: Manu
-"""
-
 #avoid conflict between mouse provider and touch (very importany with touch device)
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,disable_on_activity')
@@ -50,7 +43,6 @@ class Test(App):
         return self.screen
 
     def on_start(self, *args):
-#        self.figure_wgt = self.ids.figure_wgt
         mygraph = GraphGenerator()
         
         self.screen.figure_wgt.figure = mygraph.fig

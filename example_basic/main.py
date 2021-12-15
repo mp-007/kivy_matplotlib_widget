@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 19 11:39:26 2021
-
-@author: Manu
-"""
-
 #avoid conflict between mouse provider and touch (very importany with touch device)
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,disable_on_activity')
@@ -44,13 +37,13 @@ Screen
 
 
 class Test(App):
+    lines = []
 
     def build(self):  
         self.screen=Builder.load_string(KV)
         return self.screen
 
     def on_start(self, *args):
-#        self.figure_wgt = self.ids.figure_wgt
         mygraph = GraphGenerator()
         
         self.screen.figure_wgt.figure = mygraph.fig
@@ -59,6 +52,11 @@ class Test(App):
         self.screen.figure_wgt.xmax = mygraph.xmax
         self.screen.figure_wgt.ymin = mygraph.ymin
         self.screen.figure_wgt.ymax = mygraph.ymax
+        self.screen.figure_wgt.fast_draw = False #update axis during pan/zoom
+        
+        #register lines instance if need to be update
+        self.lines.append(mygraph.line1)
+        self.lines.append(mygraph.line2)
 
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode

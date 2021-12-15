@@ -1,12 +1,6 @@
-from __future__ import annotations
-
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from kivy.metrics import dp
-import numpy as np
 
 #optimized draw on Agg backend
 mpl.rcParams['path.simplify'] = True
@@ -32,17 +26,14 @@ class GraphGenerator(object):
         super().__init__()
 
         self.fig, self.ax1 = plt.subplots(1, 1)
-
+        
+        
         self.line1, = self.ax1.plot([], [],label='line1')
-#        self.line2, = self.ax1.plot([], [],label='line2')
-        
-#        self.line1, = self.ax1.plot([0,1,2,3,4], [1,2,8,9,4],label='line1')
-#        self.line2, = self.ax1.plot([2,8,10,15], [15,0,2,4],label='line2')
-        
-#        nb_pts=50000
-#        self.line1, = self.ax1.plot(np.random.randn(nb_pts),label='line1')
-#        self.line2, = self.ax1.plot(np.random.randn(nb_pts)+2,label='line2')        
-
+# =============================================================================
+        #add other lines
+        # self.line2, = self.ax1.plot([], [],label='line2')      
+# =============================================================================
+              
         self.xmin,self.xmax = self.ax1.get_xlim()
         self.ymin,self.ymax = self.ax1.get_ylim()
         
