@@ -1,6 +1,9 @@
 # kivy_matplotlib_widget
 A fast matplotlib rendering for Kivy based on Kivy_matplotlib project (https://github.com/jeysonmc/kivy_matplotlib) and kivy scatter. Matplotlib used 'agg' backend
 
+# How to use
+Just copy graph_widget.py and modify graph_generator_template.py in your project. Modify graph_generator_template as your needed. See examples for more informations
+
 # key features
  - zoom with 2 fingers or mouse scroll
  - pan with 1 finger or mouse left click
