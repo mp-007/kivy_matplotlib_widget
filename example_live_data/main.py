@@ -1,4 +1,4 @@
-#avoid conflict between mouse provider and touch (very importany with touch device)
+#avoid conflict between mouse provider and touch (very important with touch device)
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,disable_on_activity')
 
