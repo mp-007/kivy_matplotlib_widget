@@ -14,6 +14,7 @@ from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, Bound
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.transforms import Bbox
 from kivy.metrics import dp
 
 class MatplotFigure(Widget):
@@ -70,6 +71,8 @@ class MatplotFigure(Widget):
         self.fast_draw=True
         self.draw_left_spline=False #available only when fast_draw is True
         self.touch_mode='pan'
+        self.hover_on = False
+        self.xsorted = True #to manage x sorted data (if numpy is used)
 
         #zoom box coordonnate
         self.x0_box = None
@@ -83,6 +86,159 @@ class MatplotFigure(Widget):
         
         
         self.bind(size=self._onSize)
+
+    def register_lines(self,lines:list) -> None:
+        """ register lines method
+        
+        Args:
+            lines (list): list of matplolib line class
+            
+        Return:
+            None        
+        """ 
+        
+        #create cross hair cusor
+        self.horizontal_line = self.axes.axhline(color='k', lw=0.8, ls='--', visible=False)
+        self.vertical_line = self.axes.axvline(color='k', lw=0.8, ls='--', visible=False)
+        
+        #register lines
+        self.lines=lines
+                
+        #white background for blit method (fast draw)
+        props = dict(boxstyle='square',edgecolor='w', facecolor='w', alpha=1.0)
+        self.text_background=self.axes.text(0.5, 1.01, 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', color='w', transform=self.axes.transAxes, bbox=props)       
+        
+        #cursor text
+        self.text = self.axes.text(0.52, 1.01, '', transform=self.axes.transAxes, bbox=props)
+
+    def set_cross_hair_visible(self, visible:bool) -> None:
+        """ set curcor visibility
+        
+        Args:
+            visible (bool): make cursor visble or not
+            
+        Return:
+            None
+        
+        """       
+        self.horizontal_line.set_visible(visible)
+        self.vertical_line.set_visible(visible)
+        self.text.set_visible(visible)
+
+    def hover(self, event) -> None:
+        """ hover cursor method (cursor to nearest value)
+        
+        Args:
+            event: touch kivy event
+            
+        Return:
+            None
+        
+        """
+           
+        #if cursor is set -> hover is on
+        if self.hover_on:
+
+            #transform kivy x,y touch event to x,y data
+            trans = self.axes.transData.inverted()
+            xdata, ydata = trans.transform_point((event.x, event.y))
+
+            #loop all register lines and find closest x,y data for each valid line
+            distance=[]
+            good_line=[]
+            good_index=[]
+            good_index2=[]
+            for line in self.lines:
+                #get only visible lines
+                if line.get_visible():  
+                    #get line x,y datas
+                    self.x_cursor, self.y_cursor = line.get_data()
+                    
+                    #check if line is not empty
+                    if len(self.x_cursor)!=0:                        
+                        #!!!! if numpy is available you can used this for faster results !!!!
+                        #case 1 : x are sorted
+                        #index = min(np.searchsorted(self.x_cursor, xdata), len(self.y_cursor) - 1)
+                        #case 2:  x are not sorted
+                        #index = np.argsort(abs(self.x_cursor - xdata))[0]
+                        
+                        #find closest data index from touch (x axis)
+                        if self.xsorted:
+                            index = sorted(range(len(abs(self.x_cursor - xdata))), 
+                                           key=abs(self.x_cursor - xdata).__getitem__)[0] 
+                        else:
+                            index = sorted(range(len(abs(self.x_cursor - xdata))), 
+                                           key=abs(self.x_cursor - xdata).__getitem__)[0] 
+
+                        #get x data from index
+                        x = self.x_cursor[index]
+                        
+                        #find ydata corresponding to xdata
+                        y = self.y_cursor[index]
+                                               
+                        #get distance between line and touch (in pixels)
+                        ax=line.axes 
+                        #left axis
+                        # xy_pixels_mouse = ax.transData.transform(np.vstack([xdata,ydata]).T)
+                        xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
+                        # xy_pixels = ax.transData.transform(np.vstack([x,y]).T)
+                        xy_pixels = ax.transData.transform([(x,y)])
+                        dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
+                        dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
+                        
+                        #store distance
+                        distance.append((dx2 + dy2)**0.5)
+                        
+                        #store all best lines and index
+                        good_line.append(line)
+                        good_index.append(index)
+ 
+            #case if no good line
+            if len(good_line)==0:
+                return
+
+            #if minimum distance if lower than 50 pixels, get line datas with 
+            #minimum distance 
+            if min(distance)<dp(50):
+                #!!! if numpy is available, argmin can be used form faster result !!!
+                #idx_best=np.argmin(distance)
+                
+                #index of minimum distance
+                idx_best=distance.index(min(distance))
+                
+                #get datas from closest line
+                line=good_line[idx_best]
+                self.x_cursor, self.y_cursor = line.get_data()
+                x = self.x_cursor[good_index[idx_best]]
+                y = self.y_cursor[good_index[idx_best]]                
+                self.set_cross_hair_visible(True)
+                
+                # update the cursor x,y data               
+                ax=line.axes
+                self.horizontal_line.set_ydata(y)
+                self.vertical_line.set_xdata(x)
+
+                #x y label
+                self.text.set_text(f"x={x}, y={y}")
+
+                #blit method (always use because same visual effect as draw)
+                self.axes.draw_artist(self.axes.patch)
+                self.axes.draw_artist(self.text_background)
+                self.axes.draw_artist(self.text)
+                self.axes.draw_artist(list(self.axes.spines.values())[0])
+
+                for line in self.axes.lines:
+                    self.axes.draw_artist(line)
+
+                mybbox=self.my_blit_box(ax.bbox.bounds[0],ax.bbox.bounds[1],ax.bbox.bounds[2],ax.bbox.bounds[3]+50)                    
+                
+                #draw (blit method)
+                self.axes.figure.canvas.blit(mybbox)                 
+                self.axes.figure.canvas.flush_events()
+
+            #if touch is too far, hide cross hair cursor
+            else:
+                self.set_cross_hair_visible(False)  
 
     def home(self) -> None:
         """ reset data axis
@@ -105,6 +261,11 @@ class MatplotFigure(Widget):
         """
         self._touches = []
         self._last_touch_pos = {}
+
+    @staticmethod
+    def my_blit_box(x0, y0, width, height):
+        """ build custom matplotlib bbox """
+        return Bbox.from_bounds(x0, y0, width, height)
         
     def _get_scale(self):
         """ kivy scatter _get_scale method """
@@ -160,6 +321,12 @@ class MatplotFigure(Widget):
             elif self.touch_mode=='zoombox':
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 self.draw_box(event, self.x_init,self.y_init, event.x, real_y)
+                
+            #mode cursor
+            elif self.touch_mode=='cursor':
+                self.hover_on=True
+                self.hover(event)
+                
             changed = True
 
         #note: avoid zoom in/out on touch mode zoombox
@@ -227,7 +394,10 @@ class MatplotFigure(Widget):
                 return True
                   
             else:
-                if self.touch_mode=='zoombox':
+                if self.touch_mode=='cursor':
+                    self.hover_on=True
+                    self.hover(event)                
+                elif self.touch_mode=='zoombox':
                     real_x, real_y = x - self.pos[0], y - self.pos[1]
                     self.x_init=x
                     self.y_init=real_y
