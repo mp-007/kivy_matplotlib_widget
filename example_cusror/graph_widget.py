@@ -72,7 +72,7 @@ class MatplotFigure(Widget):
         self.draw_left_spline=False #available only when fast_draw is True
         self.touch_mode='pan'
         self.hover_on = False
-        self.xsorted = True
+        self.xsorted = True #to manage x sorted data (if numpy is used)
 
         #zoom box coordonnate
         self.x0_box = None
