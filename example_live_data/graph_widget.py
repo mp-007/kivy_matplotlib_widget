@@ -73,6 +73,7 @@ class MatplotFigure(Widget):
         self.touch_mode='pan'
         self.hover_on = False
         self.xsorted = True #to manage x sorted data (if numpy is used)
+        self.minzoom = dp(40) #minimum pixel distance to apply zoom
 
         #zoom box coordonnate
         self.x0_box = None
@@ -449,7 +450,14 @@ class MatplotFigure(Widget):
 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
-            self.reset_box()     
+            self.reset_box()  
+            if not self.collide_point(x, y) and self.do_update:
+                #update axis lim if zoombox is used and touch outside widget
+                self.update_lim()            
+                ax=self.axes
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events() 
+                return True
             
         # stop propagating if its within our bounds
         if self.collide_point(x, y):
@@ -511,8 +519,8 @@ class MatplotFigure(Widget):
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
-        cur_xlim -= dx
-        cur_ylim -= dy
+        cur_xlim -= dx/2
+        cur_ylim -= dy/2
         ax.set_xlim(cur_xlim)
         ax.set_ylim(cur_ylim)
 
@@ -598,7 +606,7 @@ class MatplotFigure(Widget):
 
     def reset_box(self):
         """ reset zoombox and apply zoombox limit if zoombox option if selected"""
-        if abs(self._box_size[0])>dp(50) and abs(self._box_size[1])>dp(50):
+        if min(abs(self._box_size[0]),abs(self._box_size[1]))>self.minzoom:
             trans = self.axes.transData.inverted()
             self.x0_box, self.y0_box = trans.transform_point((self._box_pos[0], self._box_pos[1]-self.pos[1])) 
             self.x1_box, self.y1_box = trans.transform_point((self._box_size[0]+self._box_pos[0], self._box_size[1]+self._box_pos[1]-self.pos[1]))
@@ -675,7 +683,7 @@ class MatplotFigure(Widget):
             else:
                 y0=y0_max[0][1]+pos_y
                 
-        if abs(x1-x0)<dp(20) and abs(y1-y0)>dp(50):
+        if abs(x1-x0)<dp(20) and abs(y1-y0)>self.minzoom:
             self.pos_x_rect_ver=x0
             self.pos_y_rect_ver=y0   
             
@@ -687,7 +695,7 @@ class MatplotFigure(Widget):
 
             self._alpha_ver=1 
              
-        elif abs(y1-y0)<dp(20) and abs(x1-x0)>dp(50):
+        elif abs(y1-y0)<dp(20) and abs(x1-x0)>self.minzoom:
             self.pos_x_rect_hor=x0
             self.pos_y_rect_hor=y0  
 
@@ -784,7 +792,7 @@ Builder.load_string('''
 			rectangle:
 				(self.pos_x_rect_ver-dp(20), self.pos_y_rect_ver-dp(1), dp(40),dp(4))            
 
-        #horizontal rectangle right
+        #vertical rectangle top
 		Color:
 			rgba:0, 0, 0, self._alpha_ver
 		Line:
