@@ -12,7 +12,7 @@ Just copy graph_widget.py and graph_generator_template.py in your project. Modif
  - fast rendering mode (axis not updated for faster draw)
  - use only 1 package (matplotlib) and no additional backend
  - cursor option (code in pure python) note: numpy can be used for faster draw
- - Legend widget like plotly library
+ - legend widget like plotly library
 
 ![image](https://user-images.githubusercontent.com/19823482/146577068-026a9608-a9df-4d59-a548-8b81f9b85574.png)
 
