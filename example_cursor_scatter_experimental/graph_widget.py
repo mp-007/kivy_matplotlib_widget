@@ -316,7 +316,7 @@ class MatplotFigure(Widget):
 
                 #x y label
                 if self.scatter_label  and idx_best > len(good_line)-1:                                 
-                    self.text.set_text(f"pt{self.scatter_label [good_index_scatter[idx_best]]} x={x}, y={y}")
+                    self.text.set_text(f"{self.scatter_label [good_index_scatter[idx_best]]} x={x}, y={y}")
                 else:
                     self.text.set_text(f"x={x}, y={y}")
 

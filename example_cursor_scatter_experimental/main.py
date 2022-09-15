@@ -47,7 +47,7 @@ class Test(App):
         mygraph = GraphGenerator()
         
         self.screen.figure_wgt.figure = mygraph.fig
-        self.screen.figure_wgt.scatter_label  = mygraph.ptid
+        self.screen.figure_wgt.scatter_label  = ['pt' + str(i) for i in mygraph.ptid]
         self.screen.figure_wgt.axes = mygraph.ax1
         self.screen.figure_wgt.xmin = mygraph.xmin
         self.screen.figure_wgt.xmax = mygraph.xmax
