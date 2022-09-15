@@ -90,6 +90,7 @@ class MatplotFigure(Widget):
         
         self.lines=[]
         self.scatters=[]
+        self.scatter_label = None
         
         self.bind(size=self._onSize)
 
@@ -314,7 +315,10 @@ class MatplotFigure(Widget):
                 self.vertical_line.set_xdata(x)
 
                 #x y label
-                self.text.set_text(f"x={x}, y={y}")
+                if self.scatter_label  and idx_best > len(good_line)-1:                                 
+                    self.text.set_text(f"pt{self.scatter_label [good_index_scatter[idx_best]]} x={x}, y={y}")
+                else:
+                    self.text.set_text(f"x={x}, y={y}")
 
                 #blit method (always use because same visual effect as draw)
                 self.axes.draw_artist(self.axes.patch)
