@@ -196,7 +196,7 @@ class MatplotFigure(Widget):
                         if self.multi_xdata:
                            
                             #find closest ydata from lines 
-                            idx_good_y=np.where(abs(np.array(self.x_cursor) - x)<0.05)[0]
+                            idx_good_y=np.where(abs(np.array(self.x_cursor) - x)<delta)[0]
                             index2_best = idx_good_y[np.argsort(abs(np.array(self.y_cursor)[idx_good_y] - ydata))[0]]                            
                             y = self.y_cursor[index2_best]
                             good_index2.append(index2_best)

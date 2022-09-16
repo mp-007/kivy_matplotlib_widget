@@ -55,6 +55,7 @@ class Test(App):
         self.screen.figure_wgt.ymax = mygraph.ymax
         # self.screen.figure_wgt.fast_draw = False #update axis during pan/zoom
         self.screen.figure_wgt.multi_xdata=True
+        self.screen.figure_wgt.xsorted=False
         
         #register lines instance if need to be update
         self.lines.append(mygraph.line1)
