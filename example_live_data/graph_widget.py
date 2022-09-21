@@ -16,6 +16,7 @@ from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
 from kivy.metrics import dp
+import numpy as np
 
 class MatplotFigure(Widget):
     """Widget to show a matplotlib figure in kivy.
@@ -142,13 +143,12 @@ class MatplotFigure(Widget):
 
             #transform kivy x,y touch event to x,y data
             trans = self.axes.transData.inverted()
-            xdata, ydata = trans.transform_point((event.x, event.y))
+            xdata, ydata = trans.transform_point((event.x - self.pos[0], event.y - self.pos[1]))
 
             #loop all register lines and find closest x,y data for each valid line
             distance=[]
             good_line=[]
             good_index=[]
-            good_index2=[]
             for line in self.lines:
                 #get only visible lines
                 if line.get_visible():  
@@ -157,19 +157,13 @@ class MatplotFigure(Widget):
                     
                     #check if line is not empty
                     if len(self.x_cursor)!=0:                        
-                        #!!!! if numpy is available you can used this for faster results !!!!
-                        #case 1 : x are sorted
-                        #index = min(np.searchsorted(self.x_cursor, xdata), len(self.y_cursor) - 1)
-                        #case 2:  x are not sorted
-                        #index = np.argsort(abs(self.x_cursor - xdata))[0]
                         
                         #find closest data index from touch (x axis)
                         if self.xsorted:
-                            index = sorted(range(len(abs(self.x_cursor - xdata))), 
-                                           key=abs(self.x_cursor - xdata).__getitem__)[0] 
+                            index = min(np.searchsorted(self.x_cursor, xdata), len(self.y_cursor) - 1)
+                            
                         else:
-                            index = sorted(range(len(abs(self.x_cursor - xdata))), 
-                                           key=abs(self.x_cursor - xdata).__getitem__)[0] 
+                            index = np.argsort(abs(self.x_cursor - xdata))[0]
 
                         #get x data from index
                         x = self.x_cursor[index]
@@ -180,9 +174,7 @@ class MatplotFigure(Widget):
                         #get distance between line and touch (in pixels)
                         ax=line.axes 
                         #left axis
-                        # xy_pixels_mouse = ax.transData.transform(np.vstack([xdata,ydata]).T)
                         xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
-                        # xy_pixels = ax.transData.transform(np.vstack([x,y]).T)
                         xy_pixels = ax.transData.transform([(x,y)])
                         dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
                         dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
@@ -201,11 +193,8 @@ class MatplotFigure(Widget):
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
             if min(distance)<dp(50):
-                #!!! if numpy is available, argmin can be used form faster result !!!
-                #idx_best=np.argmin(distance)
-                
                 #index of minimum distance
-                idx_best=distance.index(min(distance))
+                idx_best=np.argmin(distance)
                 
                 #get datas from closest line
                 line=good_line[idx_best]
@@ -608,8 +597,8 @@ class MatplotFigure(Widget):
         """ reset zoombox and apply zoombox limit if zoombox option if selected"""
         if min(abs(self._box_size[0]),abs(self._box_size[1]))>self.minzoom:
             trans = self.axes.transData.inverted()
-            self.x0_box, self.y0_box = trans.transform_point((self._box_pos[0], self._box_pos[1]-self.pos[1])) 
-            self.x1_box, self.y1_box = trans.transform_point((self._box_size[0]+self._box_pos[0], self._box_size[1]+self._box_pos[1]-self.pos[1]))
+            self.x0_box, self.y0_box = trans.transform_point((self._box_pos[0]-self.pos[0], self._box_pos[1]-self.pos[1])) 
+            self.x1_box, self.y1_box = trans.transform_point((self._box_size[0]+self._box_pos[0]-self.pos[0], self._box_size[1]+self._box_pos[1]-self.pos[1]))
             self.do_update=True
             
         self._box_size = 0, 0
@@ -646,26 +635,26 @@ class MatplotFigure(Widget):
             self._alpha_rect=0
         
         trans = self.axes.transData.inverted()
-        xdata, ydata = trans.transform_point((event.x, event.y-pos_y)) 
+        xdata, ydata = trans.transform_point((event.x-pos_x, event.y-pos_y)) 
 
         xmin,xmax=self.axes.get_xlim()
         ymin,ymax=self.axes.get_ylim()
         
-        x0data, y0data = trans.transform_point((x0, y0-pos_y)) 
+        x0data, y0data = trans.transform_point((x0-pos_x, y0-pos_y)) 
         if x0data>xmax or x0data<xmin or y0data>ymax or y0data<ymin:
             return
 
         if xdata<xmin:
             x1_min = self.axes.transData.transform([(xmin,ymin)])
             if x1<x0:
-                x1=x1_min[0][0]
+                x1=x1_min[0][0]+pos_x
             else:
                 x0=x1_min[0][0]
 
         if xdata>xmax:
             x0_max = self.axes.transData.transform([(xmax,ymin)])
             if x1>x0:
-                x1=x0_max[0][0]  
+                x1=x0_max[0][0]+pos_x 
             else:
                 x0=x0_max[0][0]                  
 
@@ -688,10 +677,10 @@ class MatplotFigure(Widget):
             self.pos_y_rect_ver=y0   
             
             x1_min = self.axes.transData.transform([(xmin,ymin)])
-            x0=x1_min[0][0]
+            x0=x1_min[0][0]+pos_x
 
             x0_max = self.axes.transData.transform([(xmax,ymin)])
-            x1=x0_max[0][0]             
+            x1=x0_max[0][0]+pos_x             
 
             self._alpha_ver=1 
              
