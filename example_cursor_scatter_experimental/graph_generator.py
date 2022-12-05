@@ -10,7 +10,7 @@ mpl.rcParams['agg.path.chunksize'] = 1000
 #define some matplotlib figure parameters
 mpl.rcParams['font.family'] = 'Verdana'
 mpl.rcParams['axes.spines.top'] = False
-# mpl.rcParams['axes.spines.right'] = False #remove to handle scatter fast draw
+mpl.rcParams['axes.spines.right'] = False
 mpl.rcParams['axes.linewidth'] = 1.0
 
 font_size_axis_title=dp(13)
@@ -47,6 +47,5 @@ class GraphGenerator(object):
         self.ax1.set_xlim(self.xmin, self.xmax)
         self.ax1.set_ylim(self.ymin, self.ymax)   
         self.ax1.set_xlabel("axis_x",fontsize=font_size_axis_title)
-        self.ax1.set_ylabel("axis_y",fontsize=font_size_axis_title)#
-        self.ax1.spines['right'].set_color('white') #hide scatter on 'right axis' on fast draw
+        self.ax1.set_ylabel("axis_y",fontsize=font_size_axis_title)
                 

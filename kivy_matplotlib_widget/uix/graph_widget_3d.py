@@ -755,10 +755,10 @@ class _FigureCanvas(FigureCanvasAgg):
 
 from kivy.factory import Factory
 
-Factory.register('MatplotFigure', MatplotFigure)
+Factory.register('MatplotFigure', MatplotFigure3D)
 
 Builder.load_string('''
-<MatplotFigure>
+<MatplotFigure3D>
     canvas:
         Color:
             rgba: (1, 1, 1, 1)

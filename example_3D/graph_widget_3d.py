@@ -17,7 +17,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
 from kivy.metrics import dp
 
-class MatplotFigure(Widget):
+class MatplotFigure3D(Widget):
     """Widget to show a matplotlib figure in kivy.
     The figure is rendered internally in an AGG backend then
     the rgba data is obtained and blitted into a kivy texture.
@@ -56,7 +56,7 @@ class MatplotFigure(Widget):
         self._img_texture = Texture.create(size=(w, h))
 
     def __init__(self, **kwargs):
-        super(MatplotFigure, self).__init__(**kwargs)
+        super(MatplotFigure3D, self).__init__(**kwargs)
         
         #figure info
         self.figure = None
@@ -755,10 +755,10 @@ class _FigureCanvas(FigureCanvasAgg):
 
 from kivy.factory import Factory
 
-Factory.register('MatplotFigure', MatplotFigure)
+Factory.register('MatplotFigure', MatplotFigure3D)
 
 Builder.load_string('''
-<MatplotFigure>
+<MatplotFigure3D>
     canvas:
         Color:
             rgba: (1, 1, 1, 1)

@@ -3,6 +3,7 @@ and kivy scatter
 """
 
 import math
+import copy
 
 import matplotlib
 matplotlib.use('Agg')
@@ -42,7 +43,9 @@ class MatplotFigure(Widget):
     pos_x_rect_hor=NumericProperty(0)
     pos_y_rect_hor=NumericProperty(0)
     pos_x_rect_ver=NumericProperty(0)
-    pos_y_rect_ver=NumericProperty(0)   
+    pos_y_rect_ver=NumericProperty(0)  
+    invert_rect_ver = BooleanProperty(False)
+    invert_rect_hor = BooleanProperty(False)
 
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -53,6 +56,15 @@ class MatplotFigure(Widget):
         self.width = w
         self.height = h
 
+        if self.figure.axes[0]:
+            #add copy patch
+            ax=self.figure.axes[0]
+            patch_cpy=copy.copy(ax.patch)
+            patch_cpy.set_visible(False)
+            ax.spines[:].set_zorder(10)
+            patch_cpy.set_zorder(9)
+            self.background_patch_copy= ax.add_patch(patch_cpy)
+            
         # Texture
         self._img_texture = Texture.create(size=(w, h))
 
@@ -85,7 +97,10 @@ class MatplotFigure(Widget):
         #clear touches on touch up
         self._touches = []
         self._last_touch_pos = {}
-        
+
+        #background 
+        self.background=None
+        self.background_patch_copy=None        
         
         self.bind(size=self._onSize)
 
@@ -108,8 +123,7 @@ class MatplotFigure(Widget):
                 
         #white background for blit method (fast draw)
         props = dict(boxstyle='square',edgecolor='w', facecolor='w', alpha=1.0)
-        self.text_background=self.axes.text(0.5, 1.01, 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', color='w', transform=self.axes.transAxes, bbox=props)       
-        
+
         #cursor text
         self.text = self.axes.text(0.52, 1.01, '', transform=self.axes.transAxes, bbox=props)
 
@@ -211,19 +225,22 @@ class MatplotFigure(Widget):
                 #x y label
                 self.text.set_text(f"x={x}, y={y}")
 
-                #blit method (always use because same visual effect as draw)
-                self.axes.draw_artist(self.axes.patch)
-                self.axes.draw_artist(self.text_background)
+                #blit method (always use because same visual effect as draw)                  
+                if self.background is None:
+                    self.set_cross_hair_visible(False)
+                    self.axes.figure.canvas.draw_idle()
+                    self.axes.figure.canvas.flush_events()                   
+                    self.background = self.axes.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
+                    self.set_cross_hair_visible(True)  
+
+                self.axes.figure.canvas.restore_region(self.background)
                 self.axes.draw_artist(self.text)
-                self.axes.draw_artist(list(self.axes.spines.values())[0])
 
-                for line in self.axes.lines:
-                    self.axes.draw_artist(line)
+                self.axes.draw_artist(self.horizontal_line)
+                self.axes.draw_artist(self.vertical_line)  
 
-                mybbox=self.my_blit_box(ax.bbox.bounds[0],ax.bbox.bounds[1],ax.bbox.bounds[2],ax.bbox.bounds[3]+50)                    
-                
                 #draw (blit method)
-                self.axes.figure.canvas.blit(mybbox)                 
+                self.axes.figure.canvas.blit(self.axes.bbox)                 
                 self.axes.figure.canvas.flush_events()
 
             #if touch is too far, hide cross hair cursor
@@ -236,12 +253,18 @@ class MatplotFigure(Widget):
         Return:
             None
         """
-        ax = self.axes
-        ax.set_xlim(self.xmin, self.xmax)  
-        ax.set_ylim(self.ymin, self.ymax)                                
-
-        ax.figure.canvas.draw_idle()
-        ax.figure.canvas.flush_events() 
+        #do nothing is all min/max are not set
+        if self.xmin is not None and \
+            self.xmax is not None and \
+            self.ymin is not None and \
+            self.ymax is not None:
+                
+            ax = self.axes
+            ax.set_xlim(self.xmin, self.xmax)  
+            ax.set_ylim(self.ymin, self.ymax)                                
+    
+            ax.figure.canvas.draw_idle()
+            ax.figure.canvas.flush_events() 
 
     def reset_touch(self) -> None:
         """ reset touch
@@ -251,11 +274,6 @@ class MatplotFigure(Widget):
         """
         self._touches = []
         self._last_touch_pos = {}
-
-    @staticmethod
-    def my_blit_box(x0, y0, width, height):
-        """ build custom matplotlib bbox """
-        return Bbox.from_bounds(x0, y0, width, height)
         
     def _get_scale(self):
         """ kivy scatter _get_scale method """
@@ -396,7 +414,10 @@ class MatplotFigure(Widget):
                 event.grab(self)
                 self._touches.append(event)
                 self._last_touch_pos[event] = event.pos
-    
+                if len(self._touches)>1:
+                    #new touch, reset background
+                    self.background=None
+                    
                 return True
 
         else:
@@ -455,6 +476,7 @@ class MatplotFigure(Widget):
                 self.update_lim()            
 
             ax=self.axes
+            self.background=None
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()                           
             
@@ -463,7 +485,7 @@ class MatplotFigure(Widget):
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0),new_line=None):
         """ zoom touch method """
                 
-        x = anchor[0]
+        x = anchor[0]-self.pos[0]
         y = anchor[1]-self.pos[1]
 
         trans = ax.transData.inverted()
@@ -483,11 +505,13 @@ class MatplotFigure(Widget):
 
         if self.fast_draw:   
             #use blit method            
-            ax.draw_artist(ax.patch)
-            
-            #if you want the left spline during on_move (slower) 
-            if self.draw_left_spline:
-                ax.draw_artist(list(ax.spines.values())[0])
+            if self.background is None:
+                self.background_patch_copy.set_visible(True)
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                   
+                self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                self.background_patch_copy.set_visible(False)  
+            ax.figure.canvas.restore_region(self.background)
            
             for line in ax.lines:
                 ax.draw_artist(line)
@@ -514,11 +538,14 @@ class MatplotFigure(Widget):
         ax.set_ylim(cur_ylim)
 
         if self.fast_draw: 
-            #use blit method
-            ax.draw_artist(ax.patch)
-            #if you want the left spline during on_move (slower) 
-            if self.draw_left_spline:
-                ax.draw_artist(list(ax.spines.values())[0])
+            #use blit method               
+            if self.background is None:
+                self.background_patch_copy.set_visible(True)
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                   
+                self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                self.background_patch_copy.set_visible(False)  
+            ax.figure.canvas.restore_region(self.background)                
            
             for line in ax.lines:
                 ax.draw_artist(line)
@@ -611,6 +638,8 @@ class MatplotFigure(Widget):
         self._pos_y_rect_ver = 0 
         self._alpha_hor=0 
         self._alpha_ver=0
+        self.invert_rect_hor = False
+        self.invert_rect_ver = False
         
     def draw_box(self, event, x0, y0, x1, y1) -> None:
         """ Draw zoombox method
@@ -680,10 +709,10 @@ class MatplotFigure(Widget):
             x0=x1_min[0][0]+pos_x
 
             x0_max = self.axes.transData.transform([(xmax,ymin)])
-            x1=x0_max[0][0]+pos_x             
+            x1=x0_max[0][0]+pos_x
 
-            self._alpha_ver=1 
-             
+            self._alpha_ver=1
+                
         elif abs(y1-y0)<dp(20) and abs(x1-x0)>self.minzoom:
             self.pos_x_rect_hor=x0
             self.pos_y_rect_hor=y0  
@@ -699,6 +728,15 @@ class MatplotFigure(Widget):
         else:
             self._alpha_hor=0   
             self._alpha_ver=0
+
+        if x1>x0:
+            self.invert_rect_ver=False
+        else:
+            self.invert_rect_ver=True
+        if y1>y0:
+            self.invert_rect_hor=False
+        else:
+            self.invert_rect_hor=True
             
         self._box_pos = x0, y0
         self._box_size = x1 - x0, y1 - y0
@@ -754,8 +792,12 @@ Builder.load_string('''
             source: 'border.png'
             pos: self._box_pos
             size: self._box_size
-            border: 3, 3, 3, 3
-            
+            border:
+                dp(1) if root.invert_rect_hor else -dp(1), \
+                dp(1) if root.invert_rect_ver else -dp(1), \
+                dp(1) if root.invert_rect_hor else -dp(1), \
+                dp(1) if root.invert_rect_ver else -dp(1)
+                
     canvas.after:            
         #horizontal rectangle left
 		Color:
@@ -763,7 +805,8 @@ Builder.load_string('''
 		Line:
 			width: dp(1)
 			rectangle:
-				(self.pos_x_rect_hor-dp(3), self.pos_y_rect_hor-dp(20), dp(4),dp(40))            
+				(self.pos_x_rect_hor+dp(1) if root.invert_rect_ver \
+                 else self.pos_x_rect_hor-dp(4),self.pos_y_rect_hor-dp(20), dp(4),dp(40))            
 
         #horizontal rectangle right
 		Color:
@@ -771,7 +814,8 @@ Builder.load_string('''
 		Line:
 			width: dp(1)
 			rectangle:
-				(self.pos_x_rect_hor-dp(1)+self._box_size[0], self.pos_y_rect_hor-dp(20), dp(4),dp(40))             
+				(self.pos_x_rect_hor-dp(4)+self._box_size[0] if root.invert_rect_ver \
+                 else self.pos_x_rect_hor+dp(1)+self._box_size[0], self.pos_y_rect_hor-dp(20), dp(4),dp(40))             
 
         #vertical rectangle bottom
 		Color:
@@ -779,7 +823,8 @@ Builder.load_string('''
 		Line:
 			width: dp(1)
 			rectangle:
-				(self.pos_x_rect_ver-dp(20), self.pos_y_rect_ver-dp(1), dp(40),dp(4))            
+				(self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver+dp(1) if root.invert_rect_hor else \
+                 self.pos_y_rect_ver-dp(4), dp(40),dp(4))            
 
         #vertical rectangle top
 		Color:
@@ -787,6 +832,7 @@ Builder.load_string('''
 		Line:
 			width: dp(1)
 			rectangle:
-				(self.pos_x_rect_ver-dp(20), self.pos_y_rect_ver-dp(3)+self._box_size[1], dp(40),dp(4))             
-
+				(self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver-dp(4)+self._box_size[1] \
+                 if root.invert_rect_hor else self.pos_y_rect_ver+dp(1)+self._box_size[1], \
+                 dp(40),dp(4))
         ''')
