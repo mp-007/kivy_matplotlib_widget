@@ -15,6 +15,7 @@ from kivy.properties import (
 
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
+from matplotlib.colors import to_hex
 
 
 class LegendGestures(Widget):
@@ -193,7 +194,7 @@ class LegendRv(BoxLayout):
                 "viewclass": "CellLegend"
                 }
             r_data["text"] = str(row_content.get_label())
-            r_data["mycolor"] = get_color_from_hex(row_content.get_color())
+            r_data["mycolor"] = get_color_from_hex(to_hex(row_content.get_color()))
             r_data["line_type"] = row_content.get_linestyle()
             r_data["legend_rv"] = self  
             r_data["selected"] = False
@@ -216,7 +217,7 @@ class LegendRv(BoxLayout):
             "viewclass": "CellLegend"
             }
         r_data["text"] = str(line.get_label())
-        r_data["mycolor"] = get_color_from_hex(line.get_color())
+        r_data["mycolor"] = get_color_from_hex(to_hex(line.get_color()))
         r_data["line_type"] = line.get_linestyle()
         r_data["legend_rv"] = self  
         r_data["selected"] = False
