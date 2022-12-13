@@ -9,6 +9,8 @@ class MatplotNavToolbar(BoxLayout):
     pan_btn = ObjectProperty(None)
     zoom_btn = ObjectProperty(None)
     home_btn = ObjectProperty(None)
+    back_btn = ObjectProperty(None)
+    forward_btn = ObjectProperty(None)
     info_lbl = ObjectProperty(None)
     _navtoolbar = None  # Internal NavToolbar logic
     figure_widget = ObjectProperty(None)
@@ -33,10 +35,12 @@ class _NavigationToolbar(NavigationToolbar2):
         super(_NavigationToolbar, self).__init__(canvas)
 
     def _init_toolbar(self):
-        print('set stuff')
+        print('init toolbar')
         self.widget.home_btn.bind(on_press=self.home)
         self.widget.pan_btn.bind(on_press=self.pan)
-        self.widget.zoom_btn.bind(on_press=self.zoom)
+        self.widget.zoom_btn.bind(on_press=self.zoom) 
+        self.widget.back_btn.bind(on_press=self.back)
+        self.widget.forward_btn.bind(on_press=self.forward)
 
     def dynamic_update(self):
         self.canvas.draw()
@@ -57,11 +61,22 @@ Builder.load_string('''
     pan_btn: pan_btn
     zoom_btn: zoom_btn
     info_lbl: info_lbl
+    back_btn: back_btn
+    forward_btn: forward_btn
+    Label:
+        id: info_lbl
+        size_hint: 1, 0.3    
     BoxLayout:
         size_hint: 1, 0.7
         Button:
             id: home_btn
             text: "Home"
+        Button:
+            id: back_btn
+            text: "Back"
+        Button:
+            id: forward_btn
+            text: "Forward"            
         ToggleButton:
             id: pan_btn
             text: "Pan"
@@ -70,7 +85,5 @@ Builder.load_string('''
             id: zoom_btn
             text: "Zoom"
             group: "toolbar_btn"
-    Label:
-        id: info_lbl
-        size_hint: 1, 0.3
+
         ''')

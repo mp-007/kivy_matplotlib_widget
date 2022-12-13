@@ -11,6 +11,7 @@ from kivy.app import App
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
+from kivy.metrics import dp
 
 #optimized draw on Agg backend
 mpl.rcParams['path.simplify'] = True
@@ -30,14 +31,13 @@ KV = '''
 Screen
     figure_wgt:figure_wgt
     BoxLayout:
-        orientation:'vertical'             
-        MatplotFigureGeneral:
-            id:figure_wgt
+        orientation:'vertical' 
         MatplotNavToolbar:
             id: navbar_wgt
             size_hint: 1, 0.2
-            figure_widget: figure_wgt            
-            
+            figure_widget: figure_wgt              
+        MatplotFigureGeneral:
+            id:figure_wgt
 '''
 
 
@@ -61,6 +61,11 @@ class Test(App):
         self.screen.figure_wgt.figure = fig
         
         self.screen.ids.navbar_wgt._navtoolbar._init_toolbar()
+        
+        #if user want to hide cursor label
+        # self.screen.ids.navbar_wgt.ids.info_lbl.height=dp(0.01)
+        # self.screen.ids.navbar_wgt.ids.info_lbl.opacity=0
+        # self.screen.ids.navbar_wgt.ids.info_lbl.size_hint_y=None
 
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode
