@@ -78,7 +78,7 @@ class Test(App):
         ax2.set_ylabel('Static axis',weight='bold')
             
         self.screen.figure_wgt.figure = fig
-        self.screen.figure_wgt.fast_draw=False
+        #self.screen.figure_wgt.fast_draw=False
         
         self.lines=fig.axes[0].lines + fig.axes[1].lines
         self.screen.figure_wgt.register_lines(self.lines)
