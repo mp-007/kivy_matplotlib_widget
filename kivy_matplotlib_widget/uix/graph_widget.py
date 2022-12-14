@@ -65,6 +65,13 @@ class MatplotFigure(Widget):
             patch_cpy.set_zorder(9)
             self.background_patch_copy= ax.add_patch(patch_cpy)
             
+            #set xmin axes attribute
+            self.axes = self.figure.axes[0]
+            
+            #set default xmin/xmax and ymin/ymax
+            self.xmin,self.xmax = self.axes.get_xlim()
+            self.ymin,self.ymax = self.axes.get_ylim()
+           
         # Texture
         self._img_texture = Texture.create(size=(w, h))
 
@@ -85,7 +92,7 @@ class MatplotFigure(Widget):
         self.draw_left_spline=False #available only when fast_draw is True
         self.touch_mode='pan'
         self.hover_on = False
-        self.xsorted = True #to manage x sorted data (if numpy is used)
+        self.xsorted = False #to manage x sorted data
         self.minzoom = dp(40) #minimum pixel distance to apply zoom
 
         #zoom box coordonnate
@@ -121,11 +128,10 @@ class MatplotFigure(Widget):
         #register lines
         self.lines=lines
                 
-        #white background for blit method (fast draw)
-        props = dict(boxstyle='square',edgecolor='w', facecolor='w', alpha=1.0)
-
         #cursor text
-        self.text = self.axes.text(0.52, 1.01, '', transform=self.axes.transAxes, bbox=props)
+        self.text = self.axes.text(1.0, 1.01, '', 
+                                      transform=self.axes.transAxes,
+                                      ha='right')
 
     def set_cross_hair_visible(self, visible:bool) -> None:
         """ set curcor visibility
