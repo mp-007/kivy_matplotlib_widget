@@ -40,19 +40,19 @@ Screen
                 group:'touch_mode'
                 state:'down'
                 text:"pan" 
-                on_release:
+                on_press:
                     app.set_touch_mode('pan')
                     self.state='down'
             ToggleButton:
                 group:'touch_mode'
                 text:"zoom box"  
-                on_release:
+                on_press:
                     app.set_touch_mode('zoombox')
                     self.state='down' 
             ToggleButton:
                 group:'touch_mode'
                 text:"cursor"  
-                on_release:
+                on_press:
                     app.set_touch_mode('cursor')
                     self.state='down'                       
         MatplotFigureTwinx:

@@ -15,7 +15,6 @@ from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, Bound
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.transforms import Bbox
 from kivy.metrics import dp
 import numpy as np
 
@@ -46,6 +45,9 @@ class MatplotFigureScatter(Widget):
     pos_y_rect_ver=NumericProperty(0)   
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)
+    legend_instance = ObjectProperty(None)
+    legend_do_scroll_x = BooleanProperty(True)
+    legend_do_scroll_y = BooleanProperty(True)    
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -449,6 +451,10 @@ class MatplotFigureScatter(Widget):
         if len(self._touches) == self.translation_touches:
             if self.touch_mode=='pan':
                 self.apply_pan(self.axes, event)
+                
+            elif self.touch_mode=='drag_legend':
+                if self.legend_instance:
+                    self.apply_drag_legend(self.axes, event)                
             
             elif self.touch_mode=='zoombox':
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
@@ -508,6 +514,20 @@ class MatplotFigureScatter(Widget):
         x, y = event.x, event.y
 
         if self.collide_point(x, y):
+            if self.legend_instance:
+                if self.legend_instance.box.collide_point(x, y):
+                    if self.touch_mode!='drag_legend':
+                        return False   
+                    else:
+                        event.grab(self)
+                        self._touches.append(event)
+                        self._last_touch_pos[event] = event.pos
+                        if len(self._touches)>1:
+                            #new touch, reset background
+                            self.background=None
+                            
+                        return True             
+            
             if event.is_mouse_scrolling:
                 ax = self.axes
                 ax = self.axes
@@ -700,6 +720,42 @@ class MatplotFigureScatter(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
 
+    def apply_drag_legend(self, ax, event):
+        """ drag legend method """
+                        
+        dx = event.x - self._last_touch_pos[event][0]
+        if not self.legend_do_scroll_x:
+            dx=0
+        dy = event.y - self._last_touch_pos[event][1]      
+        if not self.legend_do_scroll_y:
+            dy=0        
+        legend = ax.get_legend()
+        if legend is not None:
+        
+            bbox = legend.get_window_extent()
+            legend_x = bbox.xmin
+            legend_y = bbox.ymin
+               
+            loc_in_canvas = legend_x +dx/2, legend_y+dy/2
+            loc_in_norm_axes = legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
+            legend._loc = tuple(loc_in_norm_axes)
+            
+            #use blit method               
+            if self.background is None:
+                ax.get_legend().set_visible(False)
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                   
+                self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                ax.get_legend().set_visible(True)
+            ax.figure.canvas.restore_region(self.background)   
+    
+            ax.draw_artist(legend)
+                
+            ax.figure.canvas.blit(ax.bbox)
+            ax.figure.canvas.flush_events() 
+
+            self.legend_instance.update_size()
+
     def zoom_factory(self, event, ax, base_scale=1.1):
         """ zoom with scrolling mouse method """
 
@@ -752,7 +808,9 @@ class MatplotFigureScatter(Widget):
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
         self.figcanvas.resize_event()
-        self.figcanvas.draw()     
+        self.figcanvas.draw()
+        if self.legend_instance:
+            self.legend_instance.update_size()        
 
     def update_lim(self):
         """ update axis lim if zoombox is used"""
