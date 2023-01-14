@@ -1005,8 +1005,9 @@ Builder.load_string('''
  
 <MatplotlibLegendBox>
     box:box
-    size_hint_x: None
+    size_hint: None,None
     width: dp(0.01) 
+    height: dp(0.01) 
     
     BoxLayout:
         id:box         
@@ -1019,8 +1020,9 @@ Builder.load_string('''
  
 <MatplotlibLegendGrid>
     box:box
-    size_hint_x: None
+    size_hint: None,None
     width: dp(0.01) 
+    height: dp(0.01) 
     
     GridLayout:
         id:box         
