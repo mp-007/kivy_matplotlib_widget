@@ -115,7 +115,7 @@ class Test(App):
         sc1 = ax2.scatter(x, y, s=30, color='magenta', alpha=0.7, marker='x', picker=3,label='scatter')
         sc2 = ax2.scatter(np.array(x)+2, np.array(y)+1, s=30, color='r', alpha=0.7, marker='x', picker=3,label='scatter2')
         sc3 = ax2.scatter(np.array(x)+3, np.array(y)+3, s=30, color='k', alpha=0.7, marker='x', picker=3,label='scatter3')
-        ax2.legend(loc=0)
+        ax2.legend(loc=4)
         
         self.screen.figure_wgt2.figure = ax2.figure
         self.screen.figure_wgt2.fast_draw = False #update axis during pan/zoom

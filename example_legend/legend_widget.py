@@ -521,8 +521,14 @@ def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto'):
     leg.set_zorder(20)
         
     #detect is the legend use column (ex: horizontal legend)
-    if leg._ncol>1:
-        ncol=leg._ncol
+    if hasattr(leg,'_ncols'):
+        #matplotlib version >3.6
+        legend_ncol = leg._ncols
+    else:
+        legend_ncol = leg._ncol
+        
+    if legend_ncol>1:
+        ncol=legend_ncol
     else:
         ncol=None
         
@@ -717,10 +723,16 @@ class MatplotlibLegendBox(FloatLayout):
             if have_title:
                 current_handles, current_labels = ax.get_legend_handles_labels()
                 nb_group=len(current_labels)                
-                if leg._ncol>1:
-                    ncol=leg._ncol
+                if hasattr(leg,'_ncols'):
+                    #matplotlib version >3.6
+                    legend_ncol = leg._ncols
                 else:
-                    ncol=None                
+                    legend_ncol = leg._ncol
+                    
+                if legend_ncol>1:
+                    ncol=legend_ncol
+                else:
+                    ncol=None               
                 if ncol:
                     title_padding = (y1_pos-y0_pos)/(ceil(nb_group/ncol)+1)
                 else:
@@ -844,10 +856,16 @@ class MatplotlibLegendGrid(FloatLayout):
             if have_title:
                 current_handles, current_labels = ax.get_legend_handles_labels()
                 nb_group=len(current_labels)                
-                if leg._ncol>1:
-                    ncol=leg._ncol
+                if hasattr(leg,'_ncols'):
+                    #matplotlib version >3.6
+                    legend_ncol = leg._ncols
                 else:
-                    ncol=None                
+                    legend_ncol = leg._ncol
+                    
+                if legend_ncol>1:
+                    ncol=legend_ncol
+                else:
+                    ncol=None               
                 if ncol:
                     title_padding = (y1_pos-y0_pos)/(ceil(nb_group/ncol)+1)
                 else:
