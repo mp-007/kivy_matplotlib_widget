@@ -153,6 +153,9 @@ class Test(App):
         self.screen.figure_wgt4.touch_mode=mode
 
     def home(self):
-        self.screen.figure_wgt.home()
+        self.screen.figure_wgt1.home()
+        self.screen.figure_wgt2.home()
+        self.screen.figure_wgt3.home()
+        self.screen.figure_wgt4.home()
         
 Test().run()
