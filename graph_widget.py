@@ -15,6 +15,8 @@ from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, Bound
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib import cbook
+from weakref import WeakKeyDictionary
 from kivy.metrics import dp
 import numpy as np
 
@@ -48,6 +50,10 @@ class MatplotFigure(Widget):
     legend_instance = ObjectProperty(None)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
+    do_pan_x = BooleanProperty(True)
+    do_pan_y = BooleanProperty(True)    
+    do_zoom_x = BooleanProperty(True)
+    do_zoom_y = BooleanProperty(True)    
 
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -110,6 +116,14 @@ class MatplotFigure(Widget):
         #background 
         self.background=None
         self.background_patch_copy=None        
+
+        #manage adjust x and y
+        self.anchor_x = None
+        self.anchor_y = None 
+        
+        #manage back and next event
+        self._nav_stack = cbook.Stack()
+        self.set_history_buttons()         
         
         self.bind(size=self._onSize)
 
@@ -274,6 +288,66 @@ class MatplotFigure(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
 
+    def back(self, *args):
+        """
+        Move back up the view lim stack.
+        For convenience of being directly connected as a GUI callback, which
+        often get passed additional parameters, this method accepts arbitrary
+        parameters, but does not use them.
+        """
+        self._nav_stack.back()
+        self.set_history_buttons()
+        self._update_view()
+
+    def forward(self, *args):
+        """
+        Move forward in the view lim stack.
+        For convenience of being directly connected as a GUI callback, which
+        often get passed additional parameters, this method accepts arbitrary
+        parameters, but does not use them.
+        """
+        self._nav_stack.forward()
+        self.set_history_buttons()
+        self._update_view()
+ 
+    def push_current(self):
+       """Push the current view limits and position onto the stack."""
+       self._nav_stack.push(
+           WeakKeyDictionary(
+               {ax: (ax._get_view(),
+                     # Store both the original and modified positions.
+                     (ax.get_position(True).frozen(),
+                      ax.get_position().frozen()))
+                for ax in self.figure.axes}))
+       self.set_history_buttons()       
+
+    def update(self):
+        """Reset the Axes stack."""
+        self._nav_stack.clear()
+        self.set_history_buttons()
+        
+    def _update_view(self):
+        """
+        Update the viewlim and position from the view and position stack for
+        each Axes.
+        """
+        nav_info = self._nav_stack()
+        if nav_info is None:
+            return
+        # Retrieve all items at once to avoid any risk of GC deleting an Axes
+        # while in the middle of the loop below.
+        items = list(nav_info.items())
+        for ax, (view, (pos_orig, pos_active)) in items:
+            ax._set_view(view)
+            # Restore both the original and modified positions
+            ax._set_position(pos_orig, 'original')
+            ax._set_position(pos_active, 'active')
+        self.figure.canvas.draw_idle() 
+        self.figure.canvas.flush_events()
+
+    def set_history_buttons(self):
+        """Enable or disable the back/forward button."""
+
     def reset_touch(self) -> None:
         """ reset touch
         
@@ -331,14 +405,25 @@ class MatplotFigure(Widget):
         changed = False
 
         if len(self._touches) == self.translation_touches:
+            
             if self.touch_mode=='pan':
+                if self._nav_stack() is None:
+                    self.push_current()                
                 self.apply_pan(self.axes, event)
-                
+ 
+            if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
+                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
+                if self._nav_stack() is None:
+                    self.push_current()                    
+                self.apply_pan(self.axes, event, mode=self.touch_mode)                
+ 
             elif self.touch_mode=='drag_legend':
                 if self.legend_instance:
                     self.apply_drag_legend(self.axes, event)
             
             elif self.touch_mode=='zoombox':
+                if self._nav_stack() is None:
+                    self.push_current()                
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 self.draw_box(event, self.x_init,self.y_init, event.x, real_y)
                 
@@ -483,6 +568,10 @@ class MatplotFigure(Widget):
             event.ungrab(self)
             del self._last_touch_pos[event]
             self._touches.remove(event)
+            if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
+                self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
+                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
+                self.push_current()
 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -501,6 +590,9 @@ class MatplotFigure(Widget):
             if self.do_update:
                 self.update_lim()            
 
+            self.anchor_x=None
+            self.anchor_y=None
+            
             ax=self.axes
             self.background=None
             ax.figure.canvas.draw_idle()
@@ -526,8 +618,10 @@ class MatplotFigure(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         if self.fast_draw:   
             #use blit method            
@@ -547,7 +641,7 @@ class MatplotFigure(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()           
 
-    def apply_pan(self, ax, event):
+    def apply_pan(self, ax, event, mode='pan'):
         """ pan method """
         
         trans = ax.transData.inverted()
@@ -558,10 +652,46 @@ class MatplotFigure(Widget):
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
-        cur_xlim -= dx/2
-        cur_ylim -= dy/2
-        ax.set_xlim(cur_xlim)
-        ax.set_ylim(cur_ylim)
+        if not mode=='pan_y' and not mode=='adjust_y':             
+            if mode=='adjust_x':
+                if self.anchor_x is None:
+                    midpoint= (cur_xlim[1] - cur_xlim[0])/2
+                    if xdata>midpoint:
+                        self.anchor_x='left'
+                    else:
+                        self.anchor_x='right'
+                if self.anchor_x=='left':                
+                    if xdata> cur_xlim[0]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(None,cur_xlim[1])
+                else:
+                    if xdata< cur_xlim[1]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(cur_xlim[0],None)
+            else:
+                cur_xlim -= dx/2
+                ax.set_xlim(cur_xlim)
+                
+        if not mode=='pan_x' and not mode=='adjust_x':
+            if mode=='adjust_y':
+                if self.anchor_y is None:
+                    midpoint= (cur_ylim[1] - cur_ylim[0])/2
+                    if ydata>midpoint:
+                        self.anchor_y='top'
+                    else:
+                        self.anchor_y='bottom'               
+                
+                if self.anchor_y=='top':
+                    if ydata> cur_ylim[0]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(None,cur_ylim[1])
+                else:
+                    if ydata< cur_ylim[1]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(cur_ylim[0],None)                   
+            else:            
+                cur_ylim -= dy/2
+                ax.set_ylim(cur_ylim)
 
         if self.fast_draw: 
             #use blit method               
@@ -649,8 +779,10 @@ class MatplotFigure(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    
