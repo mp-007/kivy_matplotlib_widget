@@ -36,6 +36,12 @@ Screen
             Button:
                 text:"home"
                 on_release:app.home()
+            Button:
+                text:"back"
+                on_release:app.back()  
+            Button:
+                text:"forward"
+                on_release:app.forward()                
             ToggleButton:
                 group:'touch_mode'
                 state:'down'
@@ -46,15 +52,50 @@ Screen
             ToggleButton:
                 group:'touch_mode'
                 text:"zoom box"  
-                on_press:
+                on_release:
                     app.set_touch_mode('zoombox')
                     self.state='down' 
             ToggleButton:
                 group:'touch_mode'
                 text:"cursor"  
-                on_press:
+                on_release:
                     app.set_touch_mode('cursor')
-                    self.state='down'                       
+                    self.state='down'  
+        BoxLayout:
+            size_hint_y:0.2                    
+            ToggleButton:
+                group:'touch_mode'
+                text:"pan_x" 
+                on_press:
+                    app.set_touch_mode('pan_x')
+                    self.state='down'
+            ToggleButton:
+                group:'touch_mode'
+                text:"pan_y" 
+                on_press:
+                    app.set_touch_mode('pan_y')
+                    self.state='down'                    
+            ToggleButton:
+                group:'touch_mode'
+                text:"adjust_x"  
+                on_press:
+                    app.set_touch_mode('adjust_x')
+                    self.state='down'
+            ToggleButton:
+                group:'touch_mode'
+                text:"adjust_y"  
+                on_press:
+                    app.set_touch_mode('adjust_y')
+                    self.state='down' 
+
+            ToggleButton:
+                text:"zoom_x"  
+                on_press:
+                    app.set_zoom_behavior('zoom_x',self.state)                     
+            ToggleButton:
+                text:"zoom_y"  
+                on_press:
+                    app.set_zoom_behavior('zoom_y',self.state)                     
         MatplotFigureTwinx:
             id:figure_wgt
 '''
@@ -78,15 +119,27 @@ class Test(App):
         ax2.set_ylabel('Static axis',weight='bold')
             
         self.screen.figure_wgt.figure = fig
-        #self.screen.figure_wgt.fast_draw=False
+        self.screen.figure_wgt.fast_draw=False
         
         self.lines=fig.axes[0].lines + fig.axes[1].lines
         self.screen.figure_wgt.register_lines(self.lines)
 
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode
-
+        
+    def set_zoom_behavior(self,mode,state):
+        boolean_val=True
+        if state=='down':
+            boolean_val=False
+        if mode=='zoom_x':
+            self.screen.figure_wgt.do_zoom_y=boolean_val
+        elif mode=='zoom_y':
+            self.screen.figure_wgt.do_zoom_x=boolean_val        
     def home(self):
         self.screen.figure_wgt.home()
+    def back(self):
+        self.screen.figure_wgt.back()   
+    def forward(self):
+        self.screen.figure_wgt.forward() 
         
 Test().run()

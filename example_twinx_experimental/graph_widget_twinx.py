@@ -15,6 +15,8 @@ from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, Bound
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib import cbook
+from weakref import WeakKeyDictionary
 from kivy.metrics import dp
 import numpy as np
 
@@ -48,6 +50,10 @@ class MatplotFigureTwinx(Widget):
     legend_instance = ObjectProperty(None)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
+    do_pan_x = BooleanProperty(True)
+    do_pan_y = BooleanProperty(True)    
+    do_zoom_x = BooleanProperty(True)
+    do_zoom_y = BooleanProperty(True)    
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -127,6 +133,14 @@ class MatplotFigureTwinx(Widget):
         
         #twin x axis
         self.twinx=False
+        
+        #manage adjust x and y
+        self.anchor_x = None
+        self.anchor_y = None 
+
+        #manage back and next event
+        self._nav_stack = cbook.Stack()
+        self.set_history_buttons()              
         
         self.bind(size=self._onSize)
 
@@ -313,6 +327,66 @@ class MatplotFigureTwinx(Widget):
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
 
+    def back(self, *args):
+        """
+        Move back up the view lim stack.
+        For convenience of being directly connected as a GUI callback, which
+        often get passed additional parameters, this method accepts arbitrary
+        parameters, but does not use them.
+        """
+        self._nav_stack.back()
+        self.set_history_buttons()
+        self._update_view()
+
+    def forward(self, *args):
+        """
+        Move forward in the view lim stack.
+        For convenience of being directly connected as a GUI callback, which
+        often get passed additional parameters, this method accepts arbitrary
+        parameters, but does not use them.
+        """
+        self._nav_stack.forward()
+        self.set_history_buttons()
+        self._update_view()
+
+    def push_current(self):
+       """Push the current view limits and position onto the stack."""
+       self._nav_stack.push(
+           WeakKeyDictionary(
+               {ax: (ax._get_view(),
+                     # Store both the original and modified positions.
+                     (ax.get_position(True).frozen(),
+                      ax.get_position().frozen()))
+                for ax in self.figure.axes}))
+       self.set_history_buttons()       
+
+    def update(self):
+        """Reset the Axes stack."""
+        self._nav_stack.clear()
+        self.set_history_buttons()
+
+    def _update_view(self):
+        """
+        Update the viewlim and position from the view and position stack for
+        each Axes.
+        """
+        nav_info = self._nav_stack()
+        if nav_info is None:
+            return
+        # Retrieve all items at once to avoid any risk of GC deleting an Axes
+        # while in the middle of the loop below.
+        items = list(nav_info.items())
+        for ax, (view, (pos_orig, pos_active)) in items:
+            ax._set_view(view)
+            # Restore both the original and modified positions
+            ax._set_position(pos_orig, 'original')
+            ax._set_position(pos_active, 'active')
+        self.figure.canvas.draw_idle() 
+        self.figure.canvas.flush_events()
+
+    def set_history_buttons(self):
+        """Enable or disable the back/forward button."""
+
     def reset_touch(self) -> None:
         """ reset touch
         
@@ -371,16 +445,30 @@ class MatplotFigureTwinx(Widget):
 
         if len(self._touches) == self.translation_touches:
             if self.touch_mode=='pan':
+                if self._nav_stack() is None:
+                    self.push_current()                 
                 if self.twinx:
                     self.apply_pan_twinx(self.figure.axes[0], self.figure.axes[1], event)
                 else:
                     self.apply_pan(self.figure.axes[0], event)
 
+
+            if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
+                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
+                if self._nav_stack() is None:
+                    self.push_current() 
+                if self.twinx:
+                    self.apply_pan_twinx(self.figure.axes[0], self.figure.axes[1], event, mode=self.touch_mode)
+                else:
+                    self.apply_pan(self.figure.axes[0], event, mode=self.touch_mode)
+                    
             elif self.touch_mode=='drag_legend':
                 if self.legend_instance:
                     self.apply_drag_legend(self.figure.axes[0], event)
                     
             elif self.touch_mode=='zoombox':
+                if self._nav_stack() is None:
+                    self.push_current()                
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 self.draw_box(event, self.x_init,self.y_init, event.x, real_y)
                 
@@ -541,7 +629,11 @@ class MatplotFigureTwinx(Widget):
             event.ungrab(self)
             del self._last_touch_pos[event]
             self._touches.remove(event)
-
+            if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
+                self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
+                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
+                self.push_current()
+                
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
             self.reset_box()  
@@ -557,6 +649,9 @@ class MatplotFigureTwinx(Widget):
 
             if self.do_update:
                 self.update_lim()            
+
+            self.anchor_x=None
+            self.anchor_y=None
 
             self.background=None
             self.figure.canvas.draw_idle()
@@ -582,8 +677,10 @@ class MatplotFigureTwinx(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         if self.fast_draw:   
             #use blit method            
@@ -623,13 +720,16 @@ class MatplotFigureTwinx(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         new_height2 = (cur_ylim2[1] - cur_ylim2[0]) * scale_factor    
         
         rely2 = (cur_ylim2[1] - ydata2) / (cur_ylim2[1] - cur_ylim2[0])
-        ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+        if self.do_zoom_y:
+            ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
 
         if self.fast_draw: 
             #use blit method
@@ -657,7 +757,7 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
             
-    def apply_pan(self, ax, event):
+    def apply_pan(self, ax, event, mode='pan'):
         """ pan method """
         
         trans = ax.transData.inverted()
@@ -668,10 +768,46 @@ class MatplotFigureTwinx(Widget):
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
-        cur_xlim -= dx/2
-        cur_ylim -= dy/2
-        ax.set_xlim(cur_xlim)
-        ax.set_ylim(cur_ylim)
+        if not mode=='pan_y' and not mode=='adjust_y':             
+            if mode=='adjust_x':
+                if self.anchor_x is None:
+                    midpoint= (cur_xlim[1] - cur_xlim[0])/2
+                    if xdata>midpoint:
+                        self.anchor_x='left'
+                    else:
+                        self.anchor_x='right'
+                if self.anchor_x=='left':                
+                    if xdata> cur_xlim[0]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(None,cur_xlim[1])
+                else:
+                    if xdata< cur_xlim[1]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(cur_xlim[0],None)
+            else:
+                cur_xlim -= dx/2
+                ax.set_xlim(cur_xlim)
+
+        if not mode=='pan_x' and not mode=='adjust_x':
+            if mode=='adjust_y':
+                if self.anchor_y is None:
+                    midpoint= (cur_ylim[1] - cur_ylim[0])/2
+                    if ydata>midpoint:
+                        self.anchor_y='top'
+                    else:
+                        self.anchor_y='bottom'               
+
+                if self.anchor_y=='top':
+                    if ydata> cur_ylim[0]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(None,cur_ylim[1])
+                else:
+                    if ydata< cur_ylim[1]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(cur_ylim[0],None)                   
+            else:            
+                cur_ylim -= dy/2
+                ax.set_ylim(cur_ylim)
 
         if self.fast_draw: 
             #use blit method               
@@ -693,7 +829,7 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
 
-    def apply_pan_twinx(self, ax, ax2, event):
+    def apply_pan_twinx(self, ax, ax2, event, mode='pan'):
         """twin axis pan method"""
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((event.x, event.y))
@@ -710,13 +846,72 @@ class MatplotFigureTwinx(Widget):
         ypress2 = ypress * ratio + cur_ylim2[0]
         dy2 = ydata2 - ypress2
 
-        cur_xlim -= dx/2
-        cur_ylim -= dy/2
-        cur_ylim2 -= dy2/2
+        if not mode=='pan_y' and not mode=='adjust_y':             
+            if mode=='adjust_x':
+                if self.anchor_x is None:
+                    midpoint= (cur_xlim[1] + cur_xlim[0])/2
+                    if xdata>midpoint:
+                        self.anchor_x='left'
+                    else:
+                        self.anchor_x='right'
+                if self.anchor_x=='left':                
+                    if xdata> cur_xlim[0]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(None,cur_xlim[1])
+                else:
+                    if xdata< cur_xlim[1]:
+                        cur_xlim -= dx/2
+                        ax.set_xlim(cur_xlim[0],None)
+            else:
+                cur_xlim -= dx/2
+                ax.set_xlim(cur_xlim)
 
-        ax.set_xlim(cur_xlim)
-        ax.set_ylim(cur_ylim)
-        ax2.set_ylim(cur_ylim2)
+        if not mode=='pan_x' and not mode=='adjust_x':
+            if mode=='adjust_y':
+                trans_ax2 = ax2.transData.inverted()
+                xdata_ax2, ydata_ax2 = trans_ax2.transform_point((event.x, event.y))                
+                if self.anchor_y is None:
+                    midpoint_x = (cur_xlim[1] + cur_xlim[0])/2
+                    midpoint_ax1= (cur_ylim[1] + cur_ylim[0])/2
+                    midpoint_ax2= (cur_ylim2[1] + cur_ylim2[0])/2
+                    if xdata>midpoint_x:
+                        ax_anchor='right'
+                    else:
+                        ax_anchor='left'
+                    
+                    if ax_anchor=='left':
+                        if ydata>midpoint_ax1:
+                            self.anchor_y='top_left'
+                        else:
+                            self.anchor_y='bottom_left'   
+                    else:                        
+                        
+                        if ydata_ax2>midpoint_ax2:
+                            self.anchor_y='top_right'
+                        else:
+                            self.anchor_y='bottom_right' 
+                # print(self.anchor_y)
+                if self.anchor_y=='top_left':
+                    if ydata > cur_ylim[0]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(None,cur_ylim[1])
+                elif self.anchor_y=='top_right':
+                    if ydata_ax2 > cur_ylim2[0]:
+                        cur_ylim2 -= dy2/2   
+                        ax2.set_ylim(None,cur_ylim2[1])                    
+                elif self.anchor_y=='bottom_left':
+                    if ydata < cur_ylim[1]:
+                        cur_ylim -= dy/2   
+                        ax.set_ylim(cur_ylim[0],None) 
+                else:
+                    if ydata_ax2 < cur_ylim2[1]:
+                        cur_ylim2 -= dy2/2   
+                        ax2.set_ylim(cur_ylim2[0],None)                     
+            else:            
+                cur_ylim -= dy/2
+                cur_ylim2 -= dy2/2
+                ax.set_ylim(cur_ylim)
+                ax2.set_ylim(cur_ylim2)
 
         if self.fast_draw: 
             #use blit method            
@@ -810,8 +1005,10 @@ class MatplotFigureTwinx(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    
@@ -846,12 +1043,15 @@ class MatplotFigureTwinx(Widget):
         relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
         rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
 
-        ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
-        ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+        if self.do_zoom_x:
+            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+        if self.do_zoom_y:
+            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
 
         new_height2 = (cur_ylim2[1] - cur_ylim2[0]) * scale_factor
         rely2 = (cur_ylim2[1] - ydata2) / (cur_ylim2[1] - cur_ylim2[0])
-        ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+        if self.do_zoom_y:
+            ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 

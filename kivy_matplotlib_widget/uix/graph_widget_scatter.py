@@ -782,7 +782,7 @@ class MatplotFigureScatter(Widget):
         if not mode=='pan_y' and not mode=='adjust_y':             
             if mode=='adjust_x':
                 if self.anchor_x is None:
-                    midpoint= (cur_xlim[1] - cur_xlim[0])/2
+                    midpoint= (cur_xlim[1] + cur_xlim[0])/2
                     if xdata>midpoint:
                         self.anchor_x='left'
                     else:
@@ -802,7 +802,7 @@ class MatplotFigureScatter(Widget):
         if not mode=='pan_x' and not mode=='adjust_x':
             if mode=='adjust_y':
                 if self.anchor_y is None:
-                    midpoint= (cur_ylim[1] - cur_ylim[0])/2
+                    midpoint= (cur_ylim[1] + cur_ylim[0])/2
                     if ydata>midpoint:
                         self.anchor_y='top'
                     else:
