@@ -7,5 +7,6 @@ r("MatplotFigureScatter", module="kivy_matplotlib_widget.uix.graph_widget_scatte
 r("MatplotFigure3D", module="kivy_matplotlib_widget.uix.graph_widget_3d")
 r("MatplotFigureGeneral", module="kivy_matplotlib_widget.uix.graph_widget_general")
 r("MatplotFigureTwinx", module="kivy_matplotlib_widget.uix.graph_widget_twinx")
+r("MatplotNavToolbar", module="kivy_matplotlib_widget.uix.navigation_bar_widget")
 r("LegendRv", module="kivy_matplotlib_widget.uix.legend_widget")
 r("LegendRvHorizontal", module="kivy_matplotlib_widget.uix.legend_widget")
