@@ -1,7 +1,7 @@
 import kivy
 
 
-kivy.require("1.11.1")
+kivy.require("2.0.0")
 
 import kivy_matplotlib_widget.factory_registers  # NOQA
 
