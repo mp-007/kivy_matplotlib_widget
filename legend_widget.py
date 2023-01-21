@@ -11,7 +11,8 @@ from kivy.properties import (
     ObjectProperty,
     NumericProperty,
     ListProperty,
-    BooleanProperty
+    BooleanProperty,
+    ColorProperty
     )
 
 from kivy.lang import Builder
@@ -169,6 +170,8 @@ class LegendRv(BoxLayout):
     """     
     figure_wgt = ObjectProperty(None) 
     data=ListProperty()
+    text_color=ColorProperty([0,0,0,1])
+    background_color=ColorProperty([1,1,1,1])
 
     def __init__(self, **kwargs):
         """init class
@@ -203,6 +206,7 @@ class LegendRv(BoxLayout):
             r_data["legend_rv"] = self  
             r_data["selected"] = False
             r_data["matplotlib_line"] = row_content
+            r_data["text_color"] = self.text_color
 
             self.data.append(r_data)
        
@@ -226,6 +230,7 @@ class LegendRv(BoxLayout):
         r_data["legend_rv"] = self  
         r_data["selected"] = False
         r_data["matplotlib_line"] = line
+        r_data["text_color"] = self.text_color
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -305,7 +310,9 @@ class LegendRvHorizontal(BoxLayout):
     """     
     figure_wgt = ObjectProperty(None) 
     data=ListProperty()
-
+    text_color=ColorProperty([0,0,0,1])
+    background_color=ColorProperty([1,1,1,1])
+    
     def __init__(self, **kwargs):
         """init class
         
@@ -339,6 +346,7 @@ class LegendRvHorizontal(BoxLayout):
             r_data["legend_rv"] = self  
             r_data["selected"] = False
             r_data["matplotlib_line"] = row_content
+            r_data["text_color"] = self.text_color
 
             self.data.append(r_data)
        
@@ -362,6 +370,7 @@ class LegendRvHorizontal(BoxLayout):
         r_data["legend_rv"] = self  
         r_data["selected"] = False
         r_data["matplotlib_line"] = line
+        r_data["text_color"] = self.text_color
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -465,6 +474,7 @@ class CellLegend(LegendGestures, BoxLayout):
     matplotlib_line = ObjectProperty(None)
     line_type = StringProperty('-')	
     mycolor= ListProperty([0,0,1])
+    text_color=ColorProperty([0,0,0,1])
     
     def __init__(self, **kwargs):
         """ init class """
@@ -487,7 +497,8 @@ class CellLegendHorizontal(LegendGestures, BoxLayout):
     matplotlib_line = ObjectProperty(None)
     line_type = StringProperty('-')	
     mycolor= ListProperty([0,0,1])
-    
+    text_color=ColorProperty([0,0,0,1])
+
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs)    
@@ -957,7 +968,7 @@ Builder.load_string('''
 <LegendRv>
     canvas.before:
         Color:
-            rgba: (1, 1, 1, 1)    
+            rgba: root.background_color  
         Rectangle:
             pos: self.pos
             size: self.size    
@@ -981,7 +992,7 @@ Builder.load_string('''
 <LegendRvHorizontal>
     canvas.before:
         Color:
-            rgba: (1, 1, 1, 1)    
+            rgba: root.background_color 
         Rectangle:
             pos: self.pos
             size: self.size    
@@ -1151,7 +1162,7 @@ Builder.load_string('''
             text:root.text
             halign:'left'
             valign:'center'
-            color:0,0,0,1
+            color:root.text_color
             font_size: dp(18.5)
         
     Widget:
@@ -1264,7 +1275,7 @@ Builder.load_string('''
         text_size:self.size
         halign:'left'
         valign:'center'
-        color:0,0,0,1
+        color:root.text_color
         font_size: dp(18.5)
         shorten: True
         shorten_from: 'center'
