@@ -125,7 +125,8 @@ class MatplotFigureGeneral(Widget):
         x, y = mouse_pos
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
-            self.figcanvas.motion_notify_event(x, real_y, guiEvent=None)
+            if self.figcanvas:
+                self.figcanvas.motion_notify_event(x, real_y, guiEvent=None)
             
     def on_touch_down(self, event):
         x, y = event.x, event.y
