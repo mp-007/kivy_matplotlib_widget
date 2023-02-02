@@ -69,7 +69,8 @@ class MatplotFigure(Widget):
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            ax.spines[:].set_zorder(10)
+            for pos in ['right', 'top', 'bottom', 'left']:
+                ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy= ax.add_patch(patch_cpy)
             

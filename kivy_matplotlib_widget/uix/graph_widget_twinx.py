@@ -69,7 +69,8 @@ class MatplotFigureTwinx(Widget):
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            ax.spines[:].set_zorder(10)
+            for pos in ['right', 'top', 'bottom', 'left']:
+                ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy= ax.add_patch(patch_cpy)
             
@@ -82,7 +83,8 @@ class MatplotFigureTwinx(Widget):
                 ax2=self.figure.axes[1]
                 patch_cpy_ax2=copy.copy(ax2.patch)
                 patch_cpy_ax2.set_visible(False)
-                ax2.spines[:].set_zorder(10)
+                for pos in ['right', 'top', 'bottom', 'left']:
+                    ax2.spines[pos].set_zorder(10)
                 patch_cpy_ax2.set_zorder(9)
                 self.background_ax2_patch_copy= ax2.add_patch(patch_cpy_ax2) 
                 self.ymin2,self.ymax2 = ax.get_ylim()
