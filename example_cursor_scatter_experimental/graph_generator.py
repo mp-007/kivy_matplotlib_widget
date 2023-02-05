@@ -35,17 +35,12 @@ class GraphGenerator(object):
         self.x = [2,4,5,7,6,8,9,11,12,12]
         self.y = [1,2,3,4,5,6,7,8,9,10]
 
-        self.line1 = self.ax1.scatter(self.x, self.y, s=30, color='magenta', alpha=0.7, marker='x', picker=3)
+        self.scatter1 = self.ax1.scatter(self.x, self.y, s=30, color='magenta', alpha=0.7, marker='x', picker=3)
         for i, ptlbl in enumerate(self.ptid):
             self.ax1.annotate(ptlbl, (self.x[i], self.y[i]),xytext=(5,0),textcoords='offset points',size=8,color='darkslategrey')        
-
-        self.xmin,self.xmax = self.ax1.get_xlim()
-        self.ymin,self.ymax = self.ax1.get_ylim()
         
         self.fig.subplots_adjust(left=0.13,top=0.96,right=0.93,bottom=0.2)
- 
-        self.ax1.set_xlim(self.xmin, self.xmax)
-        self.ax1.set_ylim(self.ymin, self.ymax)   
+    
         self.ax1.set_xlabel("axis_x",fontsize=font_size_axis_title)
         self.ax1.set_ylabel("axis_y",fontsize=font_size_axis_title)
                 

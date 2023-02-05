@@ -37,6 +37,8 @@ Screen
                     self.state='down'                
         MatplotFigure:
             id:figure_wgt
+            #update axis during pan/zoom
+            fast_draw:False
 '''
 
 
@@ -51,8 +53,7 @@ class Test(App):
         mygraph = GraphGenerator()
         
         self.screen.figure_wgt.figure = mygraph.fig
-        self.screen.figure_wgt.fast_draw = False #update axis during pan/zoom
-        
+
         #register lines instance if need to be update
         self.lines.append(mygraph.line1)
         self.lines.append(mygraph.line2)

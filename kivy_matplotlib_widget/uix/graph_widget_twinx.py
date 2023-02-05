@@ -53,7 +53,11 @@ class MatplotFigureTwinx(Widget):
     do_pan_x = BooleanProperty(True)
     do_pan_y = BooleanProperty(True)    
     do_zoom_x = BooleanProperty(True)
-    do_zoom_y = BooleanProperty(True)    
+    do_zoom_y = BooleanProperty(True)
+    fast_draw = BooleanProperty(True) #True will don't draw axis
+    xsorted = BooleanProperty(False) #to manage x sorted data
+    minzoom = NumericProperty(dp(40))  
+    twinx = BooleanProperty(False)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -108,15 +112,14 @@ class MatplotFigureTwinx(Widget):
         self.ymax = None
         self.ymin2 = None
         self.ymax2 = None
+        self.lines = []
         
         #option
-        self.zoompan = None
-        self.fast_draw=True
-        self.draw_left_spline=False #available only when fast_draw is True
         self.touch_mode='pan'
         self.hover_on = False
-        self.xsorted = False #to manage x sorted data
-        self.minzoom = dp(40) #minimum pixel distance to apply zoom
+        self.cursor_xaxis_formatter=None #used matplotlib formatter to display x cursor value
+        self.cursor_yaxis_formatter=None #used matplotlib formatter to display y cursor value (left axis)
+        self.cursor_yaxis2_formatter=None #used matplotlib formatter to display y cursor value (right axis)       
 
         #zoom box coordonnate
         self.x0_box = None
@@ -280,13 +283,22 @@ class MatplotFigureTwinx(Widget):
                         ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
                         new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
                         self.horizontal_line.set_ydata(new_y)
+                        if self.cursor_yaxis2_formatter:
+                            y = self.cursor_yaxis2_formatter.format_data(y) 
                     else:
                         self.horizontal_line.set_ydata(y) 
+                        if self.cursor_yaxis_formatter:
+                            y = self.cursor_yaxis_formatter.format_data(y) 
+                    
                 else:
-                    self.horizontal_line.set_ydata(y)                        
-                self.horizontal_line.set_ydata(y)
+                    self.horizontal_line.set_ydata(y)  
+                    if self.cursor_yaxis_formatter:
+                        y = self.cursor_yaxis_formatter.format_data(y)                       
+                
                 self.vertical_line.set_xdata(x)
-
+                if self.cursor_xaxis_formatter:
+                    x = self.cursor_xaxis_formatter.format_data(x)
+                    
                 #x y label
                 self.text.set_text(f"x={x}, y={y}")
 
@@ -530,7 +542,7 @@ class MatplotFigureTwinx(Widget):
         """ Manage Mouse/touch press """
         x, y = event.x, event.y
 
-        if self.collide_point(x, y):
+        if self.collide_point(x, y) and self.figure:
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
                     if self.touch_mode!='drag_legend':
@@ -647,7 +659,7 @@ class MatplotFigureTwinx(Widget):
                 return True
             
         # stop propagating if its within our bounds
-        if self.collide_point(x, y):
+        if self.collide_point(x, y) and self.figure:
 
             if self.do_update:
                 self.update_lim()            
@@ -1188,6 +1200,7 @@ class MatplotFigureTwinx(Widget):
             x1=x0_max[0][0]+pos_x
 
             self._alpha_ver=1
+            self._alpha_hor=0
                 
         elif abs(y1-y0)<dp(20) and abs(x1-x0)>self.minzoom:
             self.pos_x_rect_hor=x0
@@ -1200,6 +1213,7 @@ class MatplotFigureTwinx(Widget):
             y1=y0_max[0][1]+pos_y         
 
             self._alpha_hor=1
+            self._alpha_ver=0
                         
         else:
             self._alpha_hor=0   
