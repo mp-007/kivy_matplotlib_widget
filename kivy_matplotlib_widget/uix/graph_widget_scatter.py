@@ -47,7 +47,7 @@ class MatplotFigureScatter(Widget):
     pos_y_rect_ver=NumericProperty(0)   
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)
-    legend_instance = ObjectProperty(None)
+    legend_instance = ObjectProperty(None, allownone=True)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)    
     do_pan_x = BooleanProperty(True)
@@ -85,9 +85,16 @@ class MatplotFigureScatter(Widget):
             #set default xmin/xmax and ymin/ymax
             self.xmin,self.xmax = self.axes.get_xlim()
             self.ymin,self.ymax = self.axes.get_ylim()
+
+        if self.legend_instance:
+            self.legend_instance.reset_legend()
+            self.legend_instance=None
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
+
+        #close last figure in memory (avoid max figure warning)
+        matplotlib.pyplot.close()
 
     def __init__(self, **kwargs):
         super(MatplotFigureScatter, self).__init__(**kwargs)

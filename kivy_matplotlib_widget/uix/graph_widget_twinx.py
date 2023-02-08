@@ -47,7 +47,7 @@ class MatplotFigureTwinx(Widget):
     pos_y_rect_ver=NumericProperty(0)  
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)
-    legend_instance = ObjectProperty(None)
+    legend_instance = ObjectProperty(None, allownone=True)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
     do_pan_x = BooleanProperty(True)
@@ -96,9 +96,17 @@ class MatplotFigureTwinx(Widget):
                 self.twinx=False                            
                 self.background_ax2_patch_copy= None 
                 self.ymin2 = None
-                self.ymax2 = None         
+                self.ymax2 = None  
+                
+        if self.legend_instance:
+            self.legend_instance.reset_legend()
+            self.legend_instance=None
+            
         # Texture
         self._img_texture = Texture.create(size=(w, h))
+        
+        #close last figure in memory (avoid max figure warning)
+        matplotlib.pyplot.close()
 
     def __init__(self, **kwargs):
         super(MatplotFigureTwinx, self).__init__(**kwargs)

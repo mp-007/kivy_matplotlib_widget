@@ -171,6 +171,7 @@ class LegendRv(BoxLayout):
     figure_wgt = ObjectProperty(None) 
     data=ListProperty()
     text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
     background_color=ColorProperty([1,1,1,1])
 
     def __init__(self, **kwargs):
@@ -207,6 +208,7 @@ class LegendRv(BoxLayout):
             r_data["selected"] = False
             r_data["matplotlib_line"] = row_content
             r_data["text_color"] = self.text_color
+            r_data["text_font"] = self.text_font
 
             self.data.append(r_data)
        
@@ -231,6 +233,7 @@ class LegendRv(BoxLayout):
         r_data["selected"] = False
         r_data["matplotlib_line"] = line
         r_data["text_color"] = self.text_color
+        r_data["text_font"] = self.text_font
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -311,6 +314,7 @@ class LegendRvHorizontal(BoxLayout):
     figure_wgt = ObjectProperty(None) 
     data=ListProperty()
     text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
     background_color=ColorProperty([1,1,1,1])
     
     def __init__(self, **kwargs):
@@ -347,6 +351,7 @@ class LegendRvHorizontal(BoxLayout):
             r_data["selected"] = False
             r_data["matplotlib_line"] = row_content
             r_data["text_color"] = self.text_color
+            r_data["text_font"] = self.text_font
 
             self.data.append(r_data)
        
@@ -371,6 +376,7 @@ class LegendRvHorizontal(BoxLayout):
         r_data["selected"] = False
         r_data["matplotlib_line"] = line
         r_data["text_color"] = self.text_color
+        r_data["text_font"] = self.text_font
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -475,6 +481,7 @@ class CellLegend(LegendGestures, BoxLayout):
     line_type = StringProperty('-')	
     mycolor= ListProperty([0,0,1])
     text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
     
     def __init__(self, **kwargs):
         """ init class """
@@ -498,6 +505,7 @@ class CellLegendHorizontal(LegendGestures, BoxLayout):
     line_type = StringProperty('-')	
     mycolor= ListProperty([0,0,1])
     text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
 
     def __init__(self, **kwargs):
         """ init class """
@@ -511,12 +519,13 @@ class CellLegendHorizontal(LegendGestures, BoxLayout):
         #double tap
         self.legend_rv.doubletap(self.row_index)
         
-def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto'):
+def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto',delay=None):
     """ transform matplotlib legend to interactive legend
     
     Args:
         figure_wgt: figure widget from kivy_matplotlib_widget package
         legend_handles : 'auto' (general purpose) or variante (ex: for seaborn legend)
+        delay: create legend touch after a delay (None or int)
 
     """
     
@@ -530,6 +539,7 @@ def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto'):
         
     #put the legend on top (useful for drag behavior)
     leg.set_zorder(20)
+    figure_wgt.figcanvas.draw()
         
     #detect is the legend use column (ex: horizontal legend)
     if hasattr(leg,'_ncols'):
@@ -543,8 +553,14 @@ def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto'):
     else:
         ncol=None
         
-    #get legend bbox position ater 2sec. Otherwise, bbox is not good
-    Clock.schedule_once(partial(create_touch_legend,figure_wgt,leg,ncol,legend_handles),2)
+    create_touch_legend(figure_wgt,leg,ncol,legend_handles,0)
+    if delay is None:
+        #no delay case
+        create_touch_legend(figure_wgt,leg,ncol,legend_handles,0)
+    else:
+        #get legend bbox position atfer delay (sometime needed if 'best position' was used)
+        Clock.schedule_once(partial(create_touch_legend,figure_wgt,leg,ncol,legend_handles),delay)
+    
 
 def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):    
     """ create touch legend """
@@ -574,16 +590,28 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
     #get legend handles and labels
     current_handles, current_labels = ax.get_legend_handles_labels()
     nb_group=len(current_labels)
+    
+    if nb_group==0:
+        print('no legend available')
+        return
 
     #check if a title exist
     have_title=False
     if leg.get_title().get_text():
         have_title=True
-    
+      
+    figure_wgt_as_legend=False
+    if figure_wgt.legend_instance:
+        figure_wgt.legend_instance.reset_legend()
+        matplotlib_legend_box = figure_wgt.legend_instance
+        figure_wgt_as_legend=True
+    else:
+        matplotlib_legend_box = MatplotlibLegendGrid()
+
     if ncol:
         #reorder legend handles to fit with grid layout orientation
         #note: all kivy grid layout orientation don't fit with matpotlib grid position
-        matplotlib_legend_box = MatplotlibLegendGrid()
+        
         matplotlib_legend_box.ids.box.cols=ncol
         
         m, n = ceil(nb_group/ncol), ncol
@@ -604,7 +632,7 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
         current_handles = [current_handles[int(i)] for i in myorder]
 
     else:
-        matplotlib_legend_box = MatplotlibLegendBox()
+        matplotlib_legend_box.ids.box.cols=1
         
     #update kivy widget attributes
     matplotlib_legend_box.x_pos = x0_pos
@@ -624,7 +652,6 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
         matplotlib_legend_box.legend_height -= title_padding
             
     matplotlib_legend_box.legend_width = x1_pos-x0_pos
-
     
     if leg.get_patches()[:] and legend_handles=='variante':
         #sometime the legend handles not perfectly match with graph
@@ -670,7 +697,7 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
                 current_legend_cell.height=int(matplotlib_legend_box.legend_height/(ceil((nb_group-1)/ncol)))
                 current_legend_cell.width=int(matplotlib_legend_box.legend_width/ncol)
             else:
-                current_legend_cell.height=int(matplotlib_legend_box.legend_height/nb_group)
+                current_legend_cell.height=int(matplotlib_legend_box.legend_height/max(nb_group,1))
                 current_legend_cell.width=matplotlib_legend_box.legend_width
                 
             if isinstance(current_handles[i],mpl.container.BarContainer):
@@ -690,141 +717,11 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
     matplotlib_legend_box.figure_wgt=figure_wgt
     matplotlib_legend_box.instance_dict=instance_dict
 
-    #add kivy legend widget in figure
-    figure_wgt.parent.add_widget(matplotlib_legend_box)
-    figure_wgt.legend_instance=matplotlib_legend_box
+    #add kivy legend widget in figure if needed
+    if not figure_wgt_as_legend:
+        figure_wgt.parent.add_widget(matplotlib_legend_box)
+        figure_wgt.legend_instance=matplotlib_legend_box
     
-class MatplotlibLegendBox(FloatLayout):
-    """ Touch egend kivy class"""
-    figure_wgt= ObjectProperty(None)
-    x_pos = NumericProperty(1)
-    y_pos = NumericProperty(1)
-    legend_height = NumericProperty(1)
-    legend_width = NumericProperty(1) 
-    title_padding = NumericProperty(0)    
-    instance_dict=dict()
-    
-    def __init__(self, **kwargs):
-        """ init class """
-        super().__init__(**kwargs)    
-
-    def update_size(self):
-        """ update size """
-        if self.figure_wgt:
-            leg = self.figure_wgt.figure.axes[0].get_legend()
-            bbox = leg.get_window_extent()
-            
-            ax=self.figure_wgt.figure.axes[0]
-            legend_x0 = bbox.x0  
-            legend_y0 = bbox.y0 
-            legend_x1 = bbox.x1 
-            legend_y1 = bbox.y1 
-            pos_x, pos_y = self.figure_wgt.pos
-            x0_pos=int(legend_x0)+pos_x
-            y0_pos=int(legend_y0)+pos_y
-            x1_pos=int(legend_x1)+pos_x
-            y1_pos=int(legend_y1)+pos_y        
-
-            self.x_pos = x0_pos
-            self.y_pos = y0_pos
-            self.legend_height = y1_pos-y0_pos
-            have_title=False
-            if leg.get_title().get_text():
-                have_title=True            
-            if have_title:
-                current_handles, current_labels = ax.get_legend_handles_labels()
-                nb_group=len(current_labels)                
-                if hasattr(leg,'_ncols'):
-                    #matplotlib version >3.6
-                    legend_ncol = leg._ncols
-                else:
-                    legend_ncol = leg._ncol
-                    
-                if legend_ncol>1:
-                    ncol=legend_ncol
-                else:
-                    ncol=None               
-                if ncol:
-                    title_padding = (y1_pos-y0_pos)/(ceil(nb_group/ncol)+1)
-                else:
-                    title_padding = (y1_pos-y0_pos)/(nb_group+1)
-                    
-                self.title_padding = title_padding
-                self.legend_height -= title_padding
-            self.legend_width = x1_pos-x0_pos
-
-    def show_hide_wgt(self,row_index) -> None:
-        if self.box.children[::-1][row_index].selected:
-            #show line
-            self.box.children[::-1][row_index].selected = False
-            self.box.children[::-1][row_index].matplotlib_line.set_alpha(1)
-            self.box.children[::-1][row_index].matplotlib_text.set_alpha(1)
-            
-            hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
-            for current_hist in hist:
-                current_hist.set_visible(True)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()             
-        else:
-            #hide line
-            self.box.children[::-1][row_index].selected = True
-            self.box.children[::-1][row_index].matplotlib_line.set_alpha(0.5)
-            self.box.children[::-1][row_index].matplotlib_text.set_alpha(0.5)
-            
-            hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
-            for current_hist in hist:
-                current_hist.set_visible(False)            
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()
-           
-    def doubletap(self,row_index) -> None:  
-        """ double tap behavior is based on plotly behavior """
-        if not self.box.children[::-1][row_index].selected:
-            hist = self.instance_dict
-            current_line = hist[self.box.children[::-1][row_index].matplotlib_line][0]
-            hist_keys= list(self.instance_dict.keys())           
-            
-            if current_line.get_visible():
-                #check if we isolate line or show all lines
-                need_isolate = False
-                for line in hist_keys:
-                    if hist[line][0] != current_line and hist[line][0].get_visible():
-                        need_isolate=True
-                        break            
-            
-                if need_isolate:
-                   #isolate line'
-                   for idx,line in enumerate(hist_keys):
-                       if hist[line][0] != current_line:                      
-                           for current_hist in hist[line]:
-                               current_hist.set_visible(False)                           
-                           self.box.children[::-1][idx].selected = True
-                           self.box.children[::-1][idx].matplotlib_line.set_alpha(0.5)
-                           self.box.children[::-1][idx].matplotlib_text.set_alpha(0.5)
-                       else:
-                           self.box.children[::-1][idx].selected = False
-                           self.box.children[::-1][idx].matplotlib_line.set_alpha(1)
-                           self.box.children[::-1][idx].matplotlib_text.set_alpha(1)
-                else:
-                    #show all lines'
-                    for idx,line in enumerate(hist_keys):                     
-                        for current_hist in hist[line]:
-                            current_hist.set_visible(True) 
-                        self.box.children[::-1][idx].selected = False  
-                        self.box.children[::-1][idx].matplotlib_line.set_alpha(1)  
-                        self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                                   
-        else:
-            hist = self.instance_dict
-            #show all lines
-            for idx,line in enumerate(hist): 
-                for current_hist in hist[line]:
-                    current_hist.set_visible(True)                   
-                self.box.children[::-1][idx].selected = False 
-                self.box.children[::-1][idx].matplotlib_line.set_alpha(1) 
-                self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                   
-               
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()
         
 class MatplotlibLegendGrid(FloatLayout):
     """ Touch egend kivy class"""
@@ -845,47 +742,56 @@ class MatplotlibLegendGrid(FloatLayout):
         """ update size """
         if self.figure_wgt:
             leg = self.figure_wgt.figure.axes[0].get_legend()
-            bbox = leg.get_window_extent()
-            
-            ax=self.figure_wgt.figure.axes[0]
-            legend_x0 = bbox.x0  
-            legend_y0 = bbox.y0 
-            legend_x1 = bbox.x1 
-            legend_y1 = bbox.y1 
-            pos_x, pos_y = self.figure_wgt.pos
-            x0_pos=int(legend_x0)+pos_x
-            y0_pos=int(legend_y0)+pos_y
-            x1_pos=int(legend_x1)+pos_x
-            y1_pos=int(legend_y1)+pos_y        
+            if leg:
+                bbox = leg.get_window_extent()
+                
+                ax=self.figure_wgt.figure.axes[0]
+                legend_x0 = bbox.x0  
+                legend_y0 = bbox.y0 
+                legend_x1 = bbox.x1 
+                legend_y1 = bbox.y1 
+                pos_x, pos_y = self.figure_wgt.pos
+                x0_pos=int(legend_x0)+pos_x
+                y0_pos=int(legend_y0)+pos_y
+                x1_pos=int(legend_x1)+pos_x
+                y1_pos=int(legend_y1)+pos_y        
+    
+                self.x_pos = x0_pos
+                self.y_pos = y0_pos
+                self.legend_height = y1_pos-y0_pos
+                have_title=False
+                if leg.get_title().get_text():
+                    have_title=True            
+                if have_title:
+                    current_handles, current_labels = ax.get_legend_handles_labels()
+                    nb_group=len(current_labels)                
+                    if hasattr(leg,'_ncols'):
+                        #matplotlib version >3.6
+                        legend_ncol = leg._ncols
+                    else:
+                        legend_ncol = leg._ncol
+                        
+                    if legend_ncol>1:
+                        ncol=legend_ncol
+                    else:
+                        ncol=None               
+                    if ncol:
+                        title_padding = (y1_pos-y0_pos)/(ceil(nb_group/ncol)+1)
+                    else:
+                        title_padding = (y1_pos-y0_pos)/(nb_group+1)
+                        
+                    self.title_padding = title_padding
+                    self.legend_height -= title_padding
+                self.legend_width = x1_pos-x0_pos
 
-            self.x_pos = x0_pos
-            self.y_pos = y0_pos
-            self.legend_height = y1_pos-y0_pos
-            have_title=False
-            if leg.get_title().get_text():
-                have_title=True            
-            if have_title:
-                current_handles, current_labels = ax.get_legend_handles_labels()
-                nb_group=len(current_labels)                
-                if hasattr(leg,'_ncols'):
-                    #matplotlib version >3.6
-                    legend_ncol = leg._ncols
-                else:
-                    legend_ncol = leg._ncol
-                    
-                if legend_ncol>1:
-                    ncol=legend_ncol
-                else:
-                    ncol=None               
-                if ncol:
-                    title_padding = (y1_pos-y0_pos)/(ceil(nb_group/ncol)+1)
-                else:
-                    title_padding = (y1_pos-y0_pos)/(nb_group+1)
-                    
-                self.title_padding = title_padding
-                self.legend_height -= title_padding
-            self.legend_width = x1_pos-x0_pos
-        
+    def reset_legend(self):
+        """ reset_legend and clear all children """
+        self.x_pos = 1
+        self.y_pos = 1
+        self.legend_height = 1  
+        self.legend_width = 1 
+        self.title_padding = 0       
+        self.box.clear_widgets()           
 
     def show_hide_wgt(self,row_index) -> None:
         if self.box.children[::-1][row_index].selected:
@@ -1012,22 +918,7 @@ Builder.load_string('''
             orientation: 'horizontal'
             size_hint_y:1
             size_hint_x:None
-            width: self.minimum_width 
- 
-<MatplotlibLegendBox>
-    box:box
-    size_hint: None,None
-    width: dp(0.01) 
-    height: dp(0.01) 
-    
-    BoxLayout:
-        id:box         
-        x:root.x_pos
-        y:root.y_pos
-        size_hint:None,None
-        height:root.legend_height+root.title_padding
-        width:root.legend_width
-        orientation:'vertical'
+            width: self.minimum_width
  
 <MatplotlibLegendGrid>
     box:box
@@ -1164,6 +1055,7 @@ Builder.load_string('''
             valign:'center'
             color:root.text_color
             font_size: dp(18.5)
+            font_name:root.text_font
         
     Widget:
 		size_hint_x:None
@@ -1277,6 +1169,7 @@ Builder.load_string('''
         valign:'center'
         color:root.text_color
         font_size: dp(18.5)
+        font_name:root.text_font
         shorten: True
         shorten_from: 'center'
         ''')
