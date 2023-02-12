@@ -155,10 +155,10 @@ class Test(App):
         fig,ax1 = plt.subplots(1,1)
         ax2 = ax1.twinx()
         x = np.linspace(0,2*np.pi,100)
-        ax1.plot(x,np.sin(x),'b')
+        ax1.plot(x,np.sin(x),'b',label='line1')
         ax1.set_xlabel('Scaleable axis')
         ax1.set_ylabel('Scaleable axis')
-        ax2.plot(x,np.sin(x+1),'r')
+        ax2.plot(x,np.sin(x+1),'r',label='line_right')
         ax2.set_ylabel('Static axis',weight='bold')
             
         self.screen.figure_wgt.figure = fig

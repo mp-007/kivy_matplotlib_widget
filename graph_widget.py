@@ -16,9 +16,12 @@ from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib import cbook
+from matplotlib.colors import to_hex
 from weakref import WeakKeyDictionary
 from kivy.metrics import dp
 import numpy as np
+from kivy.utils import get_color_from_hex
+
 
 class MatplotFigure(Widget):
     """Widget to show a matplotlib figure in kivy.
@@ -57,6 +60,7 @@ class MatplotFigure(Widget):
     fast_draw = BooleanProperty(True) #True will don't draw axis
     xsorted = BooleanProperty(False) #to manage x sorted data
     minzoom = NumericProperty(dp(40))
+    hover_instance = ObjectProperty(None, allownone=True)
 
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -129,6 +133,10 @@ class MatplotFigure(Widget):
         #manage adjust x and y
         self.anchor_x = None
         self.anchor_y = None 
+        
+        #manage hover data
+        self.x_hover_data = None
+        self.y_hover_data = None
         
         #manage back and next event
         self._nav_stack = cbook.Stack()
@@ -245,8 +253,10 @@ class MatplotFigure(Widget):
                 line=good_line[idx_best]
                 self.x_cursor, self.y_cursor = line.get_data()
                 x = self.x_cursor[good_index[idx_best]]
-                y = self.y_cursor[good_index[idx_best]]                
-                self.set_cross_hair_visible(True)
+                y = self.y_cursor[good_index[idx_best]]  
+                
+                if not self.hover_instance:
+                    self.set_cross_hair_visible(True)
                 
                 # update the cursor x,y data               
                 ax=line.axes
@@ -254,11 +264,42 @@ class MatplotFigure(Widget):
                 self.vertical_line.set_xdata(x)
 
                 #x y label
-                if self.cursor_xaxis_formatter:
-                    x = self.cursor_xaxis_formatter.format_data(x)
-                if self.cursor_yaxis_formatter:
-                    y = self.cursor_yaxis_formatter.format_data(y)                    
-                self.text.set_text(f"x={x}, y={y}")
+                if self.hover_instance:                     
+                    xy_pos = ax.transData.transform([(x,y)]) 
+                    self.x_hover_data = x
+                    self.y_hover_data = y
+                    self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                    self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                    self.hover_instance.show_cursor=True
+                        
+                    if self.cursor_xaxis_formatter:
+                        x = self.cursor_xaxis_formatter.format_data(x)
+                    if self.cursor_yaxis_formatter:
+                        y = self.cursor_yaxis_formatter.format_data(y) 
+                    self.hover_instance.label_x_value=f"{x}"
+                    self.hover_instance.label_y_value=f"{y}"
+            
+                    self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
+                    self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
+                    
+                    self.hover_instance.custom_label = line.get_label()
+                    self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
+                    
+                    if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                        self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                        self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                        self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                        self.hover_instance.hover_outside_bound=True
+                    else:
+                        self.hover_instance.hover_outside_bound=False                      
+                    
+                    return
+                else:
+                    if self.cursor_xaxis_formatter:
+                        x = self.cursor_xaxis_formatter.format_data(x)
+                    if self.cursor_yaxis_formatter:
+                        y = self.cursor_yaxis_formatter.format_data(y) 
+                    self.text.set_text(f"x={x}, y={y}")
 
                 #blit method (always use because same visual effect as draw)                  
                 if self.background is None:
@@ -281,6 +322,12 @@ class MatplotFigure(Widget):
             #if touch is too far, hide cross hair cursor
             else:
                 self.set_cross_hair_visible(False)  
+                if self.hover_instance:
+                    self.hover_instance.x_hover_pos=self.x
+                    self.hover_instance.y_hover_pos=self.y      
+                    self.hover_instance.show_cursor=False
+                    self.x_hover_data = None
+                    self.y_hover_data = None
 
     def home(self) -> None:
         """ reset data axis
@@ -411,6 +458,27 @@ class MatplotFigure(Widget):
         self._img_texture.blit_buffer(
             bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
         self._img_texture.flip_vertical()
+        
+        if self.hover_instance:
+            #update hover pos if needed
+            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+     
+                # ymin,ymax=self.axes.get_ylim()
+                # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
+                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
+                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
+    
+                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                    self.hover_instance.hover_outside_bound=True
+                else:
+                    self.hover_instance.hover_outside_bound=False            
+        
 
     def transform_with_touch(self, event):
         """ manage touch behaviour. based on kivy scatter method"""
@@ -488,6 +556,26 @@ class MatplotFigure(Widget):
 
             changed = True
         return changed
+
+    def on_motion(self,*args):
+        '''Kivy Event to trigger mouse event on motion
+           `enter_notify_event`.
+        '''
+        pos = args[1]
+        newcoord = self.to_widget(pos[0], pos[1])
+        x = newcoord[0]
+        y = newcoord[1]
+        inside = self.collide_point(x,y)
+        if inside: 
+
+            # will receive all motion events.
+            if self.figcanvas and self.hover_instance:
+                #avoid in motion if touch is detected
+                if not len(self._touches)==0:
+                    return
+                FakeEvent.x=x
+                FakeEvent.y=y
+                self.hover(FakeEvent)
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
@@ -819,6 +907,8 @@ class MatplotFigure(Widget):
         self.figcanvas.draw()  
         if self.legend_instance:
             self.legend_instance.update_size()
+        if self.hover_instance:
+            self.hover_instance.figwidth = self.width
 
     def update_lim(self):
         """ update axis lim if zoombox is used"""
@@ -984,6 +1074,10 @@ class _FigureCanvas(FigureCanvasAgg):
         self.widget.bt_h = h
         self.widget._draw_bitmap()
 
+class FakeEvent:
+    x:None
+    y:None
+    
 from kivy.factory import Factory
 
 Factory.register('MatplotFigure', MatplotFigure)
