@@ -16,7 +16,7 @@ pip install kivy-matplotlib-widget
  - reset axis on double-click (home button)
  - fast rendering mode (axis not updated for faster draw)
  - use only 1 package (matplotlib) and no additional backend
- - cursor option
+ - cursor and hover option
  - legend widget like plotly library
 
 ![image](https://user-images.githubusercontent.com/19823482/146577068-026a9608-a9df-4d59-a548-8b81f9b85574.png)
