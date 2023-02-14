@@ -397,14 +397,22 @@ class MatplotFigureScatter(Widget):
                         if self.multi_xdata:                                
                             self.hover_instance.custom_label = self.scatter_label[good_index2_scatter[idx_best]]
                         else:                   
-                            self.hover_instance.custom_label = line.get_label()
+                            self.hover_instance.custom_label = self.scatter_label[good_index_scatter[idx_best]]
                     if line:
                         self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
                     elif scatter:
                         if self.multi_xdata:
-                            self.hover_instance.custom_color = get_color_from_hex(to_hex(scatter.get_facecolors()))
+                            if len(self.x_cursor)==len(scatter.get_facecolors()):
+                                color=scatter.get_facecolors()[good_index2_scatter[idx_best]]
+                            else:
+                                color = scatter.get_facecolors()
+                            self.hover_instance.custom_color = get_color_from_hex(to_hex(color))
                         else:
-                            self.hover_instance.custom_color = get_color_from_hex(to_hex(scatter.get_facecolors()))
+                            if len(self.x_cursor)==len(scatter.get_facecolors()):
+                                color=scatter.get_facecolors()[good_index_scatter[idx_best]]
+                            else:
+                                color = scatter.get_facecolors()                           
+                            self.hover_instance.custom_color = get_color_from_hex(to_hex(color))
                                                                         
                     if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
                         self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
