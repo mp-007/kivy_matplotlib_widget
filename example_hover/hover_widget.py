@@ -24,8 +24,8 @@ def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None)
 
     if figure_wgt.hover_instance:
         figure_wgt.hover_instance.reset_hover()
-        figure_wgt.hover_widget.label_x=label_x
-        figure_wgt.hover_widget.label_y=label_y        
+        figure_wgt.hover_instance.label_x=label_x
+        figure_wgt.hover_instance.label_y=label_y        
            
     else:
         if hover_widget is None:
