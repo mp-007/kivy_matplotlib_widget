@@ -53,6 +53,7 @@ class MatplotFigure(Widget):
     legend_instance = ObjectProperty(None, allownone=True)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
+    interactive_axis = BooleanProperty(False) 
     do_pan_x = BooleanProperty(True)
     do_pan_y = BooleanProperty(True)    
     do_zoom_x = BooleanProperty(True)
@@ -673,6 +674,10 @@ class MatplotFigure(Widget):
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                 or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
                 self.push_current()
+                if self.interactive_axis:
+                    if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
+                        or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
+                        self.touch_mode='pan'
 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -746,13 +751,34 @@ class MatplotFigure(Widget):
         """ pan method """
         
         trans = ax.transData.inverted()
-        xdata, ydata = trans.transform_point((event.x, event.y))
-        xpress, ypress = trans.transform_point((self._last_touch_pos[event][0], self._last_touch_pos[event][1]))
+        xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
+        xpress, ypress = trans.transform_point((self._last_touch_pos[event][0]-self.pos[0], self._last_touch_pos[event][1]-self.pos[1]))
         dx = xdata - xpress
         dy = ydata - ypress
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
+        
+        if self.interactive_axis and self.touch_mode=='pan':
+            if ydata < cur_ylim[0]:
+                left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
+                right_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.8 + cur_xlim[0]
+                if xdata < left_anchor_zone or xdata > right_anchor_zone:
+                    mode = 'adjust_x'
+                else:
+                    mode = 'pan_x'
+                self.touch_mode = mode
+            elif xdata < cur_xlim[0]:
+                bottom_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
+                top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]               
+                if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
+                    mode = 'adjust_y'
+                else:
+                    mode= 'pan_y' 
+                self.touch_mode = mode
+            else:
+                self.touch_mode = 'pan'
+
         if not mode=='pan_y' and not mode=='adjust_y':             
             if mode=='adjust_x':
                 if self.anchor_x is None:
