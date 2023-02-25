@@ -1,4 +1,5 @@
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
 
 from kivy.properties import (
     ObjectProperty,
@@ -13,7 +14,7 @@ from kivy.core.window import Window
 from kivy.metrics import dp
         
         
-def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None):
+def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,hover_type='nearest'):
     """ add hover to matpotlib figure
     
     Args:
@@ -23,14 +24,57 @@ def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None)
     """
 
     if figure_wgt.hover_instance:
-        figure_wgt.hover_instance.reset_hover()
-        figure_wgt.hover_instance.label_x=label_x
-        figure_wgt.hover_instance.label_y=label_y        
-           
+       
+        if hover_type=='compare':
+            if not figure_wgt.compare_hover_instance:
+                if hover_widget is None:
+                    hover_widget = GeneralCompareHover()  
+                hover_widget.x_hover_pos=figure_wgt.x
+                hover_widget.y_hover_pos=figure_wgt.y 
+                hover_widget.label_x=label_x
+                hover_widget.label_y=label_y
+                figure_wgt.parent.add_widget(hover_widget)
+                figure_wgt.compare_hover_instance = hover_widget                    
+            figure_wgt.compare_hover_instance.create_child(figure_wgt.lines)            
+            figure_wgt.hover_instance = figure_wgt.compare_hover_instance
+            figure_wgt.compare_xdata=True 
+            if figure_wgt.nearest_hover_instance:
+                figure_wgt.nearest_hover_instance.show_cursor=False
+            
+        else:
+
+            if not figure_wgt.nearest_hover_instance:
+                if hover_widget is None:
+                    hover_widget = GeneralHover() 
+                hover_widget.x_hover_pos=figure_wgt.x
+                hover_widget.y_hover_pos=figure_wgt.y 
+                hover_widget.label_x=label_x
+                hover_widget.label_y=label_y
+                figure_wgt.parent.add_widget(hover_widget)                    
+                figure_wgt.nearest_hover_instance = hover_widget
+                
+            figure_wgt.hover_instance = figure_wgt.nearest_hover_instance                    
+            figure_wgt.hover_instance.reset_hover()
+            figure_wgt.hover_instance.label_x=label_x
+            figure_wgt.hover_instance.label_y=label_y
+            figure_wgt.compare_xdata=False 
+            if figure_wgt.compare_hover_instance:
+                figure_wgt.compare_hover_instance.show_cursor=False                     
     else:
         if hover_widget is None:
-            hover_widget = GeneralHover()
-            
+            if hover_type=='compare':
+                hover_widget = GeneralCompareHover()
+            else:
+                hover_widget = GeneralHover()
+         
+        if hover_type=='compare':
+            hover_widget.create_child(figure_wgt.lines)
+            figure_wgt.compare_hover_instance = hover_widget
+            figure_wgt.compare_xdata=True 
+        else:
+            figure_wgt.nearest_hover_instance = hover_widget
+            figure_wgt.compare_xdata=False
+
         hover_widget.x_hover_pos=figure_wgt.x
         hover_widget.y_hover_pos=figure_wgt.y 
         hover_widget.label_x=label_x
@@ -94,6 +138,57 @@ class HoverVerticalText(BaseHoverFloatLayout):
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs)  
+
+class GeneralCompareHover(BaseHoverFloatLayout):
+    """ GeneralCompareHover""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    background_color=ColorProperty([1,1,1,1])
+    hover_height = NumericProperty(dp(48))
+    y_touch_pos = NumericProperty(1)    
+    
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs) 
+        self.children_names=[]
+        self.children_list=[]
+
+    def create_child(self,lines):
+        if len(self.ids.main_box.children)>2:
+            #clear all added childrens
+            for i in range(len(self.ids.main_box.children)-2):
+                self.ids.main_box.remove_widget(self.ids.main_box.children[0])
+
+        self.children_names=[]
+        self.children_list=[]        
+        for i,line in enumerate(lines):
+            label=line.get_label()
+            if i==0:
+               self.ids.comparehoverbox.label_y=label
+               mywidget = self.ids.comparehoverbox
+            else:
+                mywidget=CompareHoverBox()
+                mywidget.label_y=label
+                self.ids.main_box.add_widget(mywidget)
+            self.children_names.append(label)
+            self.children_list.append(mywidget)
+
+class CompareHoverBox(BoxLayout):
+    """ Hover with vertical text""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))    
+    label_y = StringProperty('y')
+    label_y_value = StringProperty('y')
+    x_hover_pos = NumericProperty(1)
+    y_hover_pos = NumericProperty(1)
+    show_widget = BooleanProperty(False)
+    custom_color=ColorProperty([0,0,0,1],allownone=True)
+
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs)       
 
 class InfoHover(BaseHoverFloatLayout):
     """ InfoHover adapt the background and the font color with the line or scatter color""" 
@@ -318,6 +413,90 @@ Builder.load_string('''
                         root.custom_label if root.custom_label else ''  
                     font_size:root.text_size
                     color: root.text_color
-                    font_name : root.text_font                
+                    font_name : root.text_font     
                     
+<GeneralCompareHover>
+    custom_color: [0,0,0,1]    
+    
+    BoxLayout:
+        id:main_box
+        x:
+            root.x_hover_pos + dp(4) if root.x_hover_pos + dp(4) < root.figwidth - self.width  - self.padding[0] * 2 \
+            else root.x_hover_pos - dp(4) - self.width - self.padding[0] * 2
+        y:
+            root.ymin_line + dp(4) if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - dp(4) - self.height
+        size_hint: None, None
+        height: self.minimum_height
+        width: 
+            max([c.width for c in self.children]) + dp(12) if root.show_cursor \
+            else dp(0.0001)
+        orientation:'vertical'
+        padding: 0,dp(4),0,dp(4)
+        
+        canvas:            
+            Color:
+                rgba: root.background_color
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(4)]  
+            Color:
+                rgba: 0,0,0,1
+             
+            Line:
+                width: 1    
+                rounded_rectangle:
+                    (self.x, self.y, self.width, self.height,\
+                    dp(4), dp(4), dp(4), dp(4),\
+                    self.height) 
+                        
+        canvas.after:            
+            Color:
+                rgba: 0,0,1,1
+            Line:
+                width: dp(1)
+        		points: 
+                    root.x_hover_pos, \
+           			root.ymin_line, \
+       				root.x_hover_pos, \
+       				root.ymax_line
+        
+        
+        BoxLayout:
+            size_hint:None,None
+            width:label.texture_size[0] + dp(12)
+            height:label.texture_size[1] + dp(12)
+            padding: dp(12),0,0,0
+            Label:
+                id:label
+                text: 
+                    root.label_x + ': ' + root.label_x_value  
+                font_size:root.text_size
+                font_name : root.text_font
+                color: root.text_color
+                
+        CompareHoverBox: 
+            id:comparehoverbox              
+                
+<CompareHoverBox>
+    size_hint:None,None
+    width:label.texture_size[0] + dp(12) + dp(24) if self.show_widget else dp(12)
+    height:label.texture_size[1] + dp(12) if self.show_widget else dp(0.01)
+    opacity:1 if self.show_widget else 0
+    padding: dp(12),0,0,0
+    Widget:
+        size_hint_x:None
+        width:dp(16)
+        canvas:            
+            Color:
+                rgba: root.custom_color if root.custom_color else [0,0,0,1]
+            Rectangle:
+                pos: self.pos[0],self.pos[1]+self.height/2-dp(6)
+                size: dp(12),dp(12)    
+    Label:
+        id:label
+        text: root.label_y + ': ' + root.label_y_value  
+        color: root.text_color
+        font_size:root.text_size
+        font_name : root.text_font                 
         ''')

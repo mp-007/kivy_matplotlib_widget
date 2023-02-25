@@ -62,7 +62,10 @@ class MatplotFigureScatter(Widget):
     minzoom = NumericProperty(dp(40))
     multi_xdata = BooleanProperty(False)
     multi_xdata_res = NumericProperty(dp(20))
+    compare_xdata = BooleanProperty(False)   
     hover_instance = ObjectProperty(None, allownone=True)
+    nearest_hover_instance = ObjectProperty(None, allownone=True)
+    compare_hover_instance = ObjectProperty(None, allownone=True)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)

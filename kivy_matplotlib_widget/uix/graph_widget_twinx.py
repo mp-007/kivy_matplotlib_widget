@@ -61,7 +61,10 @@ class MatplotFigureTwinx(Widget):
     xsorted = BooleanProperty(False) #to manage x sorted data
     minzoom = NumericProperty(dp(40))  
     twinx = BooleanProperty(False)
+    compare_xdata = BooleanProperty(False)   
     hover_instance = ObjectProperty(None, allownone=True)
+    nearest_hover_instance = ObjectProperty(None, allownone=True)
+    compare_hover_instance = ObjectProperty(None, allownone=True)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -521,7 +524,7 @@ class MatplotFigureTwinx(Widget):
         if self.hover_instance:
             #update hover pos if needed
             if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
-                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
      
