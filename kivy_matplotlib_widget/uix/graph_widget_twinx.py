@@ -161,6 +161,9 @@ class MatplotFigureTwinx(Widget):
         #manage hover data
         self.x_hover_data = None
         self.y_hover_data = None
+        
+        #trick to manage wrong canvas size on first call (compare_hover)
+        self.first_call_compare_hover=False        
 
         #manage back and next event
         self._nav_stack = cbook.Stack()
@@ -246,30 +249,50 @@ class MatplotFigureTwinx(Widget):
 
                         #get x data from index
                         x = self.x_cursor[index]
-                        
-                        #find ydata corresponding to xdata
-                        y = self.y_cursor[index]
-                                               
-                        #get distance between line and touch (in pixels)
-                        ax=line.axes 
-                        if self.twinx:
-                            if ax==self.figure.axes[1]:
-                                #right axis
-                                trans = self.figure.axes[1].transData.inverted()
-                                xdata2, ydata2 = trans.transform_point((event.x - self.pos[0], event.y - self.pos[1])) 
-                                xy_pixels_mouse = ax.transData.transform(np.vstack([xdata2,ydata2]).T)
+         
+                        if self.compare_xdata:
+                            #get distance between line and touch (in pixels)
+                            ax=line.axes 
+                            #left axis
+                            if self.twinx:
+                                if ax==self.figure.axes[1]:
+                                    #right axis
+                                    trans = self.figure.axes[1].transData.inverted()
+                                    xdata2, ydata2 = trans.transform_point((event.x - self.pos[0], event.y - self.pos[1])) 
+                                    xy_pixels_mouse = ax.transData.transform(np.vstack([xdata2,ydata2]).T)
+                                else:  
+                                    #left axis                        
+                                    xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])                        
                             else:  
                                 #left axis                        
-                                xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])                        
-                        else:  
-                            #left axis                        
-                            xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
-                        xy_pixels = ax.transData.transform([(x,y)])
-                        dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
-                        dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
-                        
-                        #store distance
-                        distance.append(np.sqrt(dx2 + dy2))
+                                xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
+                            xy_pixels = ax.transData.transform([(x,ydata)])
+                            dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0]) 
+                            distance.append(dx2)
+                        else:                         
+                            #find ydata corresponding to xdata
+                            y = self.y_cursor[index]
+                                                   
+                            #get distance between line and touch (in pixels)
+                            ax=line.axes 
+                            if self.twinx:
+                                if ax==self.figure.axes[1]:
+                                    #right axis
+                                    trans = self.figure.axes[1].transData.inverted()
+                                    xdata2, ydata2 = trans.transform_point((event.x - self.pos[0], event.y - self.pos[1])) 
+                                    xy_pixels_mouse = ax.transData.transform(np.vstack([xdata2,ydata2]).T)
+                                else:  
+                                    #left axis                        
+                                    xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])                        
+                            else:  
+                                #left axis                        
+                                xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
+                            xy_pixels = ax.transData.transform([(x,y)])
+                            dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
+                            dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
+                            
+                            #store distance
+                            distance.append(np.sqrt(dx2 + dy2))
                         
                         #store all best lines and index
                         good_line.append(line)
@@ -283,105 +306,188 @@ class MatplotFigureTwinx(Widget):
             #minimum distance 
             if min(distance)<dp(50):
                 #index of minimum distance
-                idx_best=np.argmin(distance)
-                
-                #get datas from closest line
-                line=good_line[idx_best]
-                self.x_cursor, self.y_cursor = line.get_data()
-                x = self.x_cursor[good_index[idx_best]]
-                y = self.y_cursor[good_index[idx_best]] 
-                
-                if not self.hover_instance:
-                    self.set_cross_hair_visible(True)
-                
-                # update the cursor x,y data               
-                ax=line.axes
-                if self.twinx:
-                    if ax==self.figure.axes[1]: 
-                        cur_ylim = self.figure.axes[0].get_ylim()
-                        cur_ylim2 = self.figure.axes[1].get_ylim()
-    
-                        ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
-                        new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
-                        self.horizontal_line.set_ydata(new_y)
-                        if self.cursor_yaxis2_formatter and not self.hover_instance:
-                            y = self.cursor_yaxis2_formatter.format_data(y) 
-                    else:
-                        self.horizontal_line.set_ydata(y) 
-                        if self.cursor_yaxis_formatter and not self.hover_instance:
-                            y = self.cursor_yaxis_formatter.format_data(y) 
+                if self.compare_xdata:
+                    if not self.hover_instance or not hasattr(self.hover_instance,'children_list'):
+                        return
                     
-                else:
-                    self.horizontal_line.set_ydata(y)  
-                    if self.cursor_yaxis_formatter and not self.hover_instance:
-                        y = self.cursor_yaxis_formatter.format_data(y)                       
-                
-                self.vertical_line.set_xdata(x)
-                if self.cursor_xaxis_formatter and not self.hover_instance:
-                    x = self.cursor_xaxis_formatter.format_data(x)
-                    
-                #x y label
-                if self.hover_instance:                     
+                    idx_best_list = np.flatnonzero(np.array(distance) == min(distance))
+                    #get datas from closest line
+                    line=good_line[idx_best_list[0]]
+                    self.x_cursor, self.y_cursor = line.get_data()
+                    x = self.x_cursor[good_index[idx_best_list[0]]]
+                    y = self.y_cursor[good_index[idx_best_list[0]]] 
+
+                    ax=line.axes
                     xy_pos = ax.transData.transform([(x,y)]) 
                     self.x_hover_data = x
                     self.y_hover_data = y
                     self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                     self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-                    self.hover_instance.show_cursor=True
+                    self.hover_instance.y_touch_pos=float(xy_pixels[0][1]) + self.y
+                    
+                    if self.first_call_compare_hover:
+                        self.hover_instance.show_cursor=True 
+                    else:
+                        self.first_call_compare_hover=True
+                    
+                    if len(idx_best_list)>0:
+                        available_widget = self.hover_instance.children_list
+                        nb_widget=len(available_widget)
+                        index_list=list(range(nb_widget))
+                        for i, current_idx_best in enumerate(idx_best_list):
+                            if i > nb_widget-1:
+                                break
+                            else:
+                                line=good_line[idx_best_list[i]]
+                                line_label = line.get_label()
+                                if line_label in self.hover_instance.children_names:
+                                    index= self.hover_instance.children_names.index(line_label)                                   
+                                    y_cursor = line.get_ydata()
+                                    y = y_cursor[good_index[idx_best_list[i]]] 
+                                    ax=line.axes
+                                    xy_pos = ax.transData.transform([(x,y)]) 
+                                    available_widget[index].x_hover_pos=float(xy_pos[0][0]) + self.x
+                                    available_widget[index].y_hover_pos=float(xy_pos[0][1]) + self.y
+                                    available_widget[index].custom_color = get_color_from_hex(to_hex(line.get_color()))
+                                    
+                                    if self.twinx:
+                                        if ax==self.figure.axes[1]:
+                                            if self.cursor_yaxis2_formatter:
+                                                y = self.cursor_yaxis2_formatter.format_data(y)                         
+                                        else:
+                                            if self.cursor_yaxis_formatter:
+                                                y = self.cursor_yaxis_formatter.format_data(y) 
+                
+                                    else: 
+                                        if self.cursor_yaxis_formatter:
+                                            y = self.cursor_yaxis_formatter.format_data(y)                                        
+
+                                    available_widget[index].label_y_value=f"{y}"
+                                    available_widget[index].show_widget=True
+                                    index_list.remove(index)
+                                    
+                        if i<nb_widget-1:
+                            for ii in index_list:
+                                available_widget[ii].show_widget=False
+
+                        if self.cursor_xaxis_formatter:
+                            x = self.cursor_xaxis_formatter.format_data(x) 
+                            
+                        self.hover_instance.label_x_value=f"{x}"
+                    
+                        self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
+                        self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
-                    if self.twinx:
-                        if ax==self.figure.axes[1]:
-                            if self.cursor_yaxis2_formatter:
-                                y = self.cursor_yaxis2_formatter.format_data(y)                         
+                        if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
+                            self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
+                            self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
+                            self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
+                            self.hover_instance.hover_outside_bound=True
                         else:
+                            self.hover_instance.hover_outside_bound=False                      
+                        
+                        return                                    
+                
+                else:
+                    idx_best=np.argmin(distance)
+                    
+                    #get datas from closest line
+                    line=good_line[idx_best]
+                    self.x_cursor, self.y_cursor = line.get_data()
+                    x = self.x_cursor[good_index[idx_best]]
+                    y = self.y_cursor[good_index[idx_best]] 
+                    
+                    if not self.hover_instance:
+                        self.set_cross_hair_visible(True)
+                    
+                    # update the cursor x,y data               
+                    ax=line.axes
+                    if self.twinx:
+                        if ax==self.figure.axes[1]: 
+                            cur_ylim = self.figure.axes[0].get_ylim()
+                            cur_ylim2 = self.figure.axes[1].get_ylim()
+        
+                            ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
+                            new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
+                            self.horizontal_line.set_ydata(new_y)
+                            if self.cursor_yaxis2_formatter and not self.hover_instance:
+                                y = self.cursor_yaxis2_formatter.format_data(y) 
+                        else:
+                            self.horizontal_line.set_ydata(y) 
+                            if self.cursor_yaxis_formatter and not self.hover_instance:
+                                y = self.cursor_yaxis_formatter.format_data(y) 
+                        
+                    else:
+                        self.horizontal_line.set_ydata(y)  
+                        if self.cursor_yaxis_formatter and not self.hover_instance:
+                            y = self.cursor_yaxis_formatter.format_data(y)                       
+                    
+                    self.vertical_line.set_xdata(x)
+                    if self.cursor_xaxis_formatter and not self.hover_instance:
+                        x = self.cursor_xaxis_formatter.format_data(x)
+                        
+                    #x y label
+                    if self.hover_instance:                     
+                        xy_pos = ax.transData.transform([(x,y)]) 
+                        self.x_hover_data = x
+                        self.y_hover_data = y
+                        self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                        self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                        self.hover_instance.show_cursor=True
+                            
+                        if self.twinx:
+                            if ax==self.figure.axes[1]:
+                                if self.cursor_yaxis2_formatter:
+                                    y = self.cursor_yaxis2_formatter.format_data(y)                         
+                            else:
+                                if self.cursor_yaxis_formatter:
+                                    y = self.cursor_yaxis_formatter.format_data(y) 
+    
+                        else: 
                             if self.cursor_yaxis_formatter:
                                 y = self.cursor_yaxis_formatter.format_data(y) 
-
-                    else: 
-                        if self.cursor_yaxis_formatter:
-                            y = self.cursor_yaxis_formatter.format_data(y) 
-                            
-                    if self.cursor_xaxis_formatter:
-                        x = self.cursor_xaxis_formatter.format_data(x)                            
-                            
-                    self.hover_instance.label_x_value=f"{x}"
-                    self.hover_instance.label_y_value=f"{y}"
-            
-                    self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
-                    self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
-                    
-                    self.hover_instance.custom_label = line.get_label()
-                    self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
-                    
-                    if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
-                        self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
-                        self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
-                        self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
-                        self.hover_instance.hover_outside_bound=True
+                                
+                        if self.cursor_xaxis_formatter:
+                            x = self.cursor_xaxis_formatter.format_data(x)                            
+                                
+                        self.hover_instance.label_x_value=f"{x}"
+                        self.hover_instance.label_y_value=f"{y}"
+                
+                        self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
+                        self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
+                        
+                        self.hover_instance.custom_label = line.get_label()
+                        self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
+                        
+                        if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
+                            self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
+                            self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
+                            self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
+                            self.hover_instance.hover_outside_bound=True
+                        else:
+                            self.hover_instance.hover_outside_bound=False                      
+                        
+                        return
                     else:
-                        self.hover_instance.hover_outside_bound=False                      
-                    
-                    return
-                else:
-                    self.text.set_text(f"x={x}, y={y}")                
-
-                #blit method (always use because same visual effect as draw)                  
-                if self.background is None:
-                    self.set_cross_hair_visible(False)
-                    self.figure.canvas.draw_idle()
-                    self.figure.canvas.flush_events()                   
-                    self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
-                    self.set_cross_hair_visible(True)  
-
-                self.figure.canvas.restore_region(self.background)
-                self.figure.axes[0].draw_artist(self.text)
-
-                self.figure.axes[0].draw_artist(self.horizontal_line)
-                self.figure.axes[0].draw_artist(self.vertical_line)  
-
-                #draw (blit method)
-                self.figure.canvas.blit(self.figure.axes[0].bbox)                 
-                self.figure.canvas.flush_events()
+                        self.text.set_text(f"x={x}, y={y}")                
+    
+                    #blit method (always use because same visual effect as draw)                  
+                    if self.background is None:
+                        self.set_cross_hair_visible(False)
+                        self.figure.canvas.draw_idle()
+                        self.figure.canvas.flush_events()                   
+                        self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
+                        self.set_cross_hair_visible(True)  
+    
+                    self.figure.canvas.restore_region(self.background)
+                    self.figure.axes[0].draw_artist(self.text)
+    
+                    self.figure.axes[0].draw_artist(self.horizontal_line)
+                    self.figure.axes[0].draw_artist(self.vertical_line)  
+    
+                    #draw (blit method)
+                    self.figure.canvas.blit(self.figure.axes[0].bbox)                 
+                    self.figure.canvas.flush_events()
 
             #if touch is too far, hide cross hair cursor
             else:
