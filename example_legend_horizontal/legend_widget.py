@@ -248,14 +248,16 @@ class LegendRv(BoxLayout):
         Returns:
             None
         """     
-        for idx,line in enumerate(self.figure_wgt.axes.lines):
-            if line == remove_line:
+        remove_idx=None
+        for idx,current_data in enumerate(self.data):
+            if current_data["matplotlib_line"] == remove_line:
                 remove_idx=idx
-                break        
-        del self.data[remove_idx]
-        remove_line.remove()
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()  
+                break  
+        if remove_idx:
+            del self.data[remove_idx]
+            remove_line.remove()
+            self.figure_wgt.figure.canvas.draw_idle()
+            self.figure_wgt.figure.canvas.flush_events()  
         
     def show_hide_wgt(self,row_index) -> None:
         if self.data[row_index]["selected"]:
@@ -279,14 +281,19 @@ class LegendRv(BoxLayout):
             if current_line.get_visible():
                 #check if we isolate line or show all lines
                 need_isolate = False
-                for line in self.figure_wgt.axes.lines:
+                if len(self.figure_wgt.figure.axes)>1:
+                    figure_lines = self.figure_wgt.figure.axes[0].get_lines() + \
+                                    self.figure_wgt.figure.axes[1].get_lines()
+                else:
+                    figure_lines = list(self.figure_wgt.figure.axes[0].get_lines())
+                for line in figure_lines:
                     if line != current_line and line.get_visible():
                         need_isolate=True
                         break            
             
                 if need_isolate:
                    #isolate line'
-                   for idx,line in enumerate(self.figure_wgt.axes.lines):
+                   for idx,line in enumerate(figure_lines):
                        if line != current_line:                      
                            line.set_visible(False)  
                            self.data[idx]["selected"] = True
@@ -294,12 +301,17 @@ class LegendRv(BoxLayout):
                            self.data[idx]["selected"] = False
                 else:
                     #show all lines'
-                    for idx,line in enumerate(self.figure_wgt.axes.lines):                     
+                    for idx,line in enumerate(figure_lines):                     
                         line.set_visible(True)
                         self.data[idx]["selected"] = False                                       
         else:
             #show all lines
-            for idx,line in enumerate(self.figure_wgt.axes.lines): 
+            if len(self.figure_wgt.figure.axes)>1:
+                figure_lines = self.figure_wgt.figure.axes[0].get_lines() + \
+                                self.figure_wgt.figure.axes[1].get_lines()
+            else:
+                figure_lines = list(self.figure_wgt.figure.axes[0].get_lines())            
+            for idx,line in enumerate(figure_lines): 
                 line.set_visible(True)                   
                 self.data[idx]["selected"] = False                     
                
@@ -391,14 +403,16 @@ class LegendRvHorizontal(BoxLayout):
         Returns:
             None
         """     
-        for idx,line in enumerate(self.figure_wgt.axes.lines):
-            if line == remove_line:
+        remove_idx=None
+        for idx,current_data in enumerate(self.data):
+            if current_data["matplotlib_line"] == remove_line:
                 remove_idx=idx
-                break        
-        del self.data[remove_idx]
-        remove_line.remove()
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()  
+                break  
+        if remove_idx:       
+            del self.data[remove_idx]
+            remove_line.remove()
+            self.figure_wgt.figure.canvas.draw_idle()
+            self.figure_wgt.figure.canvas.flush_events()  
         
     def show_hide_wgt(self,row_index) -> None:
         if self.data[row_index]["selected"]:
@@ -422,14 +436,19 @@ class LegendRvHorizontal(BoxLayout):
             if current_line.get_visible():
                 #check if we isolate line or show all lines
                 need_isolate = False
-                for line in self.figure_wgt.axes.lines:
+                if len(self.figure_wgt.figure.axes)>1:
+                    figure_lines = self.figure_wgt.figure.axes[0].get_lines() + \
+                                    self.figure_wgt.figure.axes[1].get_lines()
+                else:
+                    figure_lines = list(self.figure_wgt.figure.axes[0].get_lines())                
+                for line in figure_lines:
                     if line != current_line and line.get_visible():
                         need_isolate=True
                         break            
             
                 if need_isolate:
                    #isolate line'
-                   for idx,line in enumerate(self.figure_wgt.axes.lines):
+                   for idx,line in enumerate(figure_lines):
                        if line != current_line:                      
                            line.set_visible(False)  
                            self.data[idx]["selected"] = True
@@ -437,12 +456,17 @@ class LegendRvHorizontal(BoxLayout):
                            self.data[idx]["selected"] = False
                 else:
                     #show all lines'
-                    for idx,line in enumerate(self.figure_wgt.axes.lines):                     
+                    for idx,line in enumerate(figure_lines):                     
                         line.set_visible(True)
                         self.data[idx]["selected"] = False                                       
         else:
             #show all lines
-            for idx,line in enumerate(self.figure_wgt.axes.lines): 
+            if len(self.figure_wgt.figure.axes)>1:
+                figure_lines = self.figure_wgt.figure.axes[0].get_lines() + \
+                                self.figure_wgt.figure.axes[1].get_lines()
+            else:
+                figure_lines = list(self.figure_wgt.figure.axes[0].get_lines())            
+            for idx,line in enumerate(figure_lines): 
                 line.set_visible(True)                   
                 self.data[idx]["selected"] = False                     
                
