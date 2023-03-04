@@ -755,7 +755,7 @@ class _FigureCanvas(FigureCanvasAgg):
 
 from kivy.factory import Factory
 
-Factory.register('MatplotFigure', MatplotFigure3D)
+Factory.register('MatplotFigure3D', MatplotFigure3D)
 
 Builder.load_string('''
 <MatplotFigure3D>

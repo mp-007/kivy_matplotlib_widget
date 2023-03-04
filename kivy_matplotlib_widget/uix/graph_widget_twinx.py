@@ -1533,7 +1533,7 @@ class FakeEventTwinx:
 
 from kivy.factory import Factory
 
-Factory.register('MatplotFigure', MatplotFigureTwinx)
+Factory.register('MatplotFigureTwinx', MatplotFigureTwinx)
 
 Builder.load_string('''
 <MatplotFigureTwinx>

@@ -1261,7 +1261,7 @@ class FakeEventScatter:
 
 from kivy.factory import Factory
 
-Factory.register('MatplotFigure', MatplotFigureScatter)
+Factory.register('MatplotFigureScatter', MatplotFigureScatter)
 
 Builder.load_string('''
 <MatplotFigureScatter>
