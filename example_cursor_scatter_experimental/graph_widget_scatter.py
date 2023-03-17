@@ -66,6 +66,8 @@ class MatplotFigureScatter(Widget):
     hover_instance = ObjectProperty(None, allownone=True)
     nearest_hover_instance = ObjectProperty(None, allownone=True)
     compare_hover_instance = ObjectProperty(None, allownone=True)
+    disable_mouse_scrolling = BooleanProperty(False) 
+    disable_double_tap = BooleanProperty(False)     
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -756,12 +758,15 @@ class MatplotFigureScatter(Widget):
                         return True             
             
             if event.is_mouse_scrolling:
-                ax = self.axes
-                ax = self.axes
-                self.zoom_factory(event, ax, base_scale=1.2)
+                if not self.disable_mouse_scrolling:
+                    ax = self.axes
+                    ax = self.axes
+                    self.zoom_factory(event, ax, base_scale=1.2)
+                return True
 
-            elif event.is_double_tap:                
-                self.home()
+            elif event.is_double_tap:   
+                if not self.disable_double_tap:
+                    self.home()
                 return True
                   
             else:
@@ -792,7 +797,8 @@ class MatplotFigureScatter(Widget):
         x, y = event.x, event.y
 
         if event.is_double_tap:
-            self.home()                
+            if not self.disable_double_tap:
+                self.home()                
             return True
 
         # scale/translate
