@@ -76,7 +76,7 @@ class Test(App):
         self.screen.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter('%.2f')
         self.screen.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter('%.1f')  
         
-        #add custom hover widget "InfoHover" hover to the figure.
+        #add compare hover
         add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare')        
 
     def set_touch_mode(self,mode):
