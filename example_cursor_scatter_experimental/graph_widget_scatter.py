@@ -148,6 +148,9 @@ class MatplotFigureScatter(Widget):
         self.x_hover_data = None
         self.y_hover_data = None
 
+        #pan management
+        self.first_touch_pan = None
+        
         #manage back and next event
         self._nav_stack = cbook.Stack()
         self.set_history_buttons()   
@@ -231,7 +234,7 @@ class MatplotFigureScatter(Widget):
             if self.multi_xdata:
                 xdata_res, ydata_dump = trans.transform_point((event.x-self.pos[0]+self.multi_xdata_res, 
                                                                event.y - self.pos[1]))
-                delta = xdata_res-xdata 
+                delta = abs(xdata_res-xdata)
                 
             for line in self.lines:
                 #get only visible lines
@@ -483,8 +486,25 @@ class MatplotFigureScatter(Widget):
             self.ymax is not None:
                 
             ax = self.axes
-            ax.set_xlim(self.xmin, self.xmax)  
-            ax.set_ylim(self.ymin, self.ymax)                                
+            xleft,xright=ax.get_xlim()
+            ybottom,ytop=ax.get_ylim() 
+            
+            #check inverted data
+            inverted_x = False
+            if xleft>xright:
+                inverted_x=True
+            inverted_y = False
+            if ybottom>ytop:
+                inverted_y=True         
+            
+            if inverted_x:
+                ax.set_xlim(right=self.xmin,left=self.xmax)
+            else:
+                ax.set_xlim(left=self.xmin,right=self.xmax)
+            if inverted_y:
+                ax.set_ylim(top=self.ymin,bottom=self.ymax)
+            else:
+                ax.set_ylim(bottom=self.ymin,top=self.ymax)                                
     
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
@@ -740,16 +760,8 @@ class MatplotFigureScatter(Widget):
                 ax = self.axes
                 self.zoom_factory(event, ax, base_scale=1.2)
 
-            elif event.is_double_tap:
-                
-                ax = self.axes
-                ax.set_xlim(self.xmin, self.xmax)
-                yoffset = abs(self.ymax - self.ymin) * 0.01
-                ax.set_ylim(self.ymin - yoffset, self.ymax + yoffset)
-                
-                self.reset_touch()
-                ax.figure.canvas.draw_idle()
-                ax.figure.canvas.flush_events() 
+            elif event.is_double_tap:                
+                self.home()
                 return True
                   
             else:
@@ -780,14 +792,7 @@ class MatplotFigureScatter(Widget):
         x, y = event.x, event.y
 
         if event.is_double_tap:
-            ax = self.axes
-            ax.set_xlim(self.xmin, self.xmax)
-            yoffset = abs(self.ymax - self.ymin) * 0.01
-            ax.set_ylim(self.ymin - yoffset, self.ymax + yoffset)
-
-            self.reset_touch()
-            ax.figure.canvas.draw_idle()
-            ax.figure.canvas.flush_events()                
+            self.home()                
             return True
 
         # scale/translate
@@ -816,6 +821,7 @@ class MatplotFigureScatter(Widget):
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                         self.touch_mode='pan'                
+                    self.first_touch_pan=None
                 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -904,11 +910,25 @@ class MatplotFigureScatter(Widget):
         dx = xdata - xpress
         dy = ydata - ypress
 
-        cur_xlim = ax.get_xlim()
-        cur_ylim = ax.get_ylim()
+        xleft,xright=self.axes.get_xlim()
+        ybottom,ytop=self.axes.get_ylim()
         
-        if self.interactive_axis and self.touch_mode=='pan':
-            if ydata < cur_ylim[0]:
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+            cur_xlim=(xright,xleft)
+        else:
+            cur_xlim=(xleft,xright)
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True 
+            cur_ylim=(ytop,ybottom)
+        else:
+            cur_ylim=(ybottom,ytop) 
+        
+        if self.interactive_axis and self.touch_mode=='pan' and not self.first_touch_pan=='pan':
+            if (ydata < cur_ylim[0] and not inverted_y) or (ydata > cur_ylim[1] and inverted_y):
                 left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
                 right_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
@@ -916,8 +936,8 @@ class MatplotFigureScatter(Widget):
                 else:
                     mode = 'pan_x'
                 self.touch_mode = mode
-            elif xdata < cur_xlim[0]:
-                bottom_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
+            elif (xdata < cur_xlim[0] and not inverted_x) or (xdata > cur_xlim[1] and inverted_x):
+                bottom_anchor_zone=  (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
                 top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]               
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
                     mode = 'adjust_y'
@@ -938,15 +958,24 @@ class MatplotFigureScatter(Widget):
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(None,cur_xlim[1])
+                        if inverted_x:
+                            ax.set_xlim(cur_xlim[1],None)
+                        else:
+                            ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(cur_xlim[0],None)
+                        if inverted_x:
+                            ax.set_xlim(None,cur_xlim[0])
+                        else:
+                            ax.set_xlim(cur_xlim[0],None)
             else:
                 cur_xlim -= dx/2
-                ax.set_xlim(cur_xlim)
-
+                if inverted_x:
+                    ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                else:
+                    ax.set_xlim(cur_xlim)
+                
         if not mode=='pan_x' and not mode=='adjust_x':
             if mode=='adjust_y':
                 if self.anchor_y is None:
@@ -955,19 +984,31 @@ class MatplotFigureScatter(Widget):
                         self.anchor_y='top'
                     else:
                         self.anchor_y='bottom'               
-
+                
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
-                        cur_ylim -= dy/2   
-                        ax.set_ylim(None,cur_ylim[1])
+                        cur_ylim -= dy/2 
+                        if inverted_y:
+                            ax.set_ylim(cur_ylim[1],None)
+                        else:
+                            ax.set_ylim(None,cur_ylim[1])
                 else:
                     if ydata< cur_ylim[1]:
-                        cur_ylim -= dy/2   
-                        ax.set_ylim(cur_ylim[0],None)                   
+                        cur_ylim -= dy/2  
+                        if inverted_y:
+                            ax.set_ylim(None,cur_ylim[0]) 
+                        else:
+                            ax.set_ylim(cur_ylim[0],None)
             else:            
                 cur_ylim -= dy/2
-                ax.set_ylim(cur_ylim)
+                if inverted_y:
+                    ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                else:
+                    ax.set_ylim(cur_ylim)
 
+        if self.first_touch_pan is None:
+            self.first_touch_pan=self.touch_mode
+            
         if self.fast_draw: 
             #use blit method
             if self.background is None:
@@ -1099,8 +1140,18 @@ class MatplotFigureScatter(Widget):
 
         self.do_update=False
         
-        ax.set_xlim(left=min(self.x0_box,self.x1_box),right=max(self.x0_box,self.x1_box))
-        ax.set_ylim(bottom=min(self.y0_box,self.y1_box),top=max(self.y0_box,self.y1_box))
+        #check if inverted axis
+        xleft,xright=self.axes.get_xlim()
+        ybottom,ytop=self.axes.get_ylim()
+        
+        if xright>xleft:
+            ax.set_xlim(left=min(self.x0_box,self.x1_box),right=max(self.x0_box,self.x1_box))
+        else:
+            ax.set_xlim(right=min(self.x0_box,self.x1_box),left=max(self.x0_box,self.x1_box))
+        if ytop>ybottom:
+            ax.set_ylim(bottom=min(self.y0_box,self.y1_box),top=max(self.y0_box,self.y1_box))
+        else:
+            ax.set_ylim(top=min(self.y0_box,self.y1_box),bottom=max(self.y0_box,self.y1_box))
 
     def reset_box(self):
         """ reset zoombox and apply zoombox limit if zoombox option if selected"""
@@ -1146,37 +1197,51 @@ class MatplotFigureScatter(Widget):
         trans = self.axes.transData.inverted()
         xdata, ydata = trans.transform_point((event.x-pos_x, event.y-pos_y)) 
 
-        xmin,xmax=self.axes.get_xlim()
-        ymin,ymax=self.axes.get_ylim()
+        xleft,xright=self.axes.get_xlim()
+        ybottom,ytop=self.axes.get_ylim()
         
+        xmax = max(xleft,xright)
+        xmin = min(xleft,xright)
+        ymax = max(ybottom,ytop)
+        ymin = min(ybottom,ytop)
+        
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True        
+
         x0data, y0data = trans.transform_point((x0-pos_x, y0-pos_y)) 
+         
         if x0data>xmax or x0data<xmin or y0data>ymax or y0data<ymin:
             return
 
         if xdata<xmin:
             x1_min = self.axes.transData.transform([(xmin,ymin)])
-            if x1<x0:
+            if (x1<x0 and not inverted_x) or (x1>x0 and inverted_x):
                 x1=x1_min[0][0]+pos_x
             else:
                 x0=x1_min[0][0]
 
         if xdata>xmax:
             x0_max = self.axes.transData.transform([(xmax,ymin)])
-            if x1>x0:
-                x1=x0_max[0][0]+pos_x
+            if (x1>x0 and not inverted_x) or (x1<x0 and inverted_x):
+                x1=x0_max[0][0]+pos_x 
             else:
                 x0=x0_max[0][0]                  
 
         if ydata<ymin:
             y1_min = self.axes.transData.transform([(xmin,ymin)])
-            if y1<y0:
+            if (y1<y0 and not inverted_y) or (y1>y0 and inverted_y):
                 y1=y1_min[0][1]+pos_y
             else:
                 y0=y1_min[0][1]+pos_y
-                
+
         if ydata>ymax:
             y0_max = self.axes.transData.transform([(xmax,ymax)])
-            if y1>y0:
+            if (y1>y0 and not inverted_y) or (y1<y0 and inverted_y):
                 y1=y0_max[0][1]+pos_y
             else:
                 y0=y0_max[0][1]+pos_y
