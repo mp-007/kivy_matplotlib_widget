@@ -162,6 +162,9 @@ class MatplotFigureTwinx(Widget):
         self.x_hover_data = None
         self.y_hover_data = None
         
+        #pan management
+        self.first_touch_pan = None       
+ 
         #trick to manage wrong canvas size on first call (compare_hover)
         self.first_call_compare_hover=False        
 
@@ -506,12 +509,36 @@ class MatplotFigureTwinx(Widget):
             None
         """
         ax = self.figure.axes[0]
-        ax.set_xlim(self.xmin, self.xmax)
-        ax.set_ylim(self.ymin, self.ymax) 
+        xleft,xright=ax.get_xlim()
+        ybottom,ytop=ax.get_ylim() 
         
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True         
+
+        if inverted_x:
+            ax.set_xlim(right=self.xmin,left=self.xmax)
+        else:
+            ax.set_xlim(left=self.xmin,right=self.xmax)
+        if inverted_y:
+            ax.set_ylim(top=self.ymin,bottom=self.ymax)
+        else:
+            ax.set_ylim(bottom=self.ymin,top=self.ymax)
+
         if self.twinx:                
             ax2 = self.figure.axes[1]
-            ax2.set_ylim(self.ymin2, self.ymax2)
+            ybottom2,ytop2=ax2.get_ylim() 
+            inverted_y2 = False
+            if ybottom2>ytop2:
+                inverted_y2=True               
+            if inverted_y2:
+                ax2.set_ylim(top=self.ymin2,bottom=self.ymax2)
+            else:
+                ax2.set_ylim(bottom=self.ymin2,top=self.ymax2)             
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
@@ -781,20 +808,7 @@ class MatplotFigureTwinx(Widget):
                     self.zoom_factory(event, ax, base_scale=1.2)
 
             elif event.is_double_tap:
-                
-                ax = self.figure.axes[0]
-                ax.set_xlim(self.xmin, self.xmax)
-                yoffset = abs(self.ymax - self.ymin) * 0.01
-                ax.set_ylim(self.ymin - yoffset, self.ymax + yoffset)
-                
-                if self.twinx:
-                    ax2 = self.figure.axes[1]
-                    yoffset2 = abs(self.ymax2 - self.ymin2) * 0.01
-                    ax2.set_ylim(self.ymin2 - yoffset2, self.ymax2 + yoffset2)
-                
-                self.reset_touch()
-                ax.figure.canvas.draw_idle()
-                ax.figure.canvas.flush_events() 
+                self.home()
                 return True
                   
             else:
@@ -825,19 +839,7 @@ class MatplotFigureTwinx(Widget):
         x, y = event.x, event.y
 
         if event.is_double_tap:
-            ax = self.figure.axes[0]
-            ax.set_xlim(self.xmin, self.xmax)
-            yoffset = abs(self.ymax - self.ymin) * 0.01
-            ax.set_ylim(self.ymin - yoffset, self.ymax + yoffset)
-            
-            if self.twinx:
-                ax2 = self.figure.axes[1]
-                yoffset2 = abs(self.ymax2 - self.ymin2) * 0.01
-                ax2.set_ylim(self.ymin2 - yoffset2, self.ymax2 + yoffset2)
-
-            self.reset_touch()
-            self.figure.canvas.draw_idle()
-            self.figure.canvas.flush_events()                
+            self.home()             
             return True
 
         # scale/translate
@@ -866,6 +868,7 @@ class MatplotFigureTwinx(Widget):
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                         self.touch_mode='pan'
+                    self.first_touch_pan=None
                 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -999,11 +1002,25 @@ class MatplotFigureTwinx(Widget):
         dx = xdata - xpress
         dy = ydata - ypress
 
-        cur_xlim = ax.get_xlim()
-        cur_ylim = ax.get_ylim()
+        xleft,xright=self.axes.get_xlim()
+        ybottom,ytop=self.axes.get_ylim()
         
-        if self.interactive_axis and self.touch_mode=='pan':
-            if ydata < cur_ylim[0]:
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+            cur_xlim=(xright,xleft)
+        else:
+            cur_xlim=(xleft,xright)
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True 
+            cur_ylim=(ytop,ybottom)
+        else:
+            cur_ylim=(ybottom,ytop) 
+        
+        if self.interactive_axis and self.touch_mode=='pan' and not self.first_touch_pan=='pan':
+            if (ydata < cur_ylim[0] and not inverted_y) or (ydata > cur_ylim[1] and inverted_y):
                 left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
                 right_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
@@ -1011,9 +1028,9 @@ class MatplotFigureTwinx(Widget):
                 else:
                     mode = 'pan_x'
                 self.touch_mode = mode
-            elif xdata < cur_xlim[0]:
-                bottom_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
-                top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]                
+            elif (xdata < cur_xlim[0] and not inverted_x) or (xdata > cur_xlim[1] and inverted_x):
+                bottom_anchor_zone=  (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
+                top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]               
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
                     mode = 'adjust_y'
                 else:
@@ -1026,7 +1043,7 @@ class MatplotFigureTwinx(Widget):
         if not mode=='pan_y' and not mode=='adjust_y':             
             if mode=='adjust_x':
                 if self.anchor_x is None:
-                    midpoint= (cur_xlim[1] - cur_xlim[0])/2
+                    midpoint= (cur_xlim[1] + cur_xlim[0])/2
                     if xdata>midpoint:
                         self.anchor_x='left'
                     else:
@@ -1034,35 +1051,56 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(None,cur_xlim[1])
+                        if inverted_x:
+                            ax.set_xlim(cur_xlim[1],None)
+                        else:
+                            ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(cur_xlim[0],None)
+                        if inverted_x:
+                            ax.set_xlim(None,cur_xlim[0])
+                        else:
+                            ax.set_xlim(cur_xlim[0],None)
             else:
                 cur_xlim -= dx/2
-                ax.set_xlim(cur_xlim)
-
+                if inverted_x:
+                    ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                else:
+                    ax.set_xlim(cur_xlim)
+                
         if not mode=='pan_x' and not mode=='adjust_x':
             if mode=='adjust_y':
                 if self.anchor_y is None:
-                    midpoint= (cur_ylim[1] - cur_ylim[0])/2
+                    midpoint= (cur_ylim[1] + cur_ylim[0])/2
                     if ydata>midpoint:
                         self.anchor_y='top'
                     else:
                         self.anchor_y='bottom'               
-
+                
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
-                        cur_ylim -= dy/2   
-                        ax.set_ylim(None,cur_ylim[1])
+                        cur_ylim -= dy/2 
+                        if inverted_y:
+                            ax.set_ylim(cur_ylim[1],None)
+                        else:
+                            ax.set_ylim(None,cur_ylim[1])
                 else:
                     if ydata< cur_ylim[1]:
-                        cur_ylim -= dy/2   
-                        ax.set_ylim(cur_ylim[0],None)                   
+                        cur_ylim -= dy/2  
+                        if inverted_y:
+                            ax.set_ylim(None,cur_ylim[0]) 
+                        else:
+                            ax.set_ylim(cur_ylim[0],None)
             else:            
                 cur_ylim -= dy/2
-                ax.set_ylim(cur_ylim)
+                if inverted_y:
+                    ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                else:
+                    ax.set_ylim(cur_ylim)
+
+        if self.first_touch_pan is None:
+            self.first_touch_pan=self.touch_mode
 
         if self.fast_draw: 
             #use blit method               
@@ -1092,17 +1130,41 @@ class MatplotFigureTwinx(Widget):
         dx = xdata - xpress
         dy = ydata - ypress
 
-        cur_xlim = ax.get_xlim()
-        cur_ylim = ax.get_ylim()
-        cur_ylim2 = ax2.get_ylim()
+        # cur_xlim = ax.get_xlim()
+        # cur_ylim = ax.get_ylim()
+        # cur_ylim2 = ax2.get_ylim()
+        
+        xleft,xright=ax.get_xlim()
+        ybottom,ytop=ax.get_ylim()
+        ybottom2,ytop2=ax2.get_ylim()
+        
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+            cur_xlim=(xright,xleft)
+        else:
+            cur_xlim=(xleft,xright)
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True 
+            cur_ylim=(ytop,ybottom)
+        else:
+            cur_ylim=(ybottom,ytop)         
+        inverted_y2 = False
+        if ybottom2>ytop2:
+            inverted_y2=True 
+            cur_ylim2=(ytop2,ybottom2)
+        else:
+            cur_ylim2=(ybottom2,ytop2)  
         
         ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
         ydata2 = ydata * ratio + cur_ylim2[0]
         ypress2 = ypress * ratio + cur_ylim2[0]
         dy2 = ydata2 - ypress2        
         
-        if self.interactive_axis and self.touch_mode=='pan':
-            if ydata < cur_ylim[0]:
+        if self.interactive_axis and self.touch_mode=='pan' and not self.first_touch_pan=='pan':
+            if (ydata < cur_ylim[0] and not inverted_y) or (ydata > cur_ylim[1] and inverted_y):
                 left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
                 right_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
@@ -1110,7 +1172,8 @@ class MatplotFigureTwinx(Widget):
                 else:
                     mode = 'pan_x'
                 self.touch_mode = mode
-            elif xdata < cur_xlim[0] or xdata > cur_xlim[1]:
+            elif (xdata < cur_xlim[0] and not inverted_y) or (xdata > cur_xlim[1] and inverted_y) \
+                or (xdata > cur_xlim[1] and not inverted_y) or (xdata < cur_xlim[0] and inverted_y):
                 bottom_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
                 top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]               
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
@@ -1133,14 +1196,23 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(None,cur_xlim[1])
+                        if inverted_x:
+                            ax.set_xlim(cur_xlim[1],None)
+                        else:
+                            ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
                         cur_xlim -= dx/2
-                        ax.set_xlim(cur_xlim[0],None)
+                        if inverted_x:
+                            ax.set_xlim(None,cur_xlim[0])
+                        else:
+                            ax.set_xlim(cur_xlim[0],None)
             else:
                 cur_xlim -= dx/2
-                ax.set_xlim(cur_xlim)
+                if inverted_x:
+                    ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                else:                
+                    ax.set_xlim(cur_xlim)
 
         if not mode=='pan_x' and not mode=='adjust_x':
             if mode=='adjust_y':
@@ -1150,7 +1222,7 @@ class MatplotFigureTwinx(Widget):
                     midpoint_x = (cur_xlim[1] + cur_xlim[0])/2
                     midpoint_ax1= (cur_ylim[1] + cur_ylim[0])/2
                     midpoint_ax2= (cur_ylim2[1] + cur_ylim2[0])/2
-                    if xdata>midpoint_x:
+                    if (xdata>midpoint_x and not inverted_x) or (xdata<midpoint_x and inverted_x):
                         ax_anchor='right'
                     else:
                         ax_anchor='left'
@@ -1170,24 +1242,48 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_y=='top_left':
                     if ydata > cur_ylim[0]:
                         cur_ylim -= dy/2   
-                        ax.set_ylim(None,cur_ylim[1])
+                        if inverted_y:
+                            ax.set_ylim(cur_ylim[1],None)
+                        else:
+                            ax.set_ylim(None,cur_ylim[1])
                 elif self.anchor_y=='top_right':
                     if ydata_ax2 > cur_ylim2[0]:
                         cur_ylim2 -= dy2/2   
-                        ax2.set_ylim(None,cur_ylim2[1])                    
+                        if inverted_y2:
+                            ax2.set_ylim(cur_ylim2[1],None)
+                        else:
+                            ax2.set_ylim(None,cur_ylim2[1])                  
                 elif self.anchor_y=='bottom_left':
                     if ydata < cur_ylim[1]:
                         cur_ylim -= dy/2   
-                        ax.set_ylim(cur_ylim[0],None) 
+                        if inverted_y:
+                            ax.set_ylim(None,cur_ylim[0]) 
+                        else:
+                            ax.set_ylim(cur_ylim[0],None)
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
                         cur_ylim2 -= dy2/2   
-                        ax2.set_ylim(cur_ylim2[0],None)                     
+                        # ax2.set_ylim(cur_ylim2[0],None)  
+                        if inverted_y2:
+                            ax2.set_ylim(None,cur_ylim2[0])
+                        else:
+                            ax2.set_ylim(cur_ylim2[0],None)                         
             else:            
                 cur_ylim -= dy/2
                 cur_ylim2 -= dy2/2
-                ax.set_ylim(cur_ylim)
-                ax2.set_ylim(cur_ylim2)
+                # ax.set_ylim(cur_ylim)
+                # ax2.set_ylim(cur_ylim2)
+                if inverted_y:
+                    ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                else:
+                    ax.set_ylim(cur_ylim)
+                if inverted_y2:
+                    ax2.set_ylim(cur_ylim2[1],cur_ylim2[0])
+                else:
+                    ax2.set_ylim(cur_ylim2)
+                    
+        if self.first_touch_pan is None:
+            self.first_touch_pan=self.touch_mode
 
         if self.fast_draw: 
             #use blit method            
@@ -1359,8 +1455,31 @@ class MatplotFigureTwinx(Widget):
         ax=self.figure.axes[0]
         ax2=self.figure.axes[1]
         self.do_update=False
-        cur_ylim = ax.get_ylim()
-        cur_ylim2 = ax2.get_ylim()
+
+        #check if inverted axis
+        xleft,xright=ax.get_xlim()
+        ybottom,ytop=ax.get_ylim() 
+        ybottom2,ytop2=ax2.get_ylim() 
+        
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+            cur_xlim=(xright,xleft)
+        else:
+            cur_xlim=(xleft,xright)
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True 
+            cur_ylim=(ytop,ybottom)
+        else:
+            cur_ylim=(ybottom,ytop)         
+        inverted_y2 = False
+        if ybottom2>ytop2:
+            inverted_y2=True 
+            cur_ylim2=(ytop2,ybottom2)
+        else:
+            cur_ylim2=(ybottom2,ytop2)         
         
         range_old = cur_ylim[1] - cur_ylim[0]
         range_old2 = cur_ylim2[1] - cur_ylim2[0]
@@ -1368,9 +1487,18 @@ class MatplotFigureTwinx(Widget):
         ymin2 = (min(self.y0_box,self.y1_box)-cur_ylim[0])/range_old*range_old2+cur_ylim2[0]
         ymax2 = (max(self.y0_box,self.y1_box)-cur_ylim[0])/range_old*range_old2+cur_ylim2[0]           
         
-        ax.set_xlim(left=min(self.x0_box,self.x1_box),right=max(self.x0_box,self.x1_box))
-        ax.set_ylim(bottom=min(self.y0_box,self.y1_box),top=max(self.y0_box,self.y1_box))
-        ax2.set_ylim(bottom=ymin2,top=ymax2)
+        if inverted_x:
+            ax.set_xlim(right=min(self.x0_box,self.x1_box),left=max(self.x0_box,self.x1_box))
+        else:
+            ax.set_xlim(left=min(self.x0_box,self.x1_box),right=max(self.x0_box,self.x1_box))
+        if inverted_y:
+            ax.set_ylim(top=min(self.y0_box,self.y1_box),bottom=max(self.y0_box,self.y1_box))
+        else:
+            ax.set_ylim(bottom=min(self.y0_box,self.y1_box),top=max(self.y0_box,self.y1_box))
+        if inverted_y2:
+            ax2.set_ylim(top=ymin2,bottom=ymax2)
+        else:
+            ax2.set_ylim(bottom=ymin2,top=ymax2)
         
     def reset_box(self):
         """ reset zoombox and apply zoombox limit if zoombox option if selected"""
@@ -1418,8 +1546,24 @@ class MatplotFigureTwinx(Widget):
         trans = self.figure.axes[0].transData.inverted()
         xdata, ydata = trans.transform_point((event.x-pos_x, event.y-pos_y)) 
 
-        xmin,xmax=self.figure.axes[0].get_xlim()
-        ymin,ymax=self.figure.axes[0].get_ylim()
+        # xmin,xmax=self.figure.axes[0].get_xlim()
+        # ymin,ymax=self.figure.axes[0].get_ylim()
+        
+        xleft,xright=self.figure.axes[0].get_xlim()
+        ybottom,ytop=self.figure.axes[0].get_ylim()
+        
+        xmax = max(xleft,xright)
+        xmin = min(xleft,xright)
+        ymax = max(ybottom,ytop)
+        ymin = min(ybottom,ytop) 
+        
+        #check inverted data
+        inverted_x = False
+        if xleft>xright:
+            inverted_x=True
+        inverted_y = False
+        if ybottom>ytop:
+            inverted_y=True         
         
         x0data, y0data = trans.transform_point((x0-pos_x, y0-pos_y)) 
         if x0data>xmax or x0data<xmin or y0data>ymax or y0data<ymin:
@@ -1427,28 +1571,28 @@ class MatplotFigureTwinx(Widget):
 
         if xdata<xmin:
             x1_min = self.figure.axes[0].transData.transform([(xmin,ymin)])
-            if x1<x0:
+            if (x1<x0 and not inverted_x) or (x1>x0 and inverted_x):
                 x1=x1_min[0][0]+pos_x
             else:
                 x0=x1_min[0][0]
 
         if xdata>xmax:
             x0_max = self.figure.axes[0].transData.transform([(xmax,ymin)])
-            if x1>x0:
+            if (x1>x0 and not inverted_x) or (x1<x0 and inverted_x):
                 x1=x0_max[0][0]+pos_x 
             else:
                 x0=x0_max[0][0]                  
 
         if ydata<ymin:
             y1_min = self.figure.axes[0].transData.transform([(xmin,ymin)])
-            if y1<y0:
+            if (y1<y0 and not inverted_y) or (y1>y0 and inverted_y):
                 y1=y1_min[0][1]+pos_y
             else:
                 y0=y1_min[0][1]+pos_y
                 
         if ydata>ymax:
             y0_max = self.figure.axes[0].transData.transform([(xmax,ymax)])
-            if y1>y0:
+            if (y1>y0 and not inverted_y) or (y1<y0 and inverted_y):
                 y1=y0_max[0][1]+pos_y
             else:
                 y0=y0_max[0][1]+pos_y
