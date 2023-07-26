@@ -319,13 +319,15 @@ class MatplotFigureScatter(Widget):
                         ax=scatter.axes 
                         #left axis
                         xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
-                        xy_pixels = ax.transData.transform([(x,y)])
-                        dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
-                        dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
-                        
-                        #store distance
-                        distance.append((dx2 + dy2)**0.5)
-                        # print(distance)
+                        if np.ma.is_masked(x) or np.ma.is_masked(y):
+                            distance.append(np.nan)
+                        else:                          
+                            xy_pixels = ax.transData.transform([(x,y)])
+                            dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
+                            dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
+                            
+                            #store distance
+                            distance.append((dx2 + dy2)**0.5)
                         
                         #store all best scatters and index
                         good_scatter.append(scatter)
@@ -337,12 +339,9 @@ class MatplotFigureScatter(Widget):
 
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
-            if min(distance)<dp(50):
-                #!!! if numpy is available, argmin can be used form faster result !!!
-                #idx_best=np.argmin(distance)
-                
+            if np.nanmin(distance)<dp(50):
                 #index of minimum distance
-                idx_best=distance.index(min(distance))
+                idx_best=np.nanargmin(distance)
                 # print(idx_best)
                 
                 line=None

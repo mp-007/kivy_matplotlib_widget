@@ -256,6 +256,8 @@ class MatplotFigureTwinx(Widget):
                         x = self.x_cursor[index]
          
                         if self.compare_xdata:
+                            y = self.y_cursor[index]
+                            
                             #get distance between line and touch (in pixels)
                             ax=line.axes 
                             #left axis
@@ -271,9 +273,12 @@ class MatplotFigureTwinx(Widget):
                             else:  
                                 #left axis                        
                                 xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
-                            xy_pixels = ax.transData.transform([(x,ydata)])
-                            dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0]) 
-                            distance.append(dx2)
+                            if np.ma.is_masked(x) or np.ma.is_masked(y) or np.isnan(x) or np.isnan(y):
+                                distance.append(np.nan)
+                            else:                                
+                                xy_pixels = ax.transData.transform([(x,ydata)])
+                                dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0]) 
+                                distance.append(abs(dx2))
                         else:                         
                             #find ydata corresponding to xdata
                             y = self.y_cursor[index]
@@ -292,12 +297,15 @@ class MatplotFigureTwinx(Widget):
                             else:  
                                 #left axis                        
                                 xy_pixels_mouse = ax.transData.transform([(xdata,ydata)])
-                            xy_pixels = ax.transData.transform([(x,y)])
-                            dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
-                            dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
-                            
-                            #store distance
-                            distance.append(np.sqrt(dx2 + dy2))
+                            if np.ma.is_masked(x) or np.ma.is_masked(y):
+                                distance.append(np.nan)
+                            else:                                
+                                xy_pixels = ax.transData.transform([(x,y)])
+                                dx2 = (xy_pixels_mouse[0][0]-xy_pixels[0][0])**2
+                                dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
+                                
+                                #store distance
+                                distance.append(np.sqrt(dx2 + dy2))
                         
                         #store all best lines and index
                         good_line.append(line)
@@ -309,13 +317,13 @@ class MatplotFigureTwinx(Widget):
 
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
-            if min(distance)<dp(50):
+            if np.nanmin(distance)<dp(50):
                 #index of minimum distance
                 if self.compare_xdata:
                     if not self.hover_instance or not hasattr(self.hover_instance,'children_list'):
                         return
                     
-                    idx_best_list = np.flatnonzero(np.array(distance) == min(distance))
+                    idx_best_list = np.flatnonzero(np.array(distance) == np.nanmin(distance))
                     #get datas from closest line
                     line=good_line[idx_best_list[0]]
                     self.x_cursor, self.y_cursor = line.get_data()
@@ -350,26 +358,32 @@ class MatplotFigureTwinx(Widget):
                                     y_cursor = line.get_ydata()
                                     y = y_cursor[good_index[idx_best_list[i]]] 
                                     ax=line.axes
-                                    xy_pos = ax.transData.transform([(x,y)]) 
-                                    available_widget[index].x_hover_pos=float(xy_pos[0][0]) + self.x
-                                    available_widget[index].y_hover_pos=float(xy_pos[0][1]) + self.y
-                                    available_widget[index].custom_color = get_color_from_hex(to_hex(line.get_color()))
                                     
-                                    if self.twinx:
-                                        if ax==self.figure.axes[1]:
-                                            if self.cursor_yaxis2_formatter:
-                                                y = self.cursor_yaxis2_formatter.format_data(y)                         
-                                        else:
+                                    xy_pos = ax.transData.transform([(x,y)]) 
+                                    pos_y=float(xy_pos[0][1]) + self.y
+  
+                                    if pos_y<self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                                        pos_y>self.y+ax.bbox.bounds[1]:
+                                            
+                                        available_widget[index].x_hover_pos=float(xy_pos[0][0]) + self.x
+                                        available_widget[index].y_hover_pos=float(xy_pos[0][1]) + self.y
+                                        available_widget[index].custom_color = get_color_from_hex(to_hex(line.get_color()))
+                                    
+                                        if self.twinx:
+                                            if ax==self.figure.axes[1]:
+                                                if self.cursor_yaxis2_formatter:
+                                                    y = self.cursor_yaxis2_formatter.format_data(y)                         
+                                            else:
+                                                if self.cursor_yaxis_formatter:
+                                                    y = self.cursor_yaxis_formatter.format_data(y) 
+                    
+                                        else: 
                                             if self.cursor_yaxis_formatter:
-                                                y = self.cursor_yaxis_formatter.format_data(y) 
-                
-                                    else: 
-                                        if self.cursor_yaxis_formatter:
-                                            y = self.cursor_yaxis_formatter.format_data(y)                                        
-
-                                    available_widget[index].label_y_value=f"{y}"
-                                    available_widget[index].show_widget=True
-                                    index_list.remove(index)
+                                                y = self.cursor_yaxis_formatter.format_data(y)                                        
+    
+                                        available_widget[index].label_y_value=f"{y}"
+                                        available_widget[index].show_widget=True
+                                        index_list.remove(index)
                                     
                         if i<nb_widget-1:
                             for ii in index_list:
@@ -383,10 +397,8 @@ class MatplotFigureTwinx(Widget):
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
-                        if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
-                            self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
-                            self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
-                            self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
+                        if self.hover_instance.x_hover_pos>self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0] or \
+                            self.hover_instance.x_hover_pos<self.x+ax.bbox.bounds[0] or len(index_list)==nb_widget:               
                             self.hover_instance.hover_outside_bound=True
                         else:
                             self.hover_instance.hover_outside_bound=False                      
@@ -394,7 +406,7 @@ class MatplotFigureTwinx(Widget):
                         return                                    
                 
                 else:
-                    idx_best=np.argmin(distance)
+                    idx_best=np.nanargmin(distance)
                     
                     #get datas from closest line
                     line=good_line[idx_best]
@@ -663,8 +675,6 @@ class MatplotFigureTwinx(Widget):
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
      
-                # ymin,ymax=self.axes.get_ylim()
-                # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
                 self.hover_instance.ymin_line = float(self.figure.axes[0].bbox.bounds[1]) + self.y
                 self.hover_instance.ymax_line = float(self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] )+ self.y
     
