@@ -17,6 +17,7 @@ from kivy.properties import (
 
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
+from kivy.metrics import dp
 from matplotlib.colors import to_hex
 import matplotlib as mpl
 from math import ceil
@@ -172,7 +173,9 @@ class LegendRv(BoxLayout):
     data=ListProperty()
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
+    text_font_size=NumericProperty(dp(18.5))
     background_color=ColorProperty([1,1,1,1])
+    box_height = NumericProperty(dp(48))
 
     def __init__(self, **kwargs):
         """init class
@@ -209,6 +212,8 @@ class LegendRv(BoxLayout):
             r_data["matplotlib_line"] = row_content
             r_data["text_color"] = self.text_color
             r_data["text_font"] = self.text_font
+            r_data["text_font_size"] = self.text_font_size
+            r_data["box_height"] = self.box_height
 
             self.data.append(r_data)
        
@@ -234,6 +239,8 @@ class LegendRv(BoxLayout):
         r_data["matplotlib_line"] = line
         r_data["text_color"] = self.text_color
         r_data["text_font"] = self.text_font
+        r_data["text_font_size"] = self.text_font_size
+        r_data["box_height"] = self.box_height
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -324,10 +331,12 @@ class LegendRvHorizontal(BoxLayout):
     
     """     
     figure_wgt = ObjectProperty(None) 
-    data=ListProperty()
-    text_color=ColorProperty([0,0,0,1])
-    text_font=StringProperty("Roboto")
-    background_color=ColorProperty([1,1,1,1])
+    data = ListProperty()
+    text_color = ColorProperty([0,0,0,1])
+    text_font = StringProperty("Roboto")
+    text_font_size = NumericProperty(dp(18.5))
+    background_color = ColorProperty([1,1,1,1])
+    box_height = NumericProperty(dp(48))
     
     def __init__(self, **kwargs):
         """init class
@@ -364,6 +373,8 @@ class LegendRvHorizontal(BoxLayout):
             r_data["matplotlib_line"] = row_content
             r_data["text_color"] = self.text_color
             r_data["text_font"] = self.text_font
+            r_data["text_font_size"] = self.text_font_size
+            r_data['box_height'] = self.box_height
 
             self.data.append(r_data)
        
@@ -389,6 +400,8 @@ class LegendRvHorizontal(BoxLayout):
         r_data["matplotlib_line"] = line
         r_data["text_color"] = self.text_color
         r_data["text_font"] = self.text_font
+        r_data["text_font_size"] = self.text_font_size
+        r_data['box_height'] = self.box_height
 
         self.data.append(r_data)
         self.figure_wgt.figure.canvas.draw_idle()
@@ -506,6 +519,8 @@ class CellLegend(LegendGestures, BoxLayout):
     mycolor= ListProperty([0,0,1])
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
+    text_font_size=NumericProperty(dp(18.5))
+    box_height = NumericProperty(dp(48)) 
     
     def __init__(self, **kwargs):
         """ init class """
@@ -527,9 +542,11 @@ class CellLegendHorizontal(LegendGestures, BoxLayout):
     legend_rv = ObjectProperty(None)
     matplotlib_line = ObjectProperty(None)
     line_type = StringProperty('-')	
-    mycolor= ListProperty([0,0,1])
-    text_color=ColorProperty([0,0,0,1])
-    text_font=StringProperty("Roboto")
+    mycolor = ListProperty([0,0,1])
+    text_color = ColorProperty([0,0,0,1])
+    text_font = StringProperty("Roboto")
+    text_font_size = NumericProperty(dp(18.5))
+    box_height = NumericProperty(dp(48)) 
 
     def __init__(self, **kwargs):
         """ init class """
@@ -971,7 +988,7 @@ Builder.load_string('''
     line_type:'-'
     opacity: 0.5 if self.selected else 1
     size_hint_y: None
-    height: dp(48) 
+    height: root.box_height 
     size_hint_x:None
     width:dp(78) + line_label.texture_size[0]
     
@@ -1078,7 +1095,7 @@ Builder.load_string('''
             halign:'left'
             valign:'center'
             color:root.text_color
-            font_size: dp(18.5)
+            font_size: root.text_font_size
             font_name:root.text_font
         
     Widget:
@@ -1090,7 +1107,7 @@ Builder.load_string('''
     line_type:'-'
     opacity: 0.5 if self.selected else 1
     size_hint_y: None
-    height: dp(48) 
+    height: root.box_height
             
     Widget:
 		size_hint_x:None
@@ -1192,7 +1209,7 @@ Builder.load_string('''
         halign:'left'
         valign:'center'
         color:root.text_color
-        font_size: dp(18.5)
+        font_size: root.text_font_size
         font_name:root.text_font
         shorten: True
         shorten_from: 'center'
