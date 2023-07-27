@@ -155,7 +155,15 @@ class MatplotFigure(Widget):
         self.set_history_buttons()         
         
         self.bind(size=self._onSize)
-
+      
+    def transform_eval(self,x,axis):
+        custom_transform=axis.get_transform()
+        return custom_transform.transform_non_affine(np.array([x]))[0]
+        
+    def inv_transform_eval(self,x,axis):
+        inv_custom_transform=axis.get_transform().inverted()
+        return inv_custom_transform.transform_non_affine(np.array([x]))[0]
+    
     def register_lines(self,lines:list) -> None:
         """ register lines method
         
@@ -830,16 +838,64 @@ class MatplotFigure(Widget):
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim() 
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
+
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
+
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
+
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax]) 
 
         if self.fast_draw:   
             #use blit method            
@@ -865,8 +921,21 @@ class MatplotFigure(Widget):
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
         xpress, ypress = trans.transform_point((self._last_touch_pos[event][0]-self.pos[0], self._last_touch_pos[event][1]-self.pos[1]))
-        dx = xdata - xpress
-        dy = ydata - ypress
+        
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            dx = xdata - xpress
+        else:
+            dx = self.transform_eval(xdata,ax.xaxis) - \
+                self.transform_eval(xpress,ax.xaxis)
+                
+        if yscale == 'linear':
+            dy = ydata - ypress
+        else:
+            dy = self.transform_eval(ydata,ax.yaxis) - \
+                self.transform_eval(ypress,ax.yaxis)        
 
         xleft,xright=self.axes.get_xlim()
         ybottom,ytop=self.axes.get_ylim()
@@ -915,20 +984,41 @@ class MatplotFigure(Widget):
                         self.anchor_x='right'
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits                                  
                         if inverted_x:
                             ax.set_xlim(cur_xlim[1],None)
                         else:
                             ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits  
                         if inverted_x:
                             ax.set_xlim(None,cur_xlim[0])
                         else:
                             ax.set_xlim(cur_xlim[0],None)
             else:
-                cur_xlim -= dx/2
+                if scale == 'linear':
+                    cur_xlim -= dx/2
+                else:
+                    try:
+                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                    except (ValueError, OverflowError):
+                        cur_xlim = cur_xlim  # Keep previous limits                   
                 if inverted_x:
                     ax.set_xlim(cur_xlim[1],cur_xlim[0])
                 else:
@@ -945,20 +1035,45 @@ class MatplotFigure(Widget):
                 
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
-                        cur_ylim -= dy/2 
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits                        
+                        
                         if inverted_y:
                             ax.set_ylim(cur_ylim[1],None)
                         else:
                             ax.set_ylim(None,cur_ylim[1])
                 else:
                     if ydata< cur_ylim[1]:
-                        cur_ylim -= dy/2  
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:
                             ax.set_ylim(None,cur_ylim[0]) 
                         else:
                             ax.set_ylim(cur_ylim[0],None)
             else:            
-                cur_ylim -= dy/2
+                if yscale == 'linear':
+                    cur_ylim -= dy/2 
+                
+                else:
+                    try:
+                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                    except (ValueError, OverflowError):
+                        cur_ylim = cur_ylim  # Keep previous limits 
                 if inverted_y:
                     ax.set_ylim(cur_ylim[1],cur_ylim[0])
                 else:
@@ -1036,6 +1151,31 @@ class MatplotFigure(Widget):
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
 
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
+
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
+
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
+
         if event.button == 'scrolldown':
             # deal with zoom in
             scale_factor = 1 / base_scale
@@ -1047,16 +1187,39 @@ class MatplotFigure(Widget):
             scale_factor = 1
             print(event.button)
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax]) 
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    

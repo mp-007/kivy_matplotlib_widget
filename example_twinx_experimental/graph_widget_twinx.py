@@ -176,6 +176,14 @@ class MatplotFigureTwinx(Widget):
         
         self.bind(size=self._onSize)
 
+    def transform_eval(self,x,axis):
+        custom_transform=axis.get_transform()
+        return custom_transform.transform_non_affine(np.array([x]))[0]
+        
+    def inv_transform_eval(self,x,axis):
+        inv_custom_transform=axis.get_transform().inverted()
+        return inv_custom_transform.transform_non_affine(np.array([x]))[0]
+
     def register_lines(self,lines:list) -> None:
         """ register lines method
         
@@ -923,16 +931,64 @@ class MatplotFigureTwinx(Widget):
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim() 
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
+
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
+
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
+
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax])
 
         if self.fast_draw:   
             #use blit method            
@@ -964,24 +1020,98 @@ class MatplotFigureTwinx(Widget):
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
-        cur_ylim2 = ax2.get_ylim()  
+        cur_ylim2 = ax2.get_ylim()       
+        
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        yscale2=ax2.get_yscale()
+        
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
+
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
+
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax])
 
-        new_height2 = (cur_ylim2[1] - cur_ylim2[0]) * scale_factor    
+        if yscale2 == 'linear':
+            yold2_min=cur_ylim2[0]
+            yold2_max=cur_ylim2[1]
+
+        else:
+            ymin2_=cur_ylim2[0]
+            ymax2_=cur_ylim2[1]            
+            yold2_min = self.transform_eval(ymin2_,ax2.yaxis)
+            ydata2 = self.transform_eval(ydata2,ax2.yaxis)
+            yold2_max = self.transform_eval(ymax2_,ax2.yaxis)
+            
+        new_height2 = (yold2_max - yold2_min) * scale_factor    
         
-        rely2 = (cur_ylim2[1] - ydata2) / (cur_ylim2[1] - cur_ylim2[0])
+        rely2 = (yold2_max - ydata2) / (yold2_max - yold2_min)
         if self.do_zoom_y:
             ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+
+
+            if yscale2 == 'linear':
+                ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+            else:
+                new_ymin2 = ydata2 - new_height2 * (1 - rely2)
+                new_ymax2 = ydata2 + new_height2 * (rely2)
+                try:
+                    new_ymin2, new_ymax2 = self.inv_transform_eval(new_ymin2,ax2.yaxis), self.inv_transform_eval(new_ymax2,ax2.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin2, new_ymax2 = ymin2_, ymax2_
+                    if new_ymin2 <= 0. or new_ymax2 <= 0.:  # Limit case
+                        new_ymin2, new_ymax2 = ymin2_, ymax2_ 
+                ax2.set_ylim([new_ymin2, new_ymax2])
 
         if self.fast_draw: 
             #use blit method
@@ -1015,8 +1145,21 @@ class MatplotFigureTwinx(Widget):
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
         xpress, ypress = trans.transform_point((self._last_touch_pos[event][0]-self.pos[0], self._last_touch_pos[event][1]-self.pos[1]))
-        dx = xdata - xpress
-        dy = ydata - ypress
+        
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            dx = xdata - xpress
+        else:
+            dx = self.transform_eval(xdata,ax.xaxis) - \
+                self.transform_eval(xpress,ax.xaxis)
+                
+        if yscale == 'linear':
+            dy = ydata - ypress
+        else:
+            dy = self.transform_eval(ydata,ax.yaxis) - \
+                self.transform_eval(ypress,ax.yaxis)        
 
         xleft,xright=self.axes.get_xlim()
         ybottom,ytop=self.axes.get_ylim()
@@ -1052,9 +1195,8 @@ class MatplotFigureTwinx(Widget):
                 else:
                     mode= 'pan_y' 
                 self.touch_mode = mode
-                
             else:
-                self.touch_mode = 'pan'        
+                self.touch_mode = 'pan'
 
         if not mode=='pan_y' and not mode=='adjust_y':             
             if mode=='adjust_x':
@@ -1066,20 +1208,41 @@ class MatplotFigureTwinx(Widget):
                         self.anchor_x='right'
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits                                  
                         if inverted_x:
                             ax.set_xlim(cur_xlim[1],None)
                         else:
                             ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits  
                         if inverted_x:
                             ax.set_xlim(None,cur_xlim[0])
                         else:
                             ax.set_xlim(cur_xlim[0],None)
             else:
-                cur_xlim -= dx/2
+                if scale == 'linear':
+                    cur_xlim -= dx/2
+                else:
+                    try:
+                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                    except (ValueError, OverflowError):
+                        cur_xlim = cur_xlim  # Keep previous limits                   
                 if inverted_x:
                     ax.set_xlim(cur_xlim[1],cur_xlim[0])
                 else:
@@ -1096,20 +1259,45 @@ class MatplotFigureTwinx(Widget):
                 
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
-                        cur_ylim -= dy/2 
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits                        
+                        
                         if inverted_y:
                             ax.set_ylim(cur_ylim[1],None)
                         else:
                             ax.set_ylim(None,cur_ylim[1])
                 else:
                     if ydata< cur_ylim[1]:
-                        cur_ylim -= dy/2  
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:
                             ax.set_ylim(None,cur_ylim[0]) 
                         else:
                             ax.set_ylim(cur_ylim[0],None)
             else:            
-                cur_ylim -= dy/2
+                if yscale == 'linear':
+                    cur_ylim -= dy/2 
+                
+                else:
+                    try:
+                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                    except (ValueError, OverflowError):
+                        cur_ylim = cur_ylim  # Keep previous limits 
                 if inverted_y:
                     ax.set_ylim(cur_ylim[1],cur_ylim[0])
                 else:
@@ -1143,12 +1331,22 @@ class MatplotFigureTwinx(Widget):
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
         xpress, ypress = trans.transform_point((self._last_touch_pos[event][0]-self.pos[0], self._last_touch_pos[event][1]-self.pos[1]))
-        dx = xdata - xpress
-        dy = ydata - ypress
 
-        # cur_xlim = ax.get_xlim()
-        # cur_ylim = ax.get_ylim()
-        # cur_ylim2 = ax2.get_ylim()
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        yscale2=ax2.get_yscale()
+        
+        if scale == 'linear':
+            dx = xdata - xpress
+        else:
+            dx = self.transform_eval(xdata,ax.xaxis) - \
+                self.transform_eval(xpress,ax.xaxis)
+                
+        if yscale == 'linear':
+            dy = ydata - ypress
+        else:
+            dy = self.transform_eval(ydata,ax.yaxis) - \
+                self.transform_eval(ypress,ax.yaxis)
         
         xleft,xright=ax.get_xlim()
         ybottom,ytop=ax.get_ylim()
@@ -1177,8 +1375,13 @@ class MatplotFigureTwinx(Widget):
         ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
         ydata2 = ydata * ratio + cur_ylim2[0]
         ypress2 = ypress * ratio + cur_ylim2[0]
-        dy2 = ydata2 - ypress2        
-        
+    
+        if yscale2 == 'linear':
+            dy2 = ydata2 - ypress2 
+        else:
+            dy2 = self.transform_eval(ydata2,ax2.yaxis) - \
+                self.transform_eval(ypress2,ax2.yaxis)  
+                
         if self.interactive_axis and self.touch_mode=='pan' and not self.first_touch_pan=='pan':
             if (ydata < cur_ylim[0] and not inverted_y) or (ydata > cur_ylim[1] and inverted_y):
                 left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
@@ -1211,20 +1414,41 @@ class MatplotFigureTwinx(Widget):
                         self.anchor_x='right'
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits 
                         if inverted_x:
                             ax.set_xlim(cur_xlim[1],None)
                         else:
                             ax.set_xlim(None,cur_xlim[1])
                 else:
                     if xdata< cur_xlim[1]:
-                        cur_xlim -= dx/2
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
                             ax.set_xlim(None,cur_xlim[0])
                         else:
                             ax.set_xlim(cur_xlim[0],None)
             else:
-                cur_xlim -= dx/2
+                if scale == 'linear':
+                    cur_xlim -= dx/2
+                else:
+                    try:
+                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                    except (ValueError, OverflowError):
+                        cur_xlim = cur_xlim  # Keep previous limits
                 if inverted_x:
                     ax.set_xlim(cur_xlim[1],cur_xlim[0])
                 else:                
@@ -1257,36 +1481,86 @@ class MatplotFigureTwinx(Widget):
                 # print(self.anchor_y)
                 if self.anchor_y=='top_left':
                     if ydata > cur_ylim[0]:
-                        cur_ylim -= dy/2   
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:
                             ax.set_ylim(cur_ylim[1],None)
                         else:
                             ax.set_ylim(None,cur_ylim[1])
                 elif self.anchor_y=='top_right':
                     if ydata_ax2 > cur_ylim2[0]:
-                        cur_ylim2 -= dy2/2   
+                        if yscale2 == 'linear':
+                            cur_ylim2 -= dy2/2 
+                        
+                        else:
+                            try:
+                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim2 = cur_ylim2  # Keep previous limits                        
+                        
                         if inverted_y2:
                             ax2.set_ylim(cur_ylim2[1],None)
                         else:
                             ax2.set_ylim(None,cur_ylim2[1])                  
                 elif self.anchor_y=='bottom_left':
                     if ydata < cur_ylim[1]:
-                        cur_ylim -= dy/2   
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits   
                         if inverted_y:
                             ax.set_ylim(None,cur_ylim[0]) 
                         else:
                             ax.set_ylim(cur_ylim[0],None)
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
-                        cur_ylim2 -= dy2/2   
+                        if yscale2 == 'linear':
+                            cur_ylim2 -= dy2/2 
+                        
+                        else:
+                            try:
+                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim2 = cur_ylim2  # Keep previous limits 
                         # ax2.set_ylim(cur_ylim2[0],None)  
                         if inverted_y2:
                             ax2.set_ylim(None,cur_ylim2[0])
                         else:
                             ax2.set_ylim(cur_ylim2[0],None)                         
             else:            
-                cur_ylim -= dy/2
-                cur_ylim2 -= dy2/2
+                if yscale == 'linear':
+                    cur_ylim -= dy/2 
+                
+                else:
+                    try:
+                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                    except (ValueError, OverflowError):
+                        cur_ylim = cur_ylim  # Keep previous limits
+                        
+                if yscale2 == 'linear':
+                    cur_ylim2 -= dy2/2 
+                
+                else:
+                    try:
+                        cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                    except (ValueError, OverflowError):
+                        cur_ylim2 = cur_ylim2  # Keep previous limits
                 # ax.set_ylim(cur_ylim)
                 # ax2.set_ylim(cur_ylim2)
                 if inverted_y:
@@ -1376,6 +1650,31 @@ class MatplotFigureTwinx(Widget):
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
 
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
+
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
+
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
+
         if event.button == 'scrolldown':
             # deal with zoom in
             scale_factor = 1 / base_scale
@@ -1387,16 +1686,39 @@ class MatplotFigureTwinx(Widget):
             scale_factor = 1
             print(event.button)
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax])
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    
@@ -1412,7 +1734,33 @@ class MatplotFigureTwinx(Widget):
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((x, y))
         trans2 = ax2.transData.inverted()
-        xdata2, ydata2 = trans2.transform_point((x, y))   
+        xdata2, ydata2 = trans2.transform_point((x, y))       
+
+        scale=ax.get_xscale()
+        yscale=ax.get_yscale()
+        yscale2=ax2.get_yscale()
+
+        if scale == 'linear':
+            old_min=cur_xlim[0]
+            old_max=cur_xlim[1]
+
+        else:
+            min_=cur_xlim[0]
+            max_=cur_xlim[1]            
+            old_min = self.transform_eval(min_,ax.yaxis)
+            xdata = self.transform_eval(xdata,ax.yaxis)
+            old_max = self.transform_eval(max_,ax.yaxis)  
+
+        if yscale == 'linear':
+            yold_min=cur_ylim[0]
+            yold_max=cur_ylim[1]
+
+        else:
+            ymin_=cur_ylim[0]
+            ymax_=cur_ylim[1]            
+            yold_min = self.transform_eval(ymin_,ax.yaxis)
+            ydata = self.transform_eval(ydata,ax.yaxis)
+            yold_max = self.transform_eval(ymax_,ax.yaxis)
 
         if event.button == 'scrolldown':
             # deal with zoom in
@@ -1425,21 +1773,70 @@ class MatplotFigureTwinx(Widget):
             scale_factor = 1
             print(event.button)
 
-        new_width = (cur_xlim[1] - cur_xlim[0]) * scale_factor
-        new_height = (cur_ylim[1] - cur_ylim[0]) * scale_factor
+        new_width = (old_max - old_min) * scale_factor
+        new_height = (yold_max - yold_min) * scale_factor
 
-        relx = (cur_xlim[1] - xdata) / (cur_xlim[1] - cur_xlim[0])
-        rely = (cur_ylim[1] - ydata) / (cur_ylim[1] - cur_ylim[0])
+        relx = (old_max - xdata) / (old_max - old_min)
+        rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            if scale == 'linear':
+                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+            else:
+                new_min = xdata - new_width * (1 - relx)
+                new_max = xdata + new_width * (relx)
+                try:
+                    new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_min, new_max = min_, max_
+                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                        new_min, new_max = min_, max_ 
+                ax.set_xlim([new_min, new_max])
+    
         if self.do_zoom_y:
-            ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            if yscale == 'linear':
+                ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+            else:
+                new_ymin = ydata - new_height * (1 - rely)
+                new_ymax = ydata + new_height * (rely)
+                try:
+                    new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin, new_ymax = ymin_, ymax_
+                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_ 
+                ax.set_ylim([new_ymin, new_ymax])
 
-        new_height2 = (cur_ylim2[1] - cur_ylim2[0]) * scale_factor
-        rely2 = (cur_ylim2[1] - ydata2) / (cur_ylim2[1] - cur_ylim2[0])
+        if yscale2 == 'linear':
+            yold2_min=cur_ylim2[0]
+            yold2_max=cur_ylim2[1]
+
+        else:
+            ymin2_=cur_ylim2[0]
+            ymax2_=cur_ylim2[1]            
+            yold2_min = self.transform_eval(ymin2_,ax2.yaxis)
+            ydata2 = self.transform_eval(ydata2,ax2.yaxis)
+            yold2_max = self.transform_eval(ymax2_,ax2.yaxis)
+            
+        new_height2 = (yold2_max - yold2_min) * scale_factor    
+        
+        rely2 = (yold2_max - ydata2) / (yold2_max - yold2_min)
         if self.do_zoom_y:
             ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+
+
+            if yscale2 == 'linear':
+                ax2.set_ylim([ydata2 - new_height2 * (1 - rely2), ydata2 + new_height2 * (rely2)])
+            else:
+                new_ymin2 = ydata2 - new_height2 * (1 - rely2)
+                new_ymax2 = ydata2 + new_height2 * (rely2)
+                try:
+                    new_ymin2, new_ymax2 = self.inv_transform_eval(new_ymin2,ax2.yaxis), self.inv_transform_eval(new_ymax2,ax2.yaxis)
+                except OverflowError:  # Limit case
+                    new_ymin2, new_ymax2 = ymin2_, ymax2_
+                    if new_ymin2 <= 0. or new_ymax2 <= 0.:  # Limit case
+                        new_ymin2, new_ymax2 = ymin2_, ymax2_ 
+                ax2.set_ylim([new_ymin2, new_ymax2])
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
