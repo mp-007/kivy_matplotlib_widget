@@ -170,6 +170,10 @@ class MatplotFigureTwinx(Widget):
         #trick to manage wrong canvas size on first call (compare_hover)
         self.first_call_compare_hover=False        
 
+        #cross hair cursor
+        self.horizontal_line = None
+        self.vertical_line = None
+        
         #manage cursor update on right axis
         self.cursor_last_axis=None
         self.cursor_last_y=0
@@ -199,7 +203,7 @@ class MatplotFigureTwinx(Widget):
         """ 
         ax=self.figure.axes[0]
         
-        #create cross hair cusor
+        #create cross hair cursor
         self.horizontal_line = ax.axhline(color='k', lw=0.8, ls='--', visible=False)
         self.vertical_line = ax.axvline(color='k', lw=0.8, ls='--', visible=False)
         
@@ -226,22 +230,26 @@ class MatplotFigureTwinx(Widget):
         self.text.set_visible(visible)
 
     def update_cursor(self):
-        if self.twinx:
-            if self.cursor_last_axis==self.figure.axes[1]:
-                y = self.cursor_last_y
-                cur_ylim = self.figure.axes[0].get_ylim()
-                cur_ylim2 = self.figure.axes[1].get_ylim()
+        if self.twinx and self.horizontal_line and self.cursor_last_axis:
+            
+            if self.horizontal_line.get_visible() or self.hover_instance:
+                
+                if self.cursor_last_axis==self.figure.axes[1]:
+          
+                    if self.hover_instance:
 
-                ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
-                new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
-
-                if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
-                    self.y_hover_data=new_y
-                    xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-                    self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-                    
-                else:
-                    self.horizontal_line.set_ydata(new_y)
+                        if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
+                            self.y_hover_data=self.cursor_last_y
+                            xy_pos = self.figure.axes[1].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                            self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                        
+                    else:
+                        new_y = self.cursor_last_y
+                        x=self.vertical_line.get_xdata()  
+                        trans = self.figure.axes[0].transData.inverted()
+                        xy_pos = self.figure.axes[1].transData.transform([(x,new_y)])
+                        xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))                        
+                        self.horizontal_line.set_ydata(ydata)
                     
 
     def hover(self, event) -> None:
@@ -445,8 +453,6 @@ class MatplotFigureTwinx(Widget):
                     x = self.x_cursor[good_index[idx_best]]
                     y = self.y_cursor[good_index[idx_best]] 
                     
-                    self.cursor_last_y=y
-                    
                     if not self.hover_instance:
                         self.set_cross_hair_visible(True)
                     
@@ -461,7 +467,7 @@ class MatplotFigureTwinx(Widget):
                             ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
                             new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
                             self.horizontal_line.set_ydata(new_y)
-                            
+                            self.cursor_last_y=new_y
                             if self.cursor_yaxis2_formatter and not self.hover_instance:
                                 y = self.cursor_yaxis2_formatter.format_data(y) 
                         else:
@@ -707,8 +713,11 @@ class MatplotFigureTwinx(Widget):
         
         if self.hover_instance:
             #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
-                xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
+                if self.cursor_last_axis:
+                    xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
+                else:
+                    xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
      
@@ -1528,8 +1537,7 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax.set_ylim(None,cur_ylim[1])
                             
-                        if self.horizontal_line.get_visible() or self.hover_instance:
-                            update_cursor=True
+                        update_cursor=True
                                 
                 elif self.anchor_y=='top_right':
                     if ydata_ax2 > cur_ylim2[0]:
@@ -1548,8 +1556,7 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax2.set_ylim(None,cur_ylim2[1])  
                             
-                        if self.horizontal_line.get_visible() or self.hover_instance: 
-                            update_cursor=True
+                        update_cursor=True
       
                 elif self.anchor_y=='bottom_left':
                     if ydata < cur_ylim[1]:
@@ -1567,8 +1574,7 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax.set_ylim(cur_ylim[0],None)
                             
-                            if self.horizontal_line.get_visible() or self.hover_instance: 
-                                update_cursor=True
+                        update_cursor=True
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
                         if yscale2 == 'linear':
@@ -1586,8 +1592,7 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax2.set_ylim(cur_ylim2[0],None) 
                             
-                        if self.horizontal_line.get_visible() or self.hover_instance: 
-                            update_cursor=True
+                        update_cursor=True
             else:            
                 if yscale == 'linear':
                     cur_ylim -= dy/2 
