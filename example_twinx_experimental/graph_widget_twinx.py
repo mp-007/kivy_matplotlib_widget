@@ -170,6 +170,10 @@ class MatplotFigureTwinx(Widget):
         #trick to manage wrong canvas size on first call (compare_hover)
         self.first_call_compare_hover=False        
 
+        #manage cursor update on right axis
+        self.cursor_last_axis=None
+        self.cursor_last_y=0
+
         #manage back and next event
         self._nav_stack = cbook.Stack()
         self.set_history_buttons()              
@@ -220,6 +224,25 @@ class MatplotFigureTwinx(Widget):
         self.horizontal_line.set_visible(visible)
         self.vertical_line.set_visible(visible)
         self.text.set_visible(visible)
+
+    def update_cursor(self):
+        if self.twinx:
+            if self.cursor_last_axis==self.figure.axes[1]:
+                y = self.cursor_last_y
+                cur_ylim = self.figure.axes[0].get_ylim()
+                cur_ylim2 = self.figure.axes[1].get_ylim()
+
+                ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
+                new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
+
+                if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
+                    self.y_hover_data=new_y
+                    xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                    self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                    
+                else:
+                    self.horizontal_line.set_ydata(new_y)
+                    
 
     def hover(self, event) -> None:
         """ hover cursor method (cursor to nearest value)
@@ -422,11 +445,14 @@ class MatplotFigureTwinx(Widget):
                     x = self.x_cursor[good_index[idx_best]]
                     y = self.y_cursor[good_index[idx_best]] 
                     
+                    self.cursor_last_y=y
+                    
                     if not self.hover_instance:
                         self.set_cross_hair_visible(True)
                     
                     # update the cursor x,y data               
                     ax=line.axes
+                    self.cursor_last_axis=ax
                     if self.twinx:
                         if ax==self.figure.axes[1]: 
                             cur_ylim = self.figure.axes[0].get_ylim()
@@ -435,6 +461,7 @@ class MatplotFigureTwinx(Widget):
                             ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
                             new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
                             self.horizontal_line.set_ydata(new_y)
+                            
                             if self.cursor_yaxis2_formatter and not self.hover_instance:
                                 y = self.cursor_yaxis2_formatter.format_data(y) 
                         else:
@@ -560,7 +587,9 @@ class MatplotFigureTwinx(Widget):
             if inverted_y2:
                 ax2.set_ylim(top=self.ymin2,bottom=self.ymax2)
             else:
-                ax2.set_ylim(bottom=self.ymin2,top=self.ymax2)             
+                ax2.set_ylim(bottom=self.ymin2,top=self.ymax2) 
+                
+            self.update_cursor()
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
@@ -1336,6 +1365,8 @@ class MatplotFigureTwinx(Widget):
         yscale=ax.get_yscale()
         yscale2=ax2.get_yscale()
         
+        update_cursor=False
+        
         if scale == 'linear':
             dx = xdata - xpress
         else:
@@ -1426,6 +1457,7 @@ class MatplotFigureTwinx(Widget):
                             ax.set_xlim(cur_xlim[1],None)
                         else:
                             ax.set_xlim(None,cur_xlim[1])
+                            
                 else:
                     if xdata< cur_xlim[1]:
                         if scale == 'linear':
@@ -1440,6 +1472,7 @@ class MatplotFigureTwinx(Widget):
                             ax.set_xlim(None,cur_xlim[0])
                         else:
                             ax.set_xlim(cur_xlim[0],None)
+                            
             else:
                 if scale == 'linear':
                     cur_xlim -= dx/2
@@ -1494,6 +1527,10 @@ class MatplotFigureTwinx(Widget):
                             ax.set_ylim(cur_ylim[1],None)
                         else:
                             ax.set_ylim(None,cur_ylim[1])
+                            
+                        if self.horizontal_line.get_visible() or self.hover_instance:
+                            update_cursor=True
+                                
                 elif self.anchor_y=='top_right':
                     if ydata_ax2 > cur_ylim2[0]:
                         if yscale2 == 'linear':
@@ -1509,7 +1546,11 @@ class MatplotFigureTwinx(Widget):
                         if inverted_y2:
                             ax2.set_ylim(cur_ylim2[1],None)
                         else:
-                            ax2.set_ylim(None,cur_ylim2[1])                  
+                            ax2.set_ylim(None,cur_ylim2[1])  
+                            
+                        if self.horizontal_line.get_visible() or self.hover_instance: 
+                            update_cursor=True
+      
                 elif self.anchor_y=='bottom_left':
                     if ydata < cur_ylim[1]:
                         if yscale == 'linear':
@@ -1525,6 +1566,9 @@ class MatplotFigureTwinx(Widget):
                             ax.set_ylim(None,cur_ylim[0]) 
                         else:
                             ax.set_ylim(cur_ylim[0],None)
+                            
+                            if self.horizontal_line.get_visible() or self.hover_instance: 
+                                update_cursor=True
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
                         if yscale2 == 'linear':
@@ -1540,7 +1584,10 @@ class MatplotFigureTwinx(Widget):
                         if inverted_y2:
                             ax2.set_ylim(None,cur_ylim2[0])
                         else:
-                            ax2.set_ylim(cur_ylim2[0],None)                         
+                            ax2.set_ylim(cur_ylim2[0],None) 
+                            
+                        if self.horizontal_line.get_visible() or self.hover_instance: 
+                            update_cursor=True
             else:            
                 if yscale == 'linear':
                     cur_ylim -= dy/2 
@@ -1574,6 +1621,9 @@ class MatplotFigureTwinx(Widget):
                     
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
+            
+        if update_cursor:
+            self.update_cursor()
 
         if self.fast_draw: 
             #use blit method            
