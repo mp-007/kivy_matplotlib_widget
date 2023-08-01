@@ -177,6 +177,9 @@ class MatplotFigureTwinx(Widget):
         #manage cursor update on right axis
         self.cursor_last_axis=None
         self.cursor_last_y=0
+        
+        #manage show compare cursor on release
+        self.show_compare_cursor=False
 
         #manage back and next event
         self._nav_stack = cbook.Stack()
@@ -424,14 +427,16 @@ class MatplotFigureTwinx(Widget):
                                         available_widget[index].show_widget=True
                                         index_list.remove(index)
                                     
-                        if i<nb_widget-1:
-                            for ii in index_list:
-                                available_widget[ii].show_widget=False
+                        for ii in index_list:
+                            available_widget[ii].show_widget=False
 
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x) 
                             
                         self.hover_instance.label_x_value=f"{x}"
+
+                        if hasattr(self.hover_instance,'overlap_check'):
+                            self.hover_instance.overlap_check()
                     
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
@@ -712,8 +717,17 @@ class MatplotFigureTwinx(Widget):
         self._img_texture.flip_vertical()
         
         if self.hover_instance:
+            if self.compare_xdata and self.hover_instance:
+                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
+                    self.hover_instance.hover_outside_bound=True
+  
+                elif self.show_compare_cursor and self.touch_mode=='cursor':
+                    self.show_compare_cursor=False
+                else:
+                    self.hover_instance.hover_outside_bound=True
+
             #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
+            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
                 if self.cursor_last_axis:
                     xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
                 else:
@@ -843,6 +857,7 @@ class MatplotFigureTwinx(Widget):
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self.show_compare_cursor=False
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
                     if self.touch_mode!='drag_legend':
@@ -952,6 +967,7 @@ class MatplotFigureTwinx(Widget):
             self.anchor_y=None
 
             self.background=None
+            self.show_compare_cursor=True
             self.figure.canvas.draw_idle()
             self.figure.canvas.flush_events()                           
             

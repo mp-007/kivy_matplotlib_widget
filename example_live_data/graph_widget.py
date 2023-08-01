@@ -150,6 +150,9 @@ class MatplotFigure(Widget):
         #pan management
         self.first_touch_pan = None
         
+        #manage show compare cursor on release
+        self.show_compare_cursor = False
+        
         #manage back and next event
         self._nav_stack = cbook.Stack()
         self.set_history_buttons()         
@@ -339,14 +342,16 @@ class MatplotFigure(Widget):
                                         available_widget[index].show_widget=True
                                         index_list.remove(index)
                                     
-                        if i<nb_widget-1:
-                            for ii in index_list:
-                                available_widget[ii].show_widget=False
+                        for ii in index_list:
+                            available_widget[ii].show_widget=False
 
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x) 
                             
                         self.hover_instance.label_x_value=f"{x}"
+                        
+                        if hasattr(self.hover_instance,'overlap_check'):
+                            self.hover_instance.overlap_check()
                     
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
@@ -591,14 +596,21 @@ class MatplotFigure(Widget):
         self._img_texture.flip_vertical()
         
         if self.hover_instance:
+            if self.compare_xdata:
+                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
+                    self.hover_instance.hover_outside_bound=True
+  
+                elif self.show_compare_cursor and self.touch_mode=='cursor':
+                    self.show_compare_cursor=False
+                else:
+                    self.hover_instance.hover_outside_bound=True
+
             #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
                 xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
      
-                # ymin,ymax=self.axes.get_ylim()
-                # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
                 self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
                 self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
     
@@ -713,6 +725,7 @@ class MatplotFigure(Widget):
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self.show_compare_cursor=False
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
                     if self.touch_mode!='drag_legend':
@@ -821,6 +834,7 @@ class MatplotFigure(Widget):
             
             ax=self.axes
             self.background=None
+            self.show_compare_cursor=True
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()                           
             
