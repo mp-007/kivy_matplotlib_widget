@@ -28,7 +28,8 @@ class GraphGenerator(object):
         self.fig, self.ax1 = plt.subplots(1, 1)
 
         self.line1, = self.ax1.plot([0,1,2,3], [1,2,8,9],label='line1')
-        self.line2, = self.ax1.plot([0,1,2,3,4], [10,11,15,20,21],label='line2')
+        self.line2, = self.ax1.plot([0,1,2,3,4], [10,11,8.1,20,21],label='line2')
+        self.line3, = self.ax1.plot([0,1,2,3,4], [10,10.5,8.2,25,15],label='line3')
 
         self.xmin,self.xmax = self.ax1.get_xlim()
         self.ymin,self.ymax = self.ax1.get_ylim()

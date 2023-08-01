@@ -9,7 +9,7 @@ if platform != 'android':
 from kivy.lang import Builder
 from kivy.app import App
 from graph_generator import GraphGenerator
-from hover_widget import add_hover,HoverVerticalText,InfoHover
+from hover_widget import add_hover,HoverVerticalText,InfoHover,TagCompareHover
 from matplotlib.ticker import FormatStrFormatter
 
 KV = '''
@@ -17,6 +17,7 @@ KV = '''
 
 Screen
     figure_wgt:figure_wgt
+    figure_wgt2:figure_wgt2
     BoxLayout:
         orientation:'vertical'
         BoxLayout:
@@ -53,10 +54,12 @@ Screen
                 on_release:
                     app.change_hover_type('compare')
                     self.state='down'                    
-    
+
         MatplotFigure:
             id:figure_wgt 
-                    
+
+        MatplotFigure:
+            id:figure_wgt2                   
 '''
 
 class Test(App):
@@ -71,6 +74,7 @@ class Test(App):
         
         ax=self.screen.figure_wgt.figure.axes[0]
         self.screen.figure_wgt.register_lines(list(ax.get_lines()))
+        ax.set_title('General compare hover')
         
         #set x/y formatter for hover data
         self.screen.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter('%.2f')
@@ -79,13 +83,31 @@ class Test(App):
         #add compare hover
         add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare')        
 
+        ##figure2
+        mygraph2 = GraphGenerator()
+        self.screen.figure_wgt2.figure = mygraph2.fig
+        
+        ax=self.screen.figure_wgt2.figure.axes[0]
+        self.screen.figure_wgt2.register_lines(list(ax.get_lines()))
+        ax.set_title('Tag compare hover')
+        
+        #set x/y formatter for hover data
+        self.screen.figure_wgt2.cursor_xaxis_formatter = FormatStrFormatter('%.2f')
+        self.screen.figure_wgt2.cursor_yaxis_formatter = FormatStrFormatter('%.1f')  
+        
+        #add compare hover
+        add_hover(self.screen.figure_wgt2,mode='desktop',hover_type='compare',hover_widget=TagCompareHover()) 
+        
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode
+        self.screen.figure_wgt2.touch_mode=mode
 
     def home(self):
         self.screen.figure_wgt.home()
+        self.screen.figure_wgt2.home()
         
     def change_hover_type(self,hover_type):
         add_hover(self.screen.figure_wgt,mode='desktop',hover_type=hover_type)
+        add_hover(self.screen.figure_wgt2,mode='desktop',hover_type=hover_type)
         
 Test().run()

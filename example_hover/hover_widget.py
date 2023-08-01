@@ -12,6 +12,7 @@ from kivy.properties import (
 from kivy.lang import Builder 
 from kivy.core.window import Window 
 from kivy.metrics import dp
+import numpy as np
         
         
 def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,hover_type='nearest'):
@@ -190,6 +191,81 @@ class CompareHoverBox(BoxLayout):
         """ init class """
         super().__init__(**kwargs)       
 
+
+
+class TagCompareHover(BaseHoverFloatLayout):
+    """ TagCompareHover""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    background_color=ColorProperty([1,1,1,1])
+    hover_height = NumericProperty(dp(48))
+    y_touch_pos = NumericProperty(1)    
+    
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs) 
+        self.children_names=[]
+        self.children_list=[]
+
+    def create_child(self,lines):
+        if len(self.ids.main_box.children)>2:
+            #clear all added childrens
+            for i in range(len(self.ids.main_box.children)-2):
+                self.ids.main_box.remove_widget(self.ids.main_box.children[0])
+
+        self.children_names=[]
+        self.children_list=[]        
+        for i,line in enumerate(lines):
+            label=line.get_label()
+            if i==0:
+               self.ids.ycomparehoverbox.label_y=label
+               mywidget = self.ids.ycomparehoverbox
+            else:
+                mywidget=TagCompareHoverBox()
+                mywidget.label_y=label
+                self.ids.main_box.add_widget(mywidget)
+            self.children_names.append(label)
+            self.children_list.append(mywidget)
+            
+    def overlap_check(self):
+        if len(self.ids.main_box.children)>2:
+            y_pos_list=[]
+            child_list=[]
+            for child in self.ids.main_box.children[:-1]:
+                child.hover_offset=0
+                y_pos_list.append(child.y_hover_pos)
+                child_list.append(child)
+            heigh_child = child.ids.label.texture_size[1]+dp(6)
+            sorting_args= np.argsort(y_pos_list)
+
+            for index in range(len(sorting_args)-1):
+                #chneck overlap
+                if y_pos_list[sorting_args[index+1]]-heigh_child/2 <= y_pos_list[sorting_args[index]]+heigh_child/2 and \
+                    child_list[sorting_args[index+1]].show_widget:
+                    offset = -((y_pos_list[sorting_args[index+1]]-heigh_child/2) - (y_pos_list[sorting_args[index]]+heigh_child/2))
+
+                    y_pos_list[sorting_args[index+1]] +=offset
+                    child_list[sorting_args[index+1]].hover_offset = offset
+
+class TagCompareHoverBox(FloatLayout):
+    """ Hover with vertical text""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))    
+    label_y = StringProperty('y')
+    label_y_value = StringProperty('y')
+    x_hover_pos = NumericProperty(1)
+    y_hover_pos = NumericProperty(1)
+    show_widget = BooleanProperty(False)
+    custom_color=ColorProperty([0,0,0,1],allownone=True)
+    hover_offset = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs)     
+
+
 class InfoHover(BaseHoverFloatLayout):
     """ InfoHover adapt the background and the font color with the line or scatter color""" 
     text_color=ColorProperty([0,0,0,1])
@@ -199,12 +275,7 @@ class InfoHover(BaseHoverFloatLayout):
     
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)            
-
-    # def set_font_color(self):
-    #                     0,0,0,1 if (self.custom_color[0]*0.299 + \
-    #                     root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186 \
-    #                     else 1,1,1,1        
+        super().__init__(**kwargs)             
 
 Builder.load_string('''
 
@@ -404,9 +475,11 @@ Builder.load_string('''
             width: dp(0.01) 
             height: dp(0.01) 
             BoxLayout:
-                x:main_box.x + main_box.width + label3.texture_size[0]/2 + dp(4)
-                y:main_box.y + main_box.height - label3.texture_size[1]/2
+                size_hint:None,None
+                x:main_box.x + main_box.width + dp(4)
+                y:main_box.y + main_box.height - label3.texture_size[1]
                 width:label3.texture_size[0]
+                height:label3.texture_size[1]
                 Label:
                     id:label3
                     text: 
@@ -428,7 +501,7 @@ Builder.load_string('''
         size_hint: None, None
         height: self.minimum_height
         width: 
-            max([c.width for c in self.children]) + dp(12) if root.show_cursor \
+            self.minimum_width + dp(12) if root.show_cursor \
             else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
@@ -498,5 +571,140 @@ Builder.load_string('''
         text: root.label_y + ': ' + root.label_y_value  
         color: root.text_color
         font_size:root.text_size
-        font_name : root.text_font                 
+        font_name : root.text_font  
+
+<TagCompareHover>
+    custom_color: [0,0,0,1]    
+    
+    BoxLayout:
+        id:main_box
+        x:
+            root.x_hover_pos if root.x_hover_pos + dp(4) < root.figwidth - self.width  - self.padding[0] * 2 \
+            else root.x_hover_pos - self.width - self.padding[0] * 2
+        y:
+            root.ymin_line if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - self.height
+        size_hint: None, None
+        height: root.hover_height
+        width: 
+            self.minimum_width + dp(12) if root.show_cursor \
+            else dp(0.0001)
+        orientation:'vertical'
+        padding: 0,dp(4),0,dp(4)
+                                
+        canvas.after:            
+            Color:
+                rgba: 0,0,1,0
+            Line:
+                width: dp(1)
+        		points: 
+                    root.x_hover_pos, \
+           			root.ymin_line, \
+       				root.x_hover_pos, \
+       				root.ymax_line
+        
+        
+        FloatLayout:
+            size_hint:None,None
+            width:dp(0.01)
+            height:dp(0.01)
+            BoxLayout:            
+                size_hint:None,None
+                width:label.texture_size[0] + dp(8)
+                height:label.texture_size[1] + dp(6)
+                x: root.x_hover_pos - label.texture_size[0]/2 - dp(4)
+                y: root.ymin_line - label.texture_size[1] - dp(10)
+                canvas.before:            
+                    Color:
+                        rgba: [0,0,0,1]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size  
+                    Triangle:
+                        points:
+                            [ \
+                            root.x_hover_pos -dp(4), root.ymin_line-dp(4), \
+                            root.x_hover_pos, root.ymin_line, \
+                            root.x_hover_pos +dp(4), root.ymin_line-dp(4) \
+                            ]
+                        
+                Label:
+                    id:label
+                    text: 
+                        root.label_x_value  
+                    font_size:root.text_size
+                    font_name : root.text_font
+                    color: [1,1,1,1]
+                
+        TagCompareHoverBox: 
+            id:ycomparehoverbox 
+
+                
+<TagCompareHoverBox>
+    size_hint:None,None
+    width:dp(0.01)
+    height:dp(0.01)
+    BoxLayout:
+        id:main_box
+        size_hint:None,None
+        width:label.texture_size[0] + dp(8) if root.show_widget else dp(8)
+        height:label.texture_size[1] + dp(6) if root.show_widget else dp(0.01)
+        opacity:1 if root.show_widget else 0
+        padding: dp(2),0,0,0
+        x: root.x_hover_pos + dp(4)
+        y: root.y_hover_pos - label.texture_size[1]/2-dp(3) + root.hover_offset
+    
+        canvas.before:            
+            Color:
+                rgba: root.custom_color if root.custom_color else [0,0,0,1]
+            Rectangle:
+                pos: self.pos
+                size: self.size  
+
+            Triangle:
+                points:
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x, root.y_hover_pos+ dp(4) + root.hover_offset, \
+                    main_box.x, root.y_hover_pos- dp(4)  + root.hover_offset \
+                    ]
+            SmoothLine:
+                width:dp(1)
+                points:
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x, root.y_hover_pos + root.hover_offset \
+                    ]                
+        Label:
+            id:label
+            text: root.label_y_value  
+            color:
+                [0,0,0,1] if (root.custom_color[0]*0.299 + \
+                root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186/255 \
+                else [1,1,1,1]
+            font_size:root.text_size
+            font_name : root.text_font  
+            
+        FloatLayout:
+            size_hint: None,None
+            width: dp(0.01) 
+            height: dp(0.01) 
+            BoxLayout:
+                size_hint:None,None
+                x:main_box.x + main_box.width + dp(2)
+                y:main_box.y + main_box.height/2-label2.texture_size[1]/2
+                width:label2.texture_size[0]
+                height:label2.texture_size[1]
+                canvas.before:            
+                    Color:
+                        rgba: [1,1,1,0.7]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size                 
+                Label:
+                    id:label2
+                    text: root.label_y 
+                    font_size:root.text_size
+                    color: [0,0,0,1]
+                    font_name : root.text_font              
+              
         ''')
