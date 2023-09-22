@@ -16,6 +16,7 @@ from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
+from matplotlib.backend_bases import ResizeEvent
 from kivy.metrics import dp
 import numpy as np
 from kivy.base import EventLoop
@@ -168,7 +169,12 @@ class MatplotFigureGeneral(Widget):
         winch = self._width / dpival
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
-        self.figcanvas.resize_event()
+        
+        s = 'resize_event'
+        event = ResizeEvent(s, self.figcanvas)
+        self.figcanvas.callbacks.process(s, event)
+        self.figcanvas.draw_idle()   
+        
         self.figcanvas.draw()     
 
     def update_lim(self):

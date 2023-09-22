@@ -17,6 +17,7 @@ from kivy.vector import Vector
 from matplotlib.colors import to_hex
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib import cbook
+from matplotlib.backend_bases import ResizeEvent
 from weakref import WeakKeyDictionary
 from kivy.metrics import dp
 import numpy as np
@@ -1294,7 +1295,12 @@ class MatplotFigureScatter(Widget):
         winch = self._width / dpival
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
-        self.figcanvas.resize_event()
+        
+        s = 'resize_event'
+        event = ResizeEvent(s, self.figcanvas)
+        self.figcanvas.callbacks.process(s, event)
+        self.figcanvas.draw_idle()   
+        
         self.figcanvas.draw()
         if self.legend_instance:
             self.legend_instance.update_size()        
