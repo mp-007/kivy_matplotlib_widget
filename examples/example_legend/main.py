@@ -43,7 +43,11 @@ Screen
             LegendRv:
                 id:legend_wgt
                 figure_wgt:figure_wgt
-                size_hint_x:0.3   
+                size_hint_x:0.3  
+                text_color: 1,0,1,1
+                text_font:'DejaVuSans'
+                text_font_size:dp(24)
+                box_height:dp(60)
         BoxLayout:
             size_hint_y:0.2
             Button:

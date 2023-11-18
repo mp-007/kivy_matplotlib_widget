@@ -16,6 +16,7 @@ from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
 from matplotlib.backend_bases import ResizeEvent
+from matplotlib.backend_bases import MouseEvent
 from kivy.metrics import dp
 
 class MatplotFigure3D(Widget):
@@ -378,15 +379,27 @@ class MatplotFigure3D(Widget):
         
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
-            self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
+            # self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
+ 
+            self.figcanvas._button = 1
+            s = 'button_press_event'
+            mouseevent = MouseEvent(s, self.figcanvas, x, real_y, 1, self.figcanvas._key,
+                                dblclick=False, guiEvent=event)
+            self.figcanvas.callbacks.process(s, mouseevent)                
 
     def on_touch_move(self, event):
         """ Mouse move while pressed """
         x, y = event.x, event.y
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
-            self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
-            
+            # self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
+                
+            self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
+            s = 'motion_notify_event'
+            event = MouseEvent(s, self.figcanvas, x, y, self.figcanvas._button, self.figcanvas._key,
+                               guiEvent=None)
+            self.figcanvas.callbacks.process(s, event)
+
     # def on_touch_down(self, event):
     #     """ Manage Mouse/touch press """
     #     x, y = event.x, event.y

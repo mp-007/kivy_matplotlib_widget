@@ -99,6 +99,7 @@ Screen
         MatplotFigureTwinx:
             id:figure_wgt
             fast_draw:False
+            interactive_axis:True
             
         BoxLayout:
             size_hint_y:0.2

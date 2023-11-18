@@ -17,6 +17,7 @@ from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
 from matplotlib.backend_bases import ResizeEvent
+from matplotlib.backend_bases import MouseEvent
 from kivy.metrics import dp
 import numpy as np
 from kivy.base import EventLoop
@@ -127,7 +128,13 @@ class MatplotFigureGeneral(Widget):
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
             if self.figcanvas:
-                self.figcanvas.motion_notify_event(x, real_y, guiEvent=None)
+                # self.figcanvas.motion_notify_event(x, real_y, guiEvent=None)
+                
+                self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
+                s = 'motion_notify_event'
+                event = MouseEvent(s, self.figcanvas, x, y, self.figcanvas._button, self.figcanvas._key,
+                                   guiEvent=None)
+                self.figcanvas.callbacks.process(s, event)
             
     def on_touch_down(self, event):
         x, y = event.x, event.y
@@ -135,14 +142,26 @@ class MatplotFigureGeneral(Widget):
         if self.collide_point(x, y):
             self._pressed = True
             real_x, real_y = x - self.pos[0], y - self.pos[1]
-            self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
+            # self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
+
+            self.figcanvas._button = 1
+            s = 'button_press_event'
+            mouseevent = MouseEvent(s, self.figcanvas, x, real_y, 1, self.figcanvas._key,
+                                dblclick=False, guiEvent=event)
+            self.figcanvas.callbacks.process(s, mouseevent)
 
     def on_touch_move(self, event):
         """ Mouse move while pressed """
         x, y = event.x, event.y
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
-            self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
+            # self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
+
+            self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
+            s = 'motion_notify_event'
+            event = MouseEvent(s, self.figcanvas, x, y, self.figcanvas._button, self.figcanvas._key,
+                               guiEvent=event)
+            self.figcanvas.callbacks.process(s, event)
 
     def on_touch_up(self, event):
         x, y = event.x, event.y
@@ -151,7 +170,13 @@ class MatplotFigureGeneral(Widget):
         if self.collide_point(x, y):
             pos_x, pos_y = self.pos
             real_x, real_y = x - pos_x, y - pos_y
-            self.figcanvas.button_release_event(x, real_y, 1, guiEvent=event)
+            # self.figcanvas.button_release_event(x, real_y, 1, guiEvent=event)
+            
+            s = 'button_release_event'
+            event = MouseEvent(s, self.figcanvas, x, real_y, 1, self.figcanvas._key, guiEvent=event)
+            self.figcanvas.callbacks.process(s, event)
+            self.figcanvas._button = None            
+            
             self._pressed = False         
 
     def _onSize(self, o, size):
