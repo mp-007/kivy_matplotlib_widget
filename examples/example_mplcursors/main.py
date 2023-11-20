@@ -58,9 +58,10 @@ Screen
         BoxLayout:    
             MatplotFigureCustom:
                 id:figure_wgt
-                fast_draw:False 
+                
             MatplotFigureCustom:
                 id:figure_wgt2  
+                fast_draw:False 
                          
         BoxLayout:  
             MatplotFigureCustom:
