@@ -97,6 +97,7 @@ BoxLayout:
     figure_wgt:figure_wgt                  
     MatplotFigureSubplot:
         id:figure_wgt
+        max_hover_rate:5/60
         fast_draw:True
         interactive_axis:True
         draw_all_axes:True

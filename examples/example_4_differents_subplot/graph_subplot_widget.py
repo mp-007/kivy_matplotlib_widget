@@ -40,7 +40,7 @@ class MatplotFigureSubplot(MatplotFigure):
     interactive_axis_pad= NumericProperty(dp(100))
     _pick_info = None
     draw_all_axes = BooleanProperty(False)
-    max_hover_rate =  NumericProperty(10/60) 
+    max_hover_rate =  NumericProperty(None,allownone=True) 
     last_hover_time=None   
 
     def my_in_axes(self,ax, mouseevent):
@@ -323,13 +323,14 @@ class MatplotFigureSubplot(MatplotFigure):
         if self.hover_on:
             
             #trick to improve app fps
-            if self.last_hover_time is None:
-                self.last_hover_time = time.time()
-                
-            elif time.time() - self.last_hover_time < self.max_hover_rate:
-                return
-            else:
-                self.last_hover_time=None
+            if self.max_hover_rate is not None:
+                if self.last_hover_time is None:
+                    self.last_hover_time = time.time()
+                    
+                elif time.time() - self.last_hover_time < self.max_hover_rate:
+                    return
+                else:
+                    self.last_hover_time=None
 
             #mimic matplotlib mouse event with kivy touch evant
             self.myevent.x=event.x - self.pos[0]
