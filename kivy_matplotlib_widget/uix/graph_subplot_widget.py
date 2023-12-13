@@ -588,6 +588,115 @@ class MatplotFigureSubplot(MatplotFigure):
                 self.figcanvas.blit(ax.bbox)                 
                 self.figcanvas.flush_events()
 
+    def zoom_factory(self, event, ax, base_scale=1.1):
+        """ zoom with scrolling mouse method """
+
+        newcoord = self.to_widget(event.x, event.y, relative=True)
+        x = newcoord[0]
+        y = newcoord[1]
+
+        if not self._pick_info:
+            self.myevent.x=x
+            self.myevent.y=y
+            self.myevent.inaxes=self.figure.canvas.inaxes((x,y))               
+            #press event
+            axes = [a for a in self.figure.canvas.figure.get_axes()
+                    if a.in_axes(self.myevent)]               
+
+            self._pick_info = axes
+            
+        if not self._pick_info:
+            return        
+
+        for i,ax in enumerate(self._pick_info):
+            self.axes = ax
+            
+            twinx = any(ax.get_shared_x_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
+            
+            twiny = any(ax.get_shared_y_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
+            
+            trans = ax.transData.inverted()
+            xdata, ydata = trans.transform_point((x, y))     
+    
+            cur_xlim = ax.get_xlim()
+            cur_ylim = ax.get_ylim()
+    
+            scale=ax.get_xscale()
+            yscale=ax.get_yscale()
+            
+            if scale == 'linear':
+                old_min=cur_xlim[0]
+                old_max=cur_xlim[1]
+    
+            else:
+                min_=cur_xlim[0]
+                max_=cur_xlim[1]            
+                old_min = self.transform_eval(min_,ax.yaxis)
+                xdata = self.transform_eval(xdata,ax.yaxis)
+                old_max = self.transform_eval(max_,ax.yaxis)  
+    
+            if yscale == 'linear':
+                yold_min=cur_ylim[0]
+                yold_max=cur_ylim[1]
+    
+            else:
+                ymin_=cur_ylim[0]
+                ymax_=cur_ylim[1]            
+                yold_min = self.transform_eval(ymin_,ax.yaxis)
+                ydata = self.transform_eval(ydata,ax.yaxis)
+                yold_max = self.transform_eval(ymax_,ax.yaxis)
+    
+            if event.button == 'scrolldown':
+                # deal with zoom in
+                scale_factor = 1 / base_scale
+            elif event.button == 'scrollup':
+                # deal with zoom out
+                scale_factor = base_scale
+            else:
+                # deal with something that should never happen
+                scale_factor = 1
+                print(event.button)
+    
+            new_width = (old_max - old_min) * scale_factor
+            new_height = (yold_max - yold_min) * scale_factor
+    
+            relx = (old_max - xdata) / (old_max - old_min)
+            rely = (yold_max - ydata) / (yold_max - yold_min)
+    
+            if self.do_zoom_x and not twinx:
+                if scale == 'linear':
+                    ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+                else:
+                    new_min = xdata - new_width * (1 - relx)
+                    new_max = xdata + new_width * (relx)
+                    try:
+                        new_min, new_max = self.inv_transform_eval(new_min,ax.yaxis), self.inv_transform_eval(new_max,ax.yaxis)
+                    except OverflowError:  # Limit case
+                        new_min, new_max = min_, max_
+                        if new_min <= 0. or new_max <= 0.:  # Limit case
+                            new_min, new_max = min_, max_ 
+                    ax.set_xlim([new_min, new_max])
+        
+            if self.do_zoom_y and not twiny:
+                if yscale == 'linear':
+                    ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
+                else:
+                    new_ymin = ydata - new_height * (1 - rely)
+                    new_ymax = ydata + new_height * (rely)
+                    try:
+                        new_ymin, new_ymax = self.inv_transform_eval(new_ymin,ax.yaxis), self.inv_transform_eval(new_ymax,ax.yaxis)
+                    except OverflowError:  # Limit case
+                        new_ymin, new_ymax = ymin_, ymax_
+                        if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                            new_ymin, new_ymax = ymin_, ymax_ 
+                    ax.set_ylim([new_ymin, new_ymax]) 
+
+        self._pick_info = None
+        ax.figure.canvas.draw_idle()
+        ax.figure.canvas.flush_events()
+
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0),new_line=None):
         """ zoom touch method """
                 
@@ -595,7 +704,7 @@ class MatplotFigureSubplot(MatplotFigure):
         y = anchor[1]-self.pos[1]
 
         #manage press and drag
-        if self._pick_info is None:
+        if not self._pick_info:
             self.myevent.x=x
             self.myevent.y=y
             self.myevent.inaxes=self.figure.canvas.inaxes((x,y))               
@@ -609,9 +718,15 @@ class MatplotFigureSubplot(MatplotFigure):
             return        
         
         artists=[]
-        for ax in self._pick_info:
+        for i,ax in enumerate(self._pick_info):
             
             self.axes = ax
+            
+            twinx = any(ax.get_shared_x_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
+            
+            twiny = any(ax.get_shared_y_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
 
             artists.extend(_iter_axes_subartists(ax))
 
@@ -652,7 +767,7 @@ class MatplotFigureSubplot(MatplotFigure):
             relx = (old_max - xdata) / (old_max - old_min)
             rely = (yold_max - ydata) / (yold_max - yold_min)
     
-            if self.do_zoom_x:
+            if self.do_zoom_x and not twinx:
                 if scale == 'linear':
                     ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
                 else:
@@ -666,7 +781,7 @@ class MatplotFigureSubplot(MatplotFigure):
                             new_min, new_max = min_, max_ 
                     ax.set_xlim([new_min, new_max])
         
-            if self.do_zoom_y:
+            if self.do_zoom_y and not twiny:
                 if yscale == 'linear':
                     ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
                 else:
@@ -726,7 +841,7 @@ class MatplotFigureSubplot(MatplotFigure):
         """ pan method """
 
         #manage press and drag
-        if self._pick_info is None:
+        if not self._pick_info:
             self.myevent.x=event.x - self.pos[0]
             self.myevent.y=event.y - self.pos[1]
             self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
@@ -745,11 +860,17 @@ class MatplotFigureSubplot(MatplotFigure):
             return
 
         artists=[]
-        for ax in self._pick_info:
+        for i,ax in enumerate(self._pick_info):
             
             self.axes = ax
 
             artists.extend(_iter_axes_subartists(ax))
+
+            twinx = any(ax.get_shared_x_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
+            
+            twiny = any(ax.get_shared_y_axes().joined(ax, prev)
+                        for prev in self._pick_info[:i])
 
             trans = ax.transData.inverted()
             xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
@@ -899,14 +1020,16 @@ class MatplotFigureSubplot(MatplotFigure):
                             else:
                                 ax.set_xlim(cur_xlim[0],None)
                 else:
-                    if scale == 'linear':
-                        cur_xlim -= dx/2
-                    else:
-                        try:
-                            cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                        self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
-                        except (ValueError, OverflowError):
-                            cur_xlim = cur_xlim  # Keep previous limits                   
+                    if not twinx:
+                        if scale == 'linear':
+                            cur_xlim -= dx/2
+                        else:
+                            try:
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                            self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                            except (ValueError, OverflowError):
+                                cur_xlim = cur_xlim  # Keep previous limits  
+                            
                     if inverted_x:
                         ax.set_xlim(cur_xlim[1],cur_xlim[0])
                     else:
@@ -952,20 +1075,21 @@ class MatplotFigureSubplot(MatplotFigure):
                                 ax.set_ylim(None,cur_ylim[0]) 
                             else:
                                 ax.set_ylim(cur_ylim[0],None)
-                else:            
-                    if yscale == 'linear':
-                        cur_ylim -= dy/2 
-                    
-                    else:
-                        try:
-                            cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                        self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
-                        except (ValueError, OverflowError):
-                            cur_ylim = cur_ylim  # Keep previous limits 
-                    if inverted_y:
-                        ax.set_ylim(cur_ylim[1],cur_ylim[0])
-                    else:
-                        ax.set_ylim(cur_ylim)
+                else:   
+                    if not twiny:
+                        if yscale == 'linear':
+                            cur_ylim -= dy/2 
+                        
+                        else:
+                            try:
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                            self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                            except (ValueError, OverflowError):
+                                cur_ylim = cur_ylim  # Keep previous limits 
+                        if inverted_y:
+                            ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                        else:
+                            ax.set_ylim(cur_ylim)
 
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
@@ -1021,8 +1145,9 @@ class MatplotFigureSubplot(MatplotFigure):
             if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                 or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
-                self.push_current()
+                self.push_current()                    
                 self._pick_info=None
+                
                 if self.interactive_axis:
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
