@@ -42,7 +42,8 @@ class MatplotFigureSubplot(MatplotFigure):
     draw_all_axes = BooleanProperty(False)
     max_hover_rate =  NumericProperty(None,allownone=True) 
     last_hover_time=None   
-
+    cursor_last_axis=None
+        
     def my_in_axes(self,ax, mouseevent):
         """
         variante of matplotlib in_axes (get interactive axis)
@@ -252,6 +253,7 @@ class MatplotFigureSubplot(MatplotFigure):
                 else:
                     ax.set_ylim(bottom=ymin,top=ymax)                              
     
+            self.update_cursor()
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
 
@@ -307,6 +309,30 @@ class MatplotFigureSubplot(MatplotFigure):
 
         else:
             return False    
+
+    def update_cursor(self):
+        if self.cursor_last_axis:
+            horizontal_line=False
+            if hasattr(self,'horizontal_line'):
+                if self.horizontal_line.get_visible():
+                    horizontal_line=True
+            if horizontal_line or self.hover_instance:
+                
+                if self.cursor_last_axis!=self.axes:
+          
+                    if self.hover_instance:
+
+                        if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
+                            xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                            self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                        
+                    else:
+                        y = self.horizontal_line.get_ydata() 
+                        x = self.vertical_line.get_xdata()  
+                        trans = self.cursor_last_axis.transData.inverted()
+                        xy_pos = self.horizontal_line.axes.transData.transform([(x,y)])
+                        xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))                        
+                        self.horizontal_line.set_ydata(ydata)
 
     def hover(self, event) -> None:
         """ hover cursor method (cursor to nearest value)
@@ -378,6 +404,7 @@ class MatplotFigureSubplot(MatplotFigure):
                  if ax is None:
                      return
 
+                 self.cursor_last_axis=ax
                  #get datas from closest line
                  x = sel[0].target[0]
                  y = sel[0].target[1]
@@ -485,6 +512,8 @@ class MatplotFigureSubplot(MatplotFigure):
                     
                 if ax is None:
                     return
+                
+                self.cursor_last_axis=ax
                 
                 if hasattr(self,'horizontal_line'):
                     self.horizontal_line.set_ydata(y)
@@ -651,6 +680,8 @@ class MatplotFigureSubplot(MatplotFigure):
                             new_ymin, new_ymax = ymin_, ymax_ 
                     ax.set_ylim([new_ymin, new_ymax]) 
 
+        self.update_cursor()
+        
         if self.fast_draw: 
             #use blit method               
             if self.background is None:
@@ -939,6 +970,8 @@ class MatplotFigureSubplot(MatplotFigure):
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
 
+        self.update_cursor()
+        
         if self.fast_draw: 
             #use blit method               
             if self.background is None:
@@ -1148,3 +1181,44 @@ class MatplotFigureSubplot(MatplotFigure):
             
         self._box_pos = x0, y0
         self._box_size = x1 - x0, y1 - y0
+        
+    def _draw_bitmap(self):
+        """ draw bitmap method. based on kivy scatter method"""
+        if self._bitmap is None:
+            print("No bitmap!")
+            return
+        self._img_texture = Texture.create(size=(self.bt_w, self.bt_h))
+        self._img_texture.blit_buffer(
+            bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
+        self._img_texture.flip_vertical()
+        
+        if self.hover_instance:
+            if self.compare_xdata and self.hover_instance:
+                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
+                    self.hover_instance.hover_outside_bound=True
+  
+                elif self.show_compare_cursor and self.touch_mode=='cursor':
+                    self.show_compare_cursor=False
+                else:
+                    self.hover_instance.hover_outside_bound=True
+
+            #update hover pos if needed
+            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
+                if self.cursor_last_axis:
+                    xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
+                else:
+                    xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+
+                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+     
+                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
+                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
+    
+                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                    self.hover_instance.hover_outside_bound=True
+                else:
+                    self.hover_instance.hover_outside_bound=False
