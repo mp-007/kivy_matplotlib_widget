@@ -564,8 +564,9 @@ class Test(App):
 
 
     def set_touch_mode(self,mode):
-        screen=self.graph_app.ids.sm.current_screen
-        screen.figure_wgt.touch_mode=mode
+        for screen in self.graph_app.ids.sm.screens:
+            if hasattr(screen,'figure_wgt'):
+                screen.figure_wgt.touch_mode=mode
 
     def home(self):
         screen=self.graph_app.ids.sm.current_screen
