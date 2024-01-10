@@ -24,8 +24,6 @@ from numpy import linspace
 
 
 KV = '''
-#:import MatplotFigureSubplot graph_subplot_widget
-
 BoxLayout:
         
     orientation:'vertical'
@@ -488,19 +486,19 @@ class Test(App):
         ang = 0
          
         X,Y=ellipse(ra,rb,ang,xcenter,ycenter)
-        axTemperature.plot(X,Y,"k:",ms=1,linewidth=2.0)
+        axTemperature.plot(X,Y,":",color = contourcolor,ms=1,linewidth=2.0)
         axTemperature.annotate('$1\\sigma$', xy=(X[15], Y[15]), xycoords='data',xytext=(10, 10),
                                textcoords='offset points', horizontalalignment='right',
                                verticalalignment='bottom',fontsize=25)
          
         X,Y=ellipse(2*ra,2*rb,ang,xcenter,ycenter)
-        axTemperature.plot(X,Y,"k:",color = contourcolor,ms=1,linewidth=2.0)
+        axTemperature.plot(X,Y,":",color = contourcolor,ms=1,linewidth=2.0)
         axTemperature.annotate('$2\\sigma$', xy=(X[15], Y[15]), xycoords='data',xytext=(10, 10),
                                textcoords='offset points',horizontalalignment='right',
                                verticalalignment='bottom',fontsize=25, color = contourcolor)
          
         X,Y=ellipse(3*ra,3*rb,ang,xcenter,ycenter)
-        axTemperature.plot(X,Y,"k:",color = contourcolor, ms=1,linewidth=2.0)
+        axTemperature.plot(X,Y,":",color = contourcolor, ms=1,linewidth=2.0)
         axTemperature.annotate('$3\\sigma$', xy=(X[15], Y[15]), xycoords='data',xytext=(10, 10),
                                textcoords='offset points',horizontalalignment='right',
                                verticalalignment='bottom',fontsize=25, color = contourcolor)
