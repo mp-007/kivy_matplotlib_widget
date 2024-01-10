@@ -279,7 +279,11 @@ class MatplotFigureSubplot(MatplotFigure):
                        
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
-                    ax = self.axes
+                    ax = self.figure.canvas.inaxes((event.x - self.pos[0], 
+                                                    event.y - self.pos[1]))
+                    if ax is None:
+                        return
+                    self.axes = ax
                     self.zoom_factory(event, ax, base_scale=1.2)
                 return True
 
