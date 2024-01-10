@@ -279,12 +279,7 @@ class MatplotFigureSubplot(MatplotFigure):
                        
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
-                    ax = self.figure.canvas.inaxes((event.x - self.pos[0], 
-                                                    event.y - self.pos[1]))
-                    if ax is None:
-                        return
-                    self.axes = ax
-                    self.zoom_factory(event, ax, base_scale=1.2)
+                    self.zoom_factory(event, base_scale=1.2)
                 return True
 
             elif event.is_double_tap:
@@ -592,16 +587,15 @@ class MatplotFigureSubplot(MatplotFigure):
                 self.figcanvas.blit(ax.bbox)                 
                 self.figcanvas.flush_events()
 
-    def zoom_factory(self, event, ax, base_scale=1.1):
+    def zoom_factory(self, event, base_scale=1.1):
         """ zoom with scrolling mouse method """
 
-        newcoord = self.to_widget(event.x, event.y, relative=True)
-        x = newcoord[0]
-        y = newcoord[1]
+        x = event.x - self.pos[0]
+        y = event.y - self.pos[1]
 
         if not self._pick_info:
-            self.myevent.x=x
-            self.myevent.y=y
+            self.myevent.x=event.x - self.pos[0]
+            self.myevent.y=event.y - self.pos[1]
             self.myevent.inaxes=self.figure.canvas.inaxes((x,y))               
             #press event
             axes = [a for a in self.figure.canvas.figure.get_axes()
