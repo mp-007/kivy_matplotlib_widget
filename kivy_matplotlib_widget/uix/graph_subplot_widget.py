@@ -44,6 +44,11 @@ class MatplotFigureSubplot(MatplotFigure):
     last_hover_time=None   
     cursor_last_axis=None
         
+    text_instance = None
+    min_max_option = BooleanProperty(True)
+    current_anchor_axis=None
+    box_axes=[]
+
     def my_in_axes(self,ax, mouseevent):
         """
         variante of matplotlib in_axes (get interactive axis)
@@ -64,8 +69,6 @@ class MatplotFigureSubplot(MatplotFigure):
             ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
             ylabelright = ax.yaxis._major_tick_kw.get('tick2On')             
                    
-            # print(ylabelright)
-            
             #check if tick zone
             #y left axis
             if ylabelleft and  mouseevent.x>self.x +ax.bbox.bounds[0] - ylabelsize and \
@@ -89,10 +92,10 @@ class MatplotFigureSubplot(MatplotFigure):
                 result2 = True
 
             # #x top axis
-            elif xlabeltop and xlabelbottom and mouseevent.x>self.x +ax.bbox.bounds[0] and \
+            elif xlabeltop and mouseevent.x>self.x +ax.bbox.bounds[0] and \
                 mouseevent.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                mouseevent.y>self.y + ax.bbox.bounds[1] + xlabelsize and \
-                mouseevent.y<self.y + ax.bbox.bounds[1]:
+                mouseevent.y>self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                mouseevent.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] + xlabelsize:
                 result2 = True
         
         if result1 == result2:
@@ -124,6 +127,7 @@ class MatplotFigureSubplot(MatplotFigure):
             
             #set default axes
             self.axes = self.figure.axes[0]
+            self.cursor_last_axis = self.figure.axes[0]
             
             #set min/max axes attribute
             self.xmin,self.xmax = [],[]
@@ -253,7 +257,6 @@ class MatplotFigureSubplot(MatplotFigure):
                 else:
                     ax.set_ylim(bottom=ymin,top=ymax)                              
     
-            self.update_cursor()
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
 
@@ -296,7 +299,9 @@ class MatplotFigureSubplot(MatplotFigure):
                     self.x_init=x
                     self.y_init=real_y
                     self.draw_box(event, x, real_y, x, real_y,onpress=True) 
-                 
+                elif self.touch_mode=='minmax':
+                    self.min_max(event) 
+                                     
                 event.grab(self)
                 self._touches.append(event)
                 self._last_touch_pos[event] = event.pos
@@ -308,30 +313,6 @@ class MatplotFigureSubplot(MatplotFigure):
 
         else:
             return False    
-
-    def update_cursor(self):
-        if self.cursor_last_axis:
-            horizontal_line=False
-            if hasattr(self,'horizontal_line'):
-                if self.horizontal_line.get_visible():
-                    horizontal_line=True
-            if horizontal_line or self.hover_instance:
-                
-                if self.cursor_last_axis!=self.axes:
-          
-                    if self.hover_instance:
-
-                        if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
-                            xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-                            self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-                        
-                    else:
-                        y = self.horizontal_line.get_ydata() 
-                        x = self.vertical_line.get_xdata()  
-                        trans = self.cursor_last_axis.transData.inverted()
-                        xy_pos = self.horizontal_line.axes.transData.transform([(x,y)])
-                        xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))                        
-                        self.horizontal_line.set_ydata(ydata)
 
     def hover(self, event) -> None:
         """ hover cursor method (cursor to nearest value)
@@ -792,8 +773,6 @@ class MatplotFigureSubplot(MatplotFigure):
                         if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
                             new_ymin, new_ymax = ymin_, ymax_ 
                     ax.set_ylim([new_ymin, new_ymax]) 
-
-        self.update_cursor()
         
         if self.fast_draw: 
             #use blit method               
@@ -928,6 +907,7 @@ class MatplotFigureSubplot(MatplotFigure):
 
                     if event.x < left_anchor_zone or event.x > right_anchor_zone:
                         mode = 'adjust_x'
+                        self.current_anchor_axis = ax
                     else:
                         mode = 'pan_x'
                     self.touch_mode = mode
@@ -944,6 +924,7 @@ class MatplotFigureSubplot(MatplotFigure):
 
                     if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
                         mode = 'adjust_y'
+                        self.current_anchor_axis = ax
                     else:
                         mode= 'pan_y' 
                     self.touch_mode = mode
@@ -960,14 +941,15 @@ class MatplotFigureSubplot(MatplotFigure):
 
                     if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
                         mode = 'adjust_y'
+                        self.current_anchor_axis = ax
                     else:
                         mode= 'pan_y' 
                     self.touch_mode = mode 
 
-                elif xlabeltop and xlabelbottom and event.x>self.x +ax.bbox.bounds[0] and \
+                elif xlabeltop and event.x>self.x +ax.bbox.bounds[0] and \
                     event.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                    event.y>self.y + ax.bbox.bounds[1] + xlabelsize and \
-                    event.y<self.y + ax.bbox.bounds[1]:                    
+                    event.y>self.y +ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                    event.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] + xlabelsize:                  
                     right_lim = self.x+ax.bbox.bounds[2]+ax.bbox.bounds[0]
                     left_lim = self.x+ax.bbox.bounds[0]
                     left_anchor_zone= (right_lim - left_lim)*.2 + left_lim
@@ -975,6 +957,7 @@ class MatplotFigureSubplot(MatplotFigure):
 
                     if event.x < left_anchor_zone or event.x > right_anchor_zone:
                         mode = 'adjust_x'
+                        self.current_anchor_axis = ax
                     else:
                         mode = 'pan_x'
                     self.touch_mode = mode                    
@@ -983,42 +966,43 @@ class MatplotFigureSubplot(MatplotFigure):
     
             if not mode=='pan_y' and not mode=='adjust_y':             
                 if mode=='adjust_x':
-                    if self.anchor_x is None: 
-                        midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
-                        if event.x > midpoint:
-                            self.anchor_x='left'
+                    if self.current_anchor_axis == ax:
+                        if self.anchor_x is None: 
+                            midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
+                            if event.x > midpoint:
+                                self.anchor_x='left'
+                            else:
+                                self.anchor_x='right'
+                        if self.anchor_x=='left':                
+                            if xdata> cur_xlim[0]:
+                                if scale == 'linear':
+                                    cur_xlim -= dx/2
+                                else:
+                                    try:
+                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                    except (ValueError, OverflowError):
+                                        cur_xlim = cur_xlim  # Keep previous limits                                  
+                                if inverted_x:
+                                    ax.set_xlim(cur_xlim[1],None)
+                                else:
+                                    ax.set_xlim(None,cur_xlim[1])
                         else:
-                            self.anchor_x='right'
-                    if self.anchor_x=='left':                
-                        if xdata> cur_xlim[0]:
-                            if scale == 'linear':
-                                cur_xlim -= dx/2
-                            else:
-                                try:
-                                    cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                                self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
-                                except (ValueError, OverflowError):
-                                    cur_xlim = cur_xlim  # Keep previous limits                                  
-                            if inverted_x:
-                                ax.set_xlim(cur_xlim[1],None)
-                            else:
-                                ax.set_xlim(None,cur_xlim[1])
-                    else:
-                        if xdata< cur_xlim[1]:
-                            if scale == 'linear':
-                                cur_xlim -= dx/2
-                            else:
-                                try:
-                                    cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                                self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
-                                except (ValueError, OverflowError):
-                                    cur_xlim = cur_xlim  # Keep previous limits  
-                            if inverted_x:
-                                ax.set_xlim(None,cur_xlim[0])
-                            else:
-                                ax.set_xlim(cur_xlim[0],None)
+                            if xdata< cur_xlim[1]:
+                                if scale == 'linear':
+                                    cur_xlim -= dx/2
+                                else:
+                                    try:
+                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                    except (ValueError, OverflowError):
+                                        cur_xlim = cur_xlim  # Keep previous limits  
+                                if inverted_x:
+                                    ax.set_xlim(None,cur_xlim[0])
+                                else:
+                                    ax.set_xlim(cur_xlim[0],None)
                 else:
-                    if not twinx:
+                   if not twinx:
                         if scale == 'linear':
                             cur_xlim -= dx/2
                         else:
@@ -1026,54 +1010,54 @@ class MatplotFigureSubplot(MatplotFigure):
                                 cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
                                             self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
                             except (ValueError, OverflowError):
-                                cur_xlim = cur_xlim  # Keep previous limits  
-                            
-                    if inverted_x:
-                        ax.set_xlim(cur_xlim[1],cur_xlim[0])
-                    else:
-                        ax.set_xlim(cur_xlim)
+                                cur_xlim = cur_xlim  # Keep previous limits                   
+                        if inverted_x:
+                            ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                        else:
+                            ax.set_xlim(cur_xlim)
                     
             if not mode=='pan_x' and not mode=='adjust_x':
                 if mode=='adjust_y':
-                    if self.anchor_y is None:
-                        midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
-                        if event.y  > midpoint:
-                            self.anchor_y='top'
+                    if self.current_anchor_axis == ax:
+                        if self.anchor_y is None:
+                            midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
+                            if event.y  > midpoint:
+                                self.anchor_y='top'
+                            else:
+                                self.anchor_y='bottom'               
+                        
+                        if self.anchor_y=='top':
+                            if ydata> cur_ylim[0]:
+                                if yscale == 'linear':
+                                    cur_ylim -= dy/2 
+                                
+                                else:
+                                    try:
+                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                    except (ValueError, OverflowError):
+                                        cur_ylim = cur_ylim  # Keep previous limits                        
+                                
+                                if inverted_y:
+                                    ax.set_ylim(cur_ylim[1],None)
+                                else:
+                                    ax.set_ylim(None,cur_ylim[1])
                         else:
-                            self.anchor_y='bottom'               
-                    
-                    if self.anchor_y=='top':
-                        if ydata> cur_ylim[0]:
-                            if yscale == 'linear':
-                                cur_ylim -= dy/2 
-                            
-                            else:
-                                try:
-                                    cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                                self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
-                                except (ValueError, OverflowError):
-                                    cur_ylim = cur_ylim  # Keep previous limits                        
-                            
-                            if inverted_y:
-                                ax.set_ylim(cur_ylim[1],None)
-                            else:
-                                ax.set_ylim(None,cur_ylim[1])
-                    else:
-                        if ydata< cur_ylim[1]:
-                            if yscale == 'linear':
-                                cur_ylim -= dy/2 
-                            
-                            else:
-                                try:
-                                    cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                                self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
-                                except (ValueError, OverflowError):
-                                    cur_ylim = cur_ylim  # Keep previous limits 
-                            if inverted_y:
-                                ax.set_ylim(None,cur_ylim[0]) 
-                            else:
-                                ax.set_ylim(cur_ylim[0],None)
-                else:   
+                            if ydata< cur_ylim[1]:
+                                if yscale == 'linear':
+                                    cur_ylim -= dy/2 
+                                
+                                else:
+                                    try:
+                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                    except (ValueError, OverflowError):
+                                        cur_ylim = cur_ylim  # Keep previous limits 
+                                if inverted_y:
+                                    ax.set_ylim(None,cur_ylim[0]) 
+                                else:
+                                    ax.set_ylim(cur_ylim[0],None)
+                else:     
                     if not twiny:
                         if yscale == 'linear':
                             cur_ylim -= dy/2 
@@ -1091,8 +1075,6 @@ class MatplotFigureSubplot(MatplotFigure):
 
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
-
-        self.update_cursor()
         
         if self.fast_draw: 
             #use blit method               
@@ -1133,6 +1115,147 @@ class MatplotFigureSubplot(MatplotFigure):
             self.figcanvas.draw_idle()
             self.figcanvas.flush_events()                    
 
+    def min_max(self, event):
+        """ manage min/max touch mode """
+        
+        self.myevent.x=event.x - self.pos[0]
+        self.myevent.y=event.y - self.pos[1]
+        self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
+                                                       event.y - self.pos[1])) 
+        axes = [a for a in self.figure.canvas.figure.get_axes()
+                if self.my_in_axes(a,self.myevent)] 
+
+        for ax in axes:
+
+            xlabelsize = self.interactive_axis_pad
+            ylabelsize = self.interactive_axis_pad            
+            xlabelbottom = ax.xaxis._major_tick_kw.get('tick1On')
+            xlabeltop = ax.xaxis._major_tick_kw.get('tick2On')
+            ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
+            ylabelright = ax.yaxis._major_tick_kw.get('tick2On')
+
+            if xlabelbottom and event.x>self.x +ax.bbox.bounds[0] and \
+                event.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                event.y>self.y + ax.bbox.bounds[1] - xlabelsize and \
+                event.y<self.y + ax.bbox.bounds[1]:                   
+                                    
+                right_lim = self.x+ax.bbox.bounds[2]+ax.bbox.bounds[0]
+                left_lim = self.x+ax.bbox.bounds[0]
+                left_anchor_zone= (right_lim - left_lim)*.2 + left_lim
+                right_anchor_zone= (right_lim - left_lim)*.8 + left_lim
+
+                if event.x < left_anchor_zone or event.x > right_anchor_zone:            
+
+                    if self.text_instance:
+                        if not self.text_instance.show_text:
+                            midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
+                            if event.x < midpoint:
+                                anchor='left'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0])
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.text_instance.offset_text = False
+                            else:
+                                anchor='right'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0])
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.text_instance.offset_text = True
+                                
+                            self.text_instance.current_axis = ax
+                            self.text_instance.kind = {'axis':'x','anchor':anchor}
+                                
+                            self.text_instance.show_text=True
+                            return
+
+            elif ylabelleft and  event.x>self.x +ax.bbox.bounds[0] - ylabelsize and \
+                event.x<self.x + ax.bbox.bounds[0] and \
+                event.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                event.y>self.y + ax.bbox.bounds[1]:
+                
+                top_lim = self.y+ax.bbox.bounds[3]+ax.bbox.bounds[1]
+                bottom_lim = self.y+ax.bbox.bounds[1]                    
+                bottom_anchor_zone=  (top_lim - bottom_lim)*.2 + bottom_lim
+                top_anchor_zone= (top_lim - bottom_lim)*.8 + bottom_lim  
+
+                if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
+                    if self.text_instance:
+                        if not self.text_instance.show_text:
+                            midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
+                            if event.y  > midpoint:
+                                anchor='top'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0]) - dp(40)
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                                self.text_instance.offset_text = False
+                            else:
+                                anchor='bottom'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0]) - dp(40)
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - dp(6)
+                                self.text_instance.offset_text = False
+                            self.text_instance.current_axis = ax
+                            self.text_instance.kind = {'axis':'y','anchor':anchor}
+                                
+                            self.text_instance.show_text=True
+                            return                                    
+            elif ylabelright and event.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] + ylabelsize and \
+                event.x>self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                event.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                event.y>self.y + ax.bbox.bounds[1]:                     
+
+                top_lim = self.y+ax.bbox.bounds[3]+ax.bbox.bounds[1]
+                bottom_lim = self.y+ax.bbox.bounds[1]                    
+                bottom_anchor_zone=  (top_lim - bottom_lim)*.2 + bottom_lim
+                top_anchor_zone= (top_lim - bottom_lim)*.8 + bottom_lim  
+
+                if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
+                    if self.text_instance:
+                        if not self.text_instance.show_text:
+                            midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
+                            if event.y  > midpoint:
+                                anchor='top'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0] + ax.bbox.bounds[2]) + dp(40)
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                                self.text_instance.offset_text = True
+                            else:
+                    
+                                anchor='bottom'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0] + ax.bbox.bounds[2]) + dp(40)
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - dp(6)
+                                self.text_instance.offset_text = True
+                            self.text_instance.current_axis = ax
+                            self.text_instance.kind = {'axis':'y','anchor':anchor}
+                                
+                            self.text_instance.show_text=True
+                            return 
+                        
+            elif xlabeltop and event.x>self.x +ax.bbox.bounds[0] and \
+                event.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                event.y>self.y +ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                event.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] + xlabelsize:                    
+                right_lim = self.x+ax.bbox.bounds[2]+ax.bbox.bounds[0]
+                left_lim = self.x+ax.bbox.bounds[0]
+                left_anchor_zone= (right_lim - left_lim)*.2 + left_lim
+                right_anchor_zone= (right_lim - left_lim)*.8 + left_lim
+
+                if event.x < left_anchor_zone or event.x > right_anchor_zone:
+                    if self.text_instance:
+                        if not self.text_instance.show_text:
+                            midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
+                            if event.x < midpoint:
+                                anchor='left'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0])
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3]) + dp(2)
+                                self.text_instance.offset_text = False
+                            else:
+                                anchor='right'
+                                self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0])
+                                self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3]) + dp(2)
+                                self.text_instance.offset_text = True
+                                
+                            self.text_instance.current_axis = ax
+                            self.text_instance.kind = {'axis':'x','anchor':anchor}
+                                
+                            self.text_instance.show_text=True
+                            return
+        
     def on_touch_up(self, event):
         """ Manage Mouse/touch release """
         # remove it from our saved touches
@@ -1142,10 +1265,10 @@ class MatplotFigureSubplot(MatplotFigure):
             self._touches.remove(event)
             if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
-                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
-                self.push_current()                    
+                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y' \
+                    or self.touch_mode=='minmax':   
+                self.push_current()
                 self._pick_info=None
-                
                 if self.interactive_axis:
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
@@ -1208,6 +1331,15 @@ class MatplotFigureSubplot(MatplotFigure):
             if ax is None:
                 return
             self.axes = ax
+            
+            self.myevent.x=event.x - self.pos[0]
+            self.myevent.y=event.y - self.pos[1]
+            self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
+                                                           event.y - self.pos[1])) 
+            
+            self.box_axes = [a for a in self.figure.canvas.figure.get_axes()
+                    if a.in_axes(self.myevent)]   
+            
         else:
             ax=self.axes  
 
@@ -1305,6 +1437,58 @@ class MatplotFigureSubplot(MatplotFigure):
         self._box_pos = x0, y0
         self._box_size = x1 - x0, y1 - y0
         
+    def update_lim(self):
+        """ update axis lim if zoombox is used"""
+        ax=self.axes
+
+        self.do_update=False
+        
+        if not self.box_axes:
+
+            self.box_axes=[ax]
+            
+        for index,ax in enumerate(self.box_axes):
+            #check if inverted axis
+            xleft,xright=ax.get_xlim()
+            ybottom,ytop=ax.get_ylim()
+            
+            if xright>xleft:
+                ax.set_xlim(left=min(self.x0_box[index],self.x1_box[index]),right=max(self.x0_box[index],self.x1_box[index]))
+            else:
+                ax.set_xlim(right=min(self.x0_box[index],self.x1_box[index]),left=max(self.x0_box[index],self.x1_box[index]))
+            if ytop>ybottom:
+                ax.set_ylim(bottom=min(self.y0_box[index],self.y1_box[index]),top=max(self.y0_box[index],self.y1_box[index]))
+            else:
+                ax.set_ylim(top=min(self.y0_box[index],self.y1_box[index]),bottom=max(self.y0_box[index],self.y1_box[index]))    
+
+    def reset_box(self):
+        """ reset zoombox and apply zoombox limit if zoombox option if selected"""
+        if min(abs(self._box_size[0]),abs(self._box_size[1]))>self.minzoom:
+            self.x0_box, self.y0_box = [], []
+            self.x1_box, self.y1_box = [], [] 
+            for ax in self.box_axes:
+                trans = ax.transData.inverted()
+                x0_box, y0_box = trans.transform_point((self._box_pos[0]-self.pos[0], self._box_pos[1]-self.pos[1])) 
+                x1_box, y1_box = trans.transform_point((self._box_size[0]+self._box_pos[0]-self.pos[0], self._box_size[1]+self._box_pos[1]-self.pos[1]))
+                self.x0_box.append(x0_box)
+                self.y0_box.append(y0_box)
+                self.x1_box.append(x1_box)
+                self.y1_box.append(y1_box)
+            self.do_update=True
+            
+        self._box_size = 0, 0
+        self._box_pos = 0, 0
+        self._alpha_box=0
+
+        self._pos_x_rect_hor = 0
+        self._pos_y_rect_hor = 0
+        self._pos_x_rect_ver = 0
+        self._pos_y_rect_ver = 0 
+        self._alpha_hor=0 
+        self._alpha_ver=0
+        self.invert_rect_hor = False
+        self.invert_rect_ver = False                
+                
     def _draw_bitmap(self):
         """ draw bitmap method. based on kivy scatter method"""
         if self._bitmap is None:
@@ -1316,25 +1500,16 @@ class MatplotFigureSubplot(MatplotFigure):
         self._img_texture.flip_vertical()
         
         if self.hover_instance:
-            if self.compare_xdata and self.hover_instance:
-                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
-                    self.hover_instance.hover_outside_bound=True
-  
-                elif self.show_compare_cursor and self.touch_mode=='cursor':
-                    self.show_compare_cursor=False
-                else:
-                    self.hover_instance.hover_outside_bound=True
-
             #update hover pos if needed
-            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
-                if self.cursor_last_axis:
-                    xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
-                else:
-                    xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-
+            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data: 
+                # if self.cursor_last_axis.axes==self.axes:
+                xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
+                    
+         
+                    # ymin,ymax=self.axes.get_ylim()
+                    # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
                 self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
                 self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
     
@@ -1344,4 +1519,4 @@ class MatplotFigureSubplot(MatplotFigure):
                     self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
                     self.hover_instance.hover_outside_bound=True
                 else:
-                    self.hover_instance.hover_outside_bound=False
+                    self.hover_instance.hover_outside_bound=False  
