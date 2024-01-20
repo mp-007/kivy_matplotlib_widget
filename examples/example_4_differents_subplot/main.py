@@ -7,7 +7,7 @@ if platform != 'android':
     Config.set('input', 'mouse', 'mouse,disable_on_activity')
 
 from kivy.lang import Builder
-from kivymd.app import App
+from kivy.app import App
 
 import matplotlib.pyplot as plt
 
