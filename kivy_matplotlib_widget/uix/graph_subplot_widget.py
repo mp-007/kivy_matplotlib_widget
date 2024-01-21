@@ -43,9 +43,6 @@ class MatplotFigureSubplot(MatplotFigure):
     max_hover_rate =  NumericProperty(None,allownone=True) 
     last_hover_time=None   
     cursor_last_axis=None
-        
-    text_instance = None
-    min_max_option = BooleanProperty(True)
     current_anchor_axis=None
     box_axes=[]
 
