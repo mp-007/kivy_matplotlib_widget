@@ -9,6 +9,7 @@ if platform != 'android':
 from kivy.lang import Builder
 from kivy.app import App
 from graph_generator import GraphGenerator
+from minmax_widget import add_minmax
 
 KV = '''
 #:import MatplotFigure graph_widget
@@ -47,6 +48,12 @@ Screen
                 on_release:
                     app.set_touch_mode('cursor')
                     self.state='down'  
+            ToggleButton:
+                group:'touch_mode'
+                text:"min/max" 
+                on_release:
+                    app.set_touch_mode('minmax')
+                    self.state='down'                      
         BoxLayout:
             size_hint_y:0.2                    
             ToggleButton:
@@ -107,6 +114,9 @@ class Test(App):
         
         #register line for cursor
         self.screen.figure_wgt.register_lines(self.lines)
+        
+        #add min max option
+        add_minmax(self.screen.figure_wgt)
 
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode

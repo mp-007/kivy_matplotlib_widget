@@ -68,7 +68,9 @@ class MatplotFigure(Widget):
     compare_hover_instance = ObjectProperty(None, allownone=True)
     disable_mouse_scrolling = BooleanProperty(False) 
     disable_double_tap = BooleanProperty(False) 
-
+    text_instance = None
+    min_max_option = BooleanProperty(True)
+    
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
         self.figcanvas._isDrawn = False
@@ -762,7 +764,10 @@ class MatplotFigure(Widget):
                     self.x_init=x
                     self.y_init=real_y
                     self.draw_box(event, x, real_y, x, real_y) 
-                 
+
+                elif self.touch_mode=='minmax':
+                    self.min_max(event)
+                    
                 event.grab(self)
                 self._touches.append(event)
                 self._last_touch_pos[event] = event.pos
@@ -805,7 +810,9 @@ class MatplotFigure(Widget):
             self._touches.remove(event)
             if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
-                or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':   
+                    or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y' \
+                        or self.touch_mode=='minmax': 
+                        
                 self.push_current()
                 if self.interactive_axis:
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
@@ -1116,6 +1123,72 @@ class MatplotFigure(Widget):
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
+
+    def min_max(self, event):
+        """ manage min/max touch mode """
+        ax=self.axes
+        xlabelbottom = ax.xaxis._major_tick_kw.get('tick1On')
+        ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
+
+        if xlabelbottom and event.x>self.x +ax.bbox.bounds[0] and \
+            event.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+            event.y<self.y + ax.bbox.bounds[1]:                   
+
+            right_lim = self.x+ax.bbox.bounds[2]+ax.bbox.bounds[0]
+            left_lim = self.x+ax.bbox.bounds[0]
+            left_anchor_zone= (right_lim - left_lim)*.2 + left_lim
+            right_anchor_zone= (right_lim - left_lim)*.8 + left_lim
+
+            if event.x < left_anchor_zone or event.x > right_anchor_zone:            
+
+                if self.text_instance:
+                    if not self.text_instance.show_text:
+                        midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
+                        if event.x < midpoint:
+                            anchor='left'
+                            self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0])
+                            self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - self.text_instance.text_height
+                            self.text_instance.offset_text = False
+                        else:
+                            anchor='right'
+                            self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0])
+                            self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - self.text_instance.text_height
+                            self.text_instance.offset_text = True
+
+                        self.text_instance.current_axis = ax
+                        self.text_instance.kind = {'axis':'x','anchor':anchor}
+
+                        self.text_instance.show_text=True
+                        return
+
+        elif ylabelleft and  event.x<self.x +ax.bbox.bounds[0]  and \
+            event.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+            event.y>self.y + ax.bbox.bounds[1]:
+
+            top_lim = self.y+ax.bbox.bounds[3]+ax.bbox.bounds[1]
+            bottom_lim = self.y+ax.bbox.bounds[1]                    
+            bottom_anchor_zone=  (top_lim - bottom_lim)*.2 + bottom_lim
+            top_anchor_zone= (top_lim - bottom_lim)*.8 + bottom_lim  
+
+            if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
+                if self.text_instance:
+                    if not self.text_instance.show_text:
+                        midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
+                        if event.y  > midpoint:
+                            anchor='top'
+                            self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0]) - dp(40)
+                            self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                            self.text_instance.offset_text = False
+                        else:
+                            anchor='bottom'
+                            self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0]) - dp(40)
+                            self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - dp(6)
+                            self.text_instance.offset_text = False
+                        self.text_instance.current_axis = ax
+                        self.text_instance.kind = {'axis':'y','anchor':anchor}
+
+                        self.text_instance.show_text=True
+                        return
             
     def apply_drag_legend(self, ax, event):
         """ drag legend method """
