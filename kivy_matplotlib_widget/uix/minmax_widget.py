@@ -13,6 +13,7 @@ from kivy.properties import (
 from kivy.lang import Builder 
 from kivy.metrics import dp
 from kivy.clock import Clock
+from kivy.core import text as coretext
 
         
 def add_minmax(figure_wgt,
@@ -165,10 +166,12 @@ class TextBox(BaseTextFloatLayout):
                     axis_formatter = self.xaxis_formatter
                    
                 if kind.get('anchor') == 'left':
-                    self.ids.text_input.text=f"{axis_formatter(xlim[0])}"
+                    #u"\u2212" is to manage unicode minus
+                    self.ids.text_input.text=f"{axis_formatter(xlim[0])}".replace(u"\u2212","-")
                     
                 elif kind.get('anchor') == 'right':
-                    self.ids.text_input.text=f"{axis_formatter(xlim[1])}"
+                    #u"\u2212" is to manage unicode minus
+                    self.ids.text_input.text=f"{axis_formatter(xlim[1])}".replace(u"\u2212","-")
                 self.current_value = self.ids.text_input.text
                     
             elif kind.get('axis') == 'y':
@@ -179,10 +182,12 @@ class TextBox(BaseTextFloatLayout):
                 else:
                     axis_formatter = self.xaxis_formatter
                 if kind.get('anchor') == 'bottom':
-                    self.ids.text_input.text=f"{axis_formatter(ylim[0])}"
+                    #u"\u2212" is to manage unicode minus
+                    self.ids.text_input.text=f"{axis_formatter(ylim[0])}".replace(u"\u2212","-")
 
                 elif kind.get('anchor') == 'top':
-                    self.ids.text_input.text=f"{axis_formatter(ylim[1])}"
+                    #u"\u2212" is to manage unicode minus
+                    self.ids.text_input.text=f"{axis_formatter(ylim[1])}".replace(u"\u2212","-")
                 self.current_value = self.ids.text_input.text
             self.autofocus_text()
 
@@ -211,17 +216,15 @@ class CustomTextInput(TextInput):
         if self.text:
             
             try:
-                text_width = self._get_text_width(
-                    self.text,
-                    self.tab_width,
-                    self._label_cached
-                )
+                string = self.text
+                text_texture_width = coretext.Label(font_size=self.font_size).get_extents(string)[0]
+                
             except:
                 print('get text width failed')
             else:
                 if self.text_box_instance:
-                    if self.text_width>dp(40):
-                        self.text_box_instance.text_width=text_width + dp(20)
+                    if text_texture_width>dp(40):
+                        self.text_box_instance.text_width=text_texture_width + self.padding[0] + self.padding[2]
     def on_focus_text(self, instance,value):
         """ on focus operation"""
         if value:
