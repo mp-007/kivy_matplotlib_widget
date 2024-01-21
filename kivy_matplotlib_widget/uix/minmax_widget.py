@@ -223,8 +223,10 @@ class CustomTextInput(TextInput):
                 print('get text width failed')
             else:
                 if self.text_box_instance:
-                    if text_texture_width>dp(40):
+                    if text_texture_width>dp(20):
                         self.text_box_instance.text_width=text_texture_width + self.padding[0] + self.padding[2]
+                    else:
+                        self.text_box_instance.text_width = dp(20) + self.padding[0] + self.padding[2]
     def on_focus_text(self, instance,value):
         """ on focus operation"""
         if value:
