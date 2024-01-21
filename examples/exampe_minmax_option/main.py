@@ -361,7 +361,7 @@ class Test(App):
         
         screen2.figure_wgt.register_cursor()
         
-        add_hover(screen1.figure_wgt,mode='desktop',hover_widget=PlotlyHover2())
+        add_hover(screen2.figure_wgt,mode='desktop',hover_widget=PlotlyHover2())
 
         add_minmax(screen2.figure_wgt)
                 
