@@ -6,6 +6,12 @@ if platform != 'android':
     from kivy.config import Config
     Config.set('input', 'mouse', 'mouse,disable_on_activity')
     Config.set('kivy', 'keyboard_mode', '') #disable keyboard mode
+    
+else:
+    #if using android keyboard or kivy keyboard, it's maybe better to use softinput_mode = "below_target"
+    from kivy.core.window import Window
+    Window.keyboard_anim_args = {"d":.2,"t":"linear"}
+    Window.softinput_mode = "below_target"
 
 from kivy.lang import Builder
 from kivy.app import App
