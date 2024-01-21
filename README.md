@@ -4,7 +4,7 @@ A fast matplotlib rendering for Kivy based on Kivy_matplotlib project (https://g
 # How to use
 Just copy graph_widget.py and graph_generator_template.py in your project. Modify graph_generator_template as your needed. See examples for more informations
 
-New: install with pip install (just import module in your header: import kivy_matplotlib_widget)
+install with pip install (just import module in your header: import kivy_matplotlib_widget)
 ```
 pip install kivy-matplotlib-widget
 ```
@@ -18,6 +18,8 @@ pip install kivy-matplotlib-widget
  - use only 1 package (matplotlib) and no additional backend
  - cursor and hover option
  - legend widget like plotly library
+ - interactive axis like plotly library
+ - min/max touch option to easily change axis limit
 
 ![image](https://user-images.githubusercontent.com/19823482/146577068-026a9608-a9df-4d59-a548-8b81f9b85574.png)
 
