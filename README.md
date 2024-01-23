@@ -16,7 +16,7 @@ pip install kivy-matplotlib-widget
  - reset axis on double-click (home button)
  - fast rendering mode (axis not updated for faster draw)
  - use only 1 package (matplotlib) and no additional backend
- - cursor and hover option
+ - cursor and hover option (touch or desktop mode)
  - legend widget like plotly library
  - interactive axis like plotly library
  - min/max touch option to easily change axis limit
