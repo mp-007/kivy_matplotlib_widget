@@ -404,8 +404,12 @@ class MatplotFigureScatter(Widget):
                         
                     if self.cursor_xaxis_formatter:
                         x = self.cursor_xaxis_formatter.format_data(x)
+                    else:
+                        x = ax.xaxis.get_major_formatter().format_data_short(x)                        
                     if self.cursor_yaxis_formatter:
                         y = self.cursor_yaxis_formatter.format_data(y) 
+                    else:
+                        y = ax.yaxis.get_major_formatter().format_data_short(y)                         
                     self.hover_instance.label_x_value=f"{x}"
                     self.hover_instance.label_y_value=f"{y}"
             
@@ -446,8 +450,12 @@ class MatplotFigureScatter(Widget):
 
                     if self.cursor_xaxis_formatter:
                         x = self.cursor_xaxis_formatter.format_data(x)
+                    else:
+                        x = ax.xaxis.get_major_formatter().format_data_short(x)                         
                     if self.cursor_yaxis_formatter:
-                        y = self.cursor_yaxis_formatter.format_data(y) 
+                        y = self.cursor_yaxis_formatter.format_data(y)
+                    else:
+                        y = ax.yaxis.get_major_formatter().format_data_short(y)                         
                         
                     if self.scatter_label  and idx_best > len(good_line)-1: 
                         if self.multi_xdata:                                
@@ -632,25 +640,7 @@ class MatplotFigureScatter(Widget):
             bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
         self._img_texture.flip_vertical()
 
-        if self.hover_instance:
-            #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
-                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
-                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
-                # ymin,ymax=self.axes.get_ylim()
-                # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
-                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
-                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
-    
-                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
-                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
-                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
-                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
-                    self.hover_instance.hover_outside_bound=True
-                else:
-                    self.hover_instance.hover_outside_bound=False
+        self.update_hover()
 
     def transform_with_touch(self, event):
         """ manage touch behaviour. based on kivy scatter method"""
@@ -965,6 +955,8 @@ class MatplotFigureScatter(Widget):
                 
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events()
+            
+            self.update_hover()
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()           
@@ -1160,9 +1152,33 @@ class MatplotFigureScatter(Widget):
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events() 
             
+            self.update_hover()
+            
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
+
+    def update_hover(self):
+        """ update hover on fast draw (if exist)"""
+        if self.hover_instance:
+            #update hover pos if needed
+            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+     
+                # ymin,ymax=self.axes.get_ylim()
+                # ylim_pos = self.axes.transData.transform([(ymin,ymax)])
+                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
+                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
+    
+                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                    self.hover_instance.hover_outside_bound=True
+                else:
+                    self.hover_instance.hover_outside_bound=False
 
     def min_max(self, event):
         """ manage min/max touch mode """
