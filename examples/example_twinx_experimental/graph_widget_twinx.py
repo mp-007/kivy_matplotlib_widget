@@ -417,7 +417,9 @@ class MatplotFigureTwinx(Widget):
                                         if self.twinx:
                                             if ax==self.figure.axes[1]:
                                                 if self.cursor_yaxis2_formatter:
-                                                    y = self.cursor_yaxis2_formatter.format_data(y)                         
+                                                    y = self.cursor_yaxis2_formatter.format_data(y)  
+                                                else:
+                                                    y = ax.yaxis.get_major_formatter().format_data_short(y) 
                                             else:
                                                 if self.cursor_yaxis_formatter:
                                                     y = self.cursor_yaxis_formatter.format_data(y) 
@@ -425,7 +427,8 @@ class MatplotFigureTwinx(Widget):
                                         else: 
                                             if self.cursor_yaxis_formatter:
                                                 y = self.cursor_yaxis_formatter.format_data(y)                                        
-    
+                                            else:
+                                                y = ax.yaxis.get_major_formatter().format_data_short(y)     
                                         available_widget[index].label_y_value=f"{y}"
                                         available_widget[index].show_widget=True
                                         index_list.remove(index)
@@ -434,7 +437,9 @@ class MatplotFigureTwinx(Widget):
                             available_widget[ii].show_widget=False
 
                         if self.cursor_xaxis_formatter:
-                            x = self.cursor_xaxis_formatter.format_data(x) 
+                            x = self.cursor_xaxis_formatter.format_data(x)
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)                             
                             
                         self.hover_instance.label_x_value=f"{x}"
 
@@ -477,20 +482,26 @@ class MatplotFigureTwinx(Widget):
                             self.horizontal_line.set_ydata(new_y)
                             self.cursor_last_y=new_y
                             if self.cursor_yaxis2_formatter and not self.hover_instance:
-                                y = self.cursor_yaxis2_formatter.format_data(y) 
+                                y = self.cursor_yaxis2_formatter.format_data(y)
+                            elif not self.hover_instance:
+                                y = ax.yaxis.get_major_formatter().format_data_short(y)                                 
                         else:
                             self.horizontal_line.set_ydata(y) 
                             if self.cursor_yaxis_formatter and not self.hover_instance:
                                 y = self.cursor_yaxis_formatter.format_data(y) 
-                        
+                            elif not self.hover_instance:
+                                y = ax.yaxis.get_major_formatter().format_data_short(y)                         
                     else:
                         self.horizontal_line.set_ydata(y)  
                         if self.cursor_yaxis_formatter and not self.hover_instance:
                             y = self.cursor_yaxis_formatter.format_data(y)                       
-                    
+                        elif not self.hover_instance:
+                            y = ax.yaxis.get_major_formatter().format_data_short(y)                      
                     self.vertical_line.set_xdata(x)
                     if self.cursor_xaxis_formatter and not self.hover_instance:
                         x = self.cursor_xaxis_formatter.format_data(x)
+                    elif not self.hover_instance:
+                        x = ax.xaxis.get_major_formatter().format_data_short(x)                         
                         
                     #x y label
                     if self.hover_instance:                     
@@ -504,17 +515,25 @@ class MatplotFigureTwinx(Widget):
                         if self.twinx:
                             if ax==self.figure.axes[1]:
                                 if self.cursor_yaxis2_formatter:
-                                    y = self.cursor_yaxis2_formatter.format_data(y)                         
+                                    y = self.cursor_yaxis2_formatter.format_data(y)
+                                else:
+                                    y = ax.yaxis.get_major_formatter().format_data_short(y) 
                             else:
                                 if self.cursor_yaxis_formatter:
-                                    y = self.cursor_yaxis_formatter.format_data(y) 
+                                    y = self.cursor_yaxis_formatter.format_data(y)
+                                else:
+                                    y = ax.yaxis.get_major_formatter().format_data_short(y)
     
                         else: 
                             if self.cursor_yaxis_formatter:
-                                y = self.cursor_yaxis_formatter.format_data(y) 
+                                y = self.cursor_yaxis_formatter.format_data(y)
+                            else:
+                                y = ax.yaxis.get_major_formatter().format_data_short(y) 
                                 
                         if self.cursor_xaxis_formatter:
-                            x = self.cursor_xaxis_formatter.format_data(x)                            
+                            x = self.cursor_xaxis_formatter.format_data(x)
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)                             
                                 
                         self.hover_instance.label_x_value=f"{x}"
                         self.hover_instance.label_y_value=f"{y}"
@@ -719,35 +738,7 @@ class MatplotFigureTwinx(Widget):
             bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
         self._img_texture.flip_vertical()
         
-        if self.hover_instance:
-            if self.compare_xdata and self.hover_instance:
-                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
-                    self.hover_instance.hover_outside_bound=True
-  
-                elif self.show_compare_cursor and self.touch_mode=='cursor':
-                    self.show_compare_cursor=False
-                else:
-                    self.hover_instance.hover_outside_bound=True
-
-            #update hover pos if needed
-            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
-                if self.cursor_last_axis:
-                    xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
-                else:
-                    xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
-                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
-                self.hover_instance.ymin_line = float(self.figure.axes[0].bbox.bounds[1]) + self.y
-                self.hover_instance.ymax_line = float(self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] )+ self.y
-    
-                if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
-                    self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
-                    self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
-                    self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
-                    self.hover_instance.hover_outside_bound=True
-                else:
-                    self.hover_instance.hover_outside_bound=False          
+        self.update_hover()         
 
     def transform_with_touch(self, event):
         """ manage touch behaviour. based on kivy scatter method"""
@@ -1065,6 +1056,8 @@ class MatplotFigureTwinx(Widget):
                 ax.draw_artist(line)
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events()
+            
+            self.update_hover()
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()           
@@ -1195,6 +1188,8 @@ class MatplotFigureTwinx(Widget):
         
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events() 
+            
+            self.update_hover() 
         
         else:
             ax.figure.canvas.draw_idle()
@@ -1382,6 +1377,8 @@ class MatplotFigureTwinx(Widget):
                 
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events() 
+            
+            self.update_hover() 
             
         else:
             ax.figure.canvas.draw_idle()
@@ -1673,11 +1670,45 @@ class MatplotFigureTwinx(Widget):
                     ax2.draw_artist(line)
                     
             ax.figure.canvas.blit(ax.bbox)
-            ax.figure.canvas.flush_events()   
+            ax.figure.canvas.flush_events() 
+            
+            self.update_hover() 
             
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
+
+    def update_hover(self):
+        """ update hover on fast draw (if exist)"""
+        if self.hover_instance:
+            if self.compare_xdata and self.hover_instance:
+                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
+                    self.hover_instance.hover_outside_bound=True
+  
+                elif self.show_compare_cursor and self.touch_mode=='cursor':
+                    self.show_compare_cursor=False
+                else:
+                    self.hover_instance.hover_outside_bound=True
+
+            #update hover pos if needed
+            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:      
+                if self.cursor_last_axis:
+                    xy_pos = self.cursor_last_axis.transData.transform([(self.x_hover_data,self.y_hover_data)])
+                else:
+                    xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+     
+                self.hover_instance.ymin_line = float(self.figure.axes[0].bbox.bounds[1]) + self.y
+                self.hover_instance.ymax_line = float(self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] )+ self.y
+    
+                if self.hover_instance.x_hover_pos>self.x+self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
+                    self.hover_instance.x_hover_pos<self.x+self.figure.axes[0].bbox.bounds[0] or \
+                    self.hover_instance.y_hover_pos>self.y+self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
+                    self.hover_instance.y_hover_pos<self.y+self.figure.axes[0].bbox.bounds[1]:               
+                    self.hover_instance.hover_outside_bound=True
+                else:
+                    self.hover_instance.hover_outside_bound=False 
 
     def min_max(self, event):
         """ manage min/max touch mode """
