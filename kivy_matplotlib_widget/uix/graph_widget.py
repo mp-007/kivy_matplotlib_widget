@@ -70,6 +70,8 @@ class MatplotFigure(Widget):
     disable_double_tap = BooleanProperty(False) 
     text_instance = None
     min_max_option = BooleanProperty(True)
+    auto_zoom = BooleanProperty(False)
+    zoom_angle_detection=NumericProperty(20) #in degree
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -341,6 +343,8 @@ class MatplotFigure(Widget):
                                         
                                         if self.cursor_yaxis_formatter:
                                             y = self.cursor_yaxis_formatter.format_data(y) 
+                                        else:
+                                            y = ax.yaxis.get_major_formatter().format_data_short(y)
                                         available_widget[index].label_y_value=f"{y}"
                                         available_widget[index].show_widget=True
                                         index_list.remove(index)
@@ -350,6 +354,8 @@ class MatplotFigure(Widget):
 
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x) 
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)
                             
                         self.hover_instance.label_x_value=f"{x}"
                         
@@ -396,8 +402,12 @@ class MatplotFigure(Widget):
                             
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x)
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)
                         if self.cursor_yaxis_formatter:
                             y = self.cursor_yaxis_formatter.format_data(y) 
+                        else:
+                            y = ax.yaxis.get_major_formatter().format_data_short(y)
                         self.hover_instance.label_x_value=f"{x}"
                         self.hover_instance.label_y_value=f"{y}"
                 
@@ -419,8 +429,12 @@ class MatplotFigure(Widget):
                     else:
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x)
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)
                         if self.cursor_yaxis_formatter:
                             y = self.cursor_yaxis_formatter.format_data(y) 
+                        else:
+                            y = ax.yaxis.get_major_formatter().format_data_short(y)
                         self.text.set_text(f"x={x}, y={y}")
     
                     #blit method (always use because same visual effect as draw)                  
@@ -598,32 +612,7 @@ class MatplotFigure(Widget):
             bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
         self._img_texture.flip_vertical()
         
-        if self.hover_instance:
-            if self.compare_xdata:
-                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
-                    self.hover_instance.hover_outside_bound=True
-  
-                elif self.show_compare_cursor and self.touch_mode=='cursor':
-                    self.show_compare_cursor=False
-                else:
-                    self.hover_instance.hover_outside_bound=True
-
-            #update hover pos if needed
-            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
-                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
-                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
-                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
-                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
-                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
-    
-                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
-                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
-                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
-                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
-                    self.hover_instance.hover_outside_bound=True
-                else:
-                    self.hover_instance.hover_outside_bound=False            
+        self.update_hover()           
         
 
     def transform_with_touch(self, event):
@@ -688,6 +677,25 @@ class MatplotFigure(Widget):
         new_line = Vector(*event.pos) - anchor
         if not old_line.length():  # div by zero
             return changed
+
+        if self.auto_zoom:
+            v1 = Vector(0, 10)
+            angle = v1.angle(new_line) + 180
+            if angle<0+self.zoom_angle_detection or angle>360-self.zoom_angle_detection:
+                self.do_zoom_x=False
+                self.do_zoom_y=True
+            elif angle>90-self.zoom_angle_detection and angle<90+self.zoom_angle_detection:
+                self.do_zoom_x=True
+                self.do_zoom_y=False           
+            elif angle>180-self.zoom_angle_detection and angle<180+self.zoom_angle_detection:
+                self.do_zoom_x=False
+                self.do_zoom_y=True  
+            elif angle>270-self.zoom_angle_detection and angle<270+self.zoom_angle_detection:
+                self.do_zoom_x=True
+                self.do_zoom_y=False            
+            else:
+                self.do_zoom_x=True
+                self.do_zoom_y=True
 
         if self.do_scale:
             #            scale = new_line.length() / old_line.length()
@@ -933,6 +941,8 @@ class MatplotFigure(Widget):
                 ax.draw_artist(line)
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events()
+
+            self.update_hover()
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()           
@@ -1120,9 +1130,40 @@ class MatplotFigure(Widget):
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events() 
             
+            self.update_hover()
+            
         else:
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
+
+    def update_hover(self):
+        """ update hover on fast draw (if exist)"""
+        if self.hover_instance:
+            if self.compare_xdata:
+                if (self.touch_mode!='cursor' or len(self._touches) > 1) and not self.show_compare_cursor:
+                    self.hover_instance.hover_outside_bound=True
+  
+                elif self.show_compare_cursor and self.touch_mode=='cursor':
+                    self.show_compare_cursor=False
+                else:
+                    self.hover_instance.hover_outside_bound=True
+
+            #update hover pos if needed
+            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+                self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+     
+                self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
+                self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
+    
+                if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                    self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                    self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                    self.hover_instance.hover_outside_bound=True
+                else:
+                    self.hover_instance.hover_outside_bound=False 
 
     def min_max(self, event):
         """ manage min/max touch mode """
