@@ -71,6 +71,8 @@ class MatplotFigureScatter(Widget):
     disable_double_tap = BooleanProperty(False)     
     text_instance = None
     min_max_option = BooleanProperty(True)
+    auto_zoom = BooleanProperty(False)
+    zoom_angle_detection=NumericProperty(20) #in degree    
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -703,6 +705,25 @@ class MatplotFigureScatter(Widget):
         new_line = Vector(*event.pos) - anchor
         if not old_line.length():  # div by zero
             return changed
+
+        if self.auto_zoom:
+            v1 = Vector(0, 10)
+            angle = v1.angle(new_line) + 180
+            if angle<0+self.zoom_angle_detection or angle>360-self.zoom_angle_detection:
+                self.do_zoom_x=False
+                self.do_zoom_y=True
+            elif angle>90-self.zoom_angle_detection and angle<90+self.zoom_angle_detection:
+                self.do_zoom_x=True
+                self.do_zoom_y=False           
+            elif angle>180-self.zoom_angle_detection and angle<180+self.zoom_angle_detection:
+                self.do_zoom_x=False
+                self.do_zoom_y=True  
+            elif angle>270-self.zoom_angle_detection and angle<270+self.zoom_angle_detection:
+                self.do_zoom_x=True
+                self.do_zoom_y=False            
+            else:
+                self.do_zoom_x=True
+                self.do_zoom_y=True
 
         if self.do_scale:
             #            scale = new_line.length() / old_line.length()
