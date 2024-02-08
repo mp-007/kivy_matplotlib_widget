@@ -262,6 +262,7 @@ class MatplotFigureSubplot(MatplotFigure):
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self._pressed = True
             self.show_compare_cursor=False
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
@@ -1321,6 +1322,7 @@ class MatplotFigureSubplot(MatplotFigure):
             
         # stop propagating if its within our bounds
         if self.collide_point(x, y) and self.figure:
+            self._pressed = False
 
             if self.do_update:
                 self.update_lim()            
