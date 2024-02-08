@@ -7,9 +7,7 @@ import time
 
 import matplotlib
 matplotlib.use('Agg')
-import numpy as np
 from kivy_matplotlib_widget.uix.graph_widget import _FigureCanvas ,MatplotFigure
-from kivy_matplotlib_widget.uix.hover_widget import add_hover
 from kivy.utils import get_color_from_hex
 from matplotlib.colors import to_hex
 from kivy.metrics import dp
@@ -142,6 +140,9 @@ class MatplotFigureSubplot(MatplotFigure):
         if self.legend_instance:
             self.legend_instance.reset_legend()
             self.legend_instance=None
+            
+        if self.auto_cursor:
+            self.register_cursor()
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))

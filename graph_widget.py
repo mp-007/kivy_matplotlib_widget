@@ -70,9 +70,9 @@ class MatplotFigure(Widget):
     disable_mouse_scrolling = BooleanProperty(False) 
     disable_double_tap = BooleanProperty(False) 
     text_instance = None
-    min_max_option = BooleanProperty(True)
     auto_zoom = BooleanProperty(False)
     zoom_angle_detection=NumericProperty(20) #in degree
+    auto_cursor = BooleanProperty(False)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -103,6 +103,9 @@ class MatplotFigure(Widget):
         if self.legend_instance:
             self.legend_instance.reset_legend()
             self.legend_instance=None
+            
+        if self.auto_cursor:
+            self.register_lines(list(self.axes.lines))
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
