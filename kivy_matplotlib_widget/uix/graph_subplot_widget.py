@@ -42,6 +42,7 @@ class MatplotFigureSubplot(MatplotFigure):
     last_hover_time=None   
     cursor_last_axis=None
     current_anchor_axis=None
+    min_max_option = BooleanProperty(False)
     box_axes=[]
 
     def my_in_axes(self,ax, mouseevent):
@@ -260,6 +261,8 @@ class MatplotFigureSubplot(MatplotFigure):
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
+        if self.disabled:
+            return
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
@@ -1293,6 +1296,8 @@ class MatplotFigureSubplot(MatplotFigure):
         
     def on_touch_up(self, event):
         """ Manage Mouse/touch release """
+        if self.disabled:
+            return        
         # remove it from our saved touches
         if event in self._touches and event.grab_state:
             event.ungrab(self)

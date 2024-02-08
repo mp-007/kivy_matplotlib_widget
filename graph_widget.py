@@ -719,7 +719,7 @@ class MatplotFigure(Widget):
         '''Kivy Event to trigger mouse event on motion
            `enter_notify_event`.
         '''
-        if self._pressed:  # Do not process this event if there's a touch_move
+        if self._pressed or self.disabled:  # Do not process this event if there's a touch_move
             return
         pos = args[1]
         newcoord = self.to_widget(pos[0], pos[1])
@@ -739,6 +739,8 @@ class MatplotFigure(Widget):
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
+        if self.disabled:
+            return
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
@@ -797,7 +799,8 @@ class MatplotFigure(Widget):
 
     def on_touch_move(self, event):
         """ Manage Mouse/touch move while pressed """
-
+        if self.disabled:
+            return
         x, y = event.x, event.y
 
         if event.is_double_tap:
@@ -818,6 +821,8 @@ class MatplotFigure(Widget):
 
     def on_touch_up(self, event):
         """ Manage Mouse/touch release """
+        if self.disabled:
+            return
         # remove it from our saved touches
         if event in self._touches and event.grab_state:
             event.ungrab(self)
