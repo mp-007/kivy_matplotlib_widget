@@ -9,11 +9,9 @@ if platform != 'android':
 from kivy.lang import Builder
 from kivy.app import App
 from graph_generator import GraphGenerator
-from minmax_widget import add_minmax
+from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
 
 KV = '''
-#:import MatplotFigure graph_widget
-
 Screen
     figure_wgt:figure_wgt
     BoxLayout:
