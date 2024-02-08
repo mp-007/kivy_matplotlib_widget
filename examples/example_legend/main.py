@@ -9,10 +9,9 @@ if platform != 'android':
 from kivy.lang import Builder
 from kivy.app import App
 from graph_generator import GraphGenerator
+import kivy_matplotlib_widget  #register all widgets to kivy register
 
 KV = '''
-#:import MatplotFigure graph_widget
-#:import LegendRv legend_widget
 
 Screen
     figure_wgt:figure_wgt

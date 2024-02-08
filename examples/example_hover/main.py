@@ -9,11 +9,11 @@ if platform != 'android':
 from kivy.lang import Builder
 from kivy.app import App
 from graph_generator import GraphGenerator
-from hover_widget import add_hover,HoverVerticalText,InfoHover
+from kivy_matplotlib_widget.uix.hover_widget import add_hover,HoverVerticalText,InfoHover
 from matplotlib.ticker import FormatStrFormatter
 
+
 KV = '''
-#:import MatplotFigure graph_widget
 
 Screen
     figure_wgt:figure_wgt

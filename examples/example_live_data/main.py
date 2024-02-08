@@ -11,10 +11,9 @@ from kivy.app import App
 from graph_generator import GraphGenerator
 from kivy.clock import Clock
 import numpy as np
+import kivy_matplotlib_widget  #register all widgets to kivy register
 
 KV = '''
-#:import MatplotFigure graph_widget
-
 Screen
     figure_wgt:figure_wgt
     BoxLayout:

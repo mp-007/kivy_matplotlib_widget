@@ -25,10 +25,9 @@ from kivy.app import App
 from kivy.core.window import Window
 import numpy as np
 from random import randint
-from legend_widget import MatplotlibInteractiveLegend
+from kivy_matplotlib_widget.uix.legend_widget import MatplotlibInteractiveLegend  #also register all widgets to kivy register
 
 KV = '''
-#:import MatplotFigure graph_widget
 
 Screen
     figure_wgt:figure_wgt
