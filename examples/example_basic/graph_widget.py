@@ -36,6 +36,7 @@ class MatplotFigure(Widget):
     _img_texture = ObjectProperty(None)
     _alpha_box = NumericProperty(0)   
     _bitmap = None
+    _pressed = False
     do_update=False
     figcanvas = ObjectProperty(None)
     translation_touches = BoundedNumericProperty(1, min=1)
@@ -715,6 +716,8 @@ class MatplotFigure(Widget):
         '''Kivy Event to trigger mouse event on motion
            `enter_notify_event`.
         '''
+        if self._pressed:  # Do not process this event if there's a touch_move
+            return
         pos = args[1]
         newcoord = self.to_widget(pos[0], pos[1])
         x = newcoord[0]
@@ -736,6 +739,7 @@ class MatplotFigure(Widget):
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self._pressed = True
             self.show_compare_cursor=False
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
@@ -841,6 +845,7 @@ class MatplotFigure(Widget):
             
         # stop propagating if its within our bounds
         if self.collide_point(x, y) and self.figure:
+            self._pressed = False
 
             if self.do_update:
                 self.update_lim()            
