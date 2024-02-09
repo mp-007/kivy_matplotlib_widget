@@ -72,7 +72,7 @@ class MatplotFigureTwinx(Widget):
     text_instance = None
     min_max_option = BooleanProperty(True)
     auto_zoom = BooleanProperty(False)
-    zoom_angle_detection=NumericProperty(20) #in degree  
+    zoom_angle_detection=NumericProperty(15) #in degree  
     auto_cursor = BooleanProperty(False)
     
     def on_figure(self, obj, value):
