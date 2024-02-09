@@ -35,6 +35,7 @@ class MatplotFigureScatter(Widget):
     _img_texture = ObjectProperty(None)
     _alpha_box = NumericProperty(0)   
     _bitmap = None
+    _pressed = False
     do_update=False
     figcanvas = ObjectProperty(None)
     translation_touches = BoundedNumericProperty(1, min=1)
@@ -72,7 +73,8 @@ class MatplotFigureScatter(Widget):
     text_instance = None
     min_max_option = BooleanProperty(True)
     auto_zoom = BooleanProperty(False)
-    zoom_angle_detection=NumericProperty(20) #in degree    
+    zoom_angle_detection=NumericProperty(20) #in degree   
+    auto_cursor = BooleanProperty(False)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -103,6 +105,10 @@ class MatplotFigureScatter(Widget):
         if self.legend_instance:
             self.legend_instance.reset_legend()
             self.legend_instance=None
+            
+        if self.auto_cursor:
+            self.register_lines(list(self.axes.lines))
+            self.register_scatters(list(self.axes.collections))
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
@@ -743,6 +749,9 @@ class MatplotFigureScatter(Widget):
         '''Kivy Event to trigger mouse event on motion
            `enter_notify_event`.
         '''
+        if self._pressed or self.disabled:  # Do not process this event if there's a touch_move
+            return
+        
         pos = args[1]
         newcoord = self.to_widget(pos[0], pos[1])
         x = newcoord[0]
@@ -761,9 +770,13 @@ class MatplotFigureScatter(Widget):
                 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
+        if self.disabled:
+            return
+        
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self._pressed = True
             if self.legend_instance:
                 if self.legend_instance.box.collide_point(x, y):
                     if self.touch_mode!='drag_legend':
@@ -817,7 +830,9 @@ class MatplotFigureScatter(Widget):
 
     def on_touch_move(self, event):
         """ Manage Mouse/touch move while pressed """
-
+        if self.disabled:
+            return
+        
         x, y = event.x, event.y
 
         if event.is_double_tap:
@@ -838,6 +853,9 @@ class MatplotFigureScatter(Widget):
 
     def on_touch_up(self, event):
         """ Manage Mouse/touch release """
+        if self.disabled:
+            return
+        
         # remove it from our saved touches
         if event in self._touches and event.grab_state:
             event.ungrab(self)
@@ -867,6 +885,7 @@ class MatplotFigureScatter(Widget):
             
         # stop propagating if its within our bounds
         if self.collide_point(x, y) and self.figure:
+            self._pressed = False
 
             if self.do_update:
                 self.update_lim()            
