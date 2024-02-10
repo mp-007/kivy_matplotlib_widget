@@ -143,6 +143,7 @@ class MatplotFigureSubplot(MatplotFigure):
             self.legend_instance=None
             
         if self.auto_cursor:
+            self.register_lines([]) #create maplotlib text and cursor (if needed)
             self.register_cursor()
             
         # Texture
