@@ -6,7 +6,7 @@ install with pip install (just import module in your header to register all the 
 ```
 pip install kivy-matplotlib-widget
 ```
-You can copy also the needed widget in project.
+You can also copy the needed widget in project
 
 See examples for more informations
 
