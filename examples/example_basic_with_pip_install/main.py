@@ -8,7 +8,7 @@ if platform != 'android':
 
 from kivy.lang import Builder
 from kivy.app import App
-from graph_generator import GraphGenerator
+import matplotlib.pyplot as plt
 import kivy_matplotlib_widget #register all widgets to kivy register
 
 KV = '''
@@ -48,19 +48,12 @@ class Test(App):
         return self.screen
 
     def on_start(self, *args):
-        mygraph = GraphGenerator()
+        fig, ax1 = plt.subplots(1, 1)
+
+        ax1.plot([0,1,2,3,4], [1,2,8,9,4],label='line1')
+        ax1.plot([2,8,10,15], [15,0,2,4],label='line2')
         
-        self.screen.figure_wgt.figure = mygraph.fig
-        self.screen.figure_wgt.axes = mygraph.ax1
-        self.screen.figure_wgt.xmin = mygraph.xmin
-        self.screen.figure_wgt.xmax = mygraph.xmax
-        self.screen.figure_wgt.ymin = mygraph.ymin
-        self.screen.figure_wgt.ymax = mygraph.ymax
-        self.screen.figure_wgt.fast_draw = False #update axis during pan/zoom
-        
-        #register lines instance if need to be update
-        self.lines.append(mygraph.line1)
-        self.lines.append(mygraph.line2)
+        self.screen.figure_wgt.figure = fig
 
     def set_touch_mode(self,mode):
         self.screen.figure_wgt.touch_mode=mode
