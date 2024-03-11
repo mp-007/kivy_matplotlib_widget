@@ -1,3 +1,11 @@
+"""Basic example for kivy_matplotlib_widget
+
+Note:
+    MatplotFigure is used when you have only 1 axis with lines only.
+    
+    For general purpose, please use MatplotFigureSubplot widget.
+
+"""
 from kivy.utils import platform
 
 #avoid conflict between mouse provider and touch (very important with touch device)

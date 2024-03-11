@@ -1,3 +1,16 @@
+"""Basic example for kivy_matplotlib_widget
+
+    This example don't use kivy_matplotlib_widget module in case you want to
+    incorporate some widgets in your project and you want to customized stuffs.
+    If you don't need custom used, please install the module with:
+        
+        pip install kivy-matplotlib-widget
+    
+Note:
+    MatplotFigure is used when you have only 1 axis with lines only.
+    
+"""
+
 
 from kivy.utils import platform
 
@@ -9,6 +22,7 @@ if platform != 'android':
 
 from kivy.lang import Builder
 from kivy.app import App
+
 import matplotlib.pyplot as plt
 
 KV = '''
