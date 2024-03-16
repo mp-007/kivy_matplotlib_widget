@@ -782,6 +782,10 @@ class MatplotFigureTwinx(Widget):
                 if self._nav_stack() is None:
                     self.push_current()                
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
+                #in case x_init is not create
+                if not hasattr(self,'x_init'):
+                    self.x_init = event.x
+                    self.y_init = real_y
                 self.draw_box(event, self.x_init,self.y_init, event.x, real_y)
                 
             #mode cursor
