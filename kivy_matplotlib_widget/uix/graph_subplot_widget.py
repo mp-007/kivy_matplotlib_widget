@@ -835,10 +835,10 @@ class MatplotFigureSubplot(MatplotFigure):
 
         #manage press and drag
         if not self._pick_info:
-            self.myevent.x=event.x - self.pos[0]
-            self.myevent.y=event.y - self.pos[1]
-            self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
-                                                           event.y - self.pos[1])) 
+            self.myevent.x=event.x
+            self.myevent.y=event.y
+            self.myevent.inaxes=self.figure.canvas.inaxes((event.x, 
+                                                           event.y)) 
             #press event
             axes = [a for a in self.figure.canvas.figure.get_axes()
                     if a.in_axes(self.myevent)]               
@@ -1157,10 +1157,10 @@ class MatplotFigureSubplot(MatplotFigure):
     def min_max(self, event):
         """ manage min/max touch mode """
         
-        self.myevent.x=event.x - self.pos[0]
-        self.myevent.y=event.y - self.pos[1]
-        self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
-                                                       event.y - self.pos[1])) 
+        self.myevent.x=event.x
+        self.myevent.y=event.y
+        self.myevent.inaxes=self.figure.canvas.inaxes((event.x, 
+                                                       event.y)) 
         axes = [a for a in self.figure.canvas.figure.get_axes()
                 if self.my_in_axes(a,self.myevent)] 
 
