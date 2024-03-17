@@ -67,31 +67,31 @@ class MatplotFigureSubplot(MatplotFigure):
                    
             #check if tick zone
             #y left axis
-            if ylabelleft and  mouseevent.x>self.x +ax.bbox.bounds[0] - ylabelsize and \
-                mouseevent.x<self.x + ax.bbox.bounds[0] and \
-                mouseevent.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                mouseevent.y>self.y + ax.bbox.bounds[1]:
+            if ylabelleft and  mouseevent.x > ax.bbox.bounds[0] - ylabelsize and \
+                mouseevent.x < ax.bbox.bounds[0] and \
+                mouseevent.y < ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                mouseevent.y > ax.bbox.bounds[1]:
                 result2 = True
 
             #x bottom axis
-            elif xlabelbottom and mouseevent.x>self.x +ax.bbox.bounds[0] and \
-                mouseevent.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                mouseevent.y>self.y + ax.bbox.bounds[1] - xlabelsize and \
-                mouseevent.y<self.y + ax.bbox.bounds[1]:
+            elif xlabelbottom and mouseevent.x > ax.bbox.bounds[0] and \
+                mouseevent.x < ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                mouseevent.y > ax.bbox.bounds[1] - xlabelsize and \
+                mouseevent.y < ax.bbox.bounds[1]:
                 result2 = True
 
             #y right axis                 
-            elif ylabelright and mouseevent.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] + self.interactive_axis_pad and \
-                mouseevent.x>self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                mouseevent.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                mouseevent.y>self.y + ax.bbox.bounds[1]:                     
+            elif ylabelright and mouseevent.x < ax.bbox.bounds[2] + ax.bbox.bounds[0] + self.interactive_axis_pad and \
+                mouseevent.x > ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                mouseevent.y < ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                mouseevent.y > ax.bbox.bounds[1]:                     
                 result2 = True
 
             # #x top axis
-            elif xlabeltop and mouseevent.x>self.x +ax.bbox.bounds[0] and \
-                mouseevent.x<self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                mouseevent.y>self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                mouseevent.y<self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] + xlabelsize:
+            elif xlabeltop and mouseevent.x > ax.bbox.bounds[0] and \
+                mouseevent.x < ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
+                mouseevent.y > ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
+                mouseevent.y < ax.bbox.bounds[1] + ax.bbox.bounds[3] + xlabelsize:
                 result2 = True
         
         if result1 == result2:
@@ -835,8 +835,8 @@ class MatplotFigureSubplot(MatplotFigure):
 
         #manage press and drag
         if not self._pick_info:
-            self.myevent.x=event.x
-            self.myevent.y=event.y
+            self.myevent.x=event.x - self.pos[0]
+            self.myevent.y=event.y - self.pos[1]
             self.myevent.inaxes=self.figure.canvas.inaxes((event.x, 
                                                            event.y)) 
             #press event
@@ -1157,8 +1157,8 @@ class MatplotFigureSubplot(MatplotFigure):
     def min_max(self, event):
         """ manage min/max touch mode """
         
-        self.myevent.x=event.x
-        self.myevent.y=event.y
+        self.myevent.x=event.x  - self.pos[0]
+        self.myevent.y=event.y  - self.pos[1]
         self.myevent.inaxes=self.figure.canvas.inaxes((event.x, 
                                                        event.y)) 
         axes = [a for a in self.figure.canvas.figure.get_axes()
