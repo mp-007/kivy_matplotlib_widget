@@ -1164,9 +1164,15 @@ class MatplotFigureSubplot(MatplotFigure):
                         if self.anchor_x is None: 
                             midpoint =  ((self.x+ax.bbox.bounds[2] + ax.bbox.bounds[0]) + (self.x+ax.bbox.bounds[0]))/2
                             if event.x > midpoint:
-                                self.anchor_x='left'
+                                if inverted_x:
+                                    self.anchor_x='right'
+                                else:
+                                    self.anchor_x='left'
                             else:
-                                self.anchor_x='right'
+                                if inverted_x:
+                                    self.anchor_x='left'
+                                else:
+                                    self.anchor_x='right'
                         if self.anchor_x=='left':                
                             if xdata> cur_xlim[0]:
                                 if scale == 'linear':
@@ -1216,9 +1222,15 @@ class MatplotFigureSubplot(MatplotFigure):
                         if self.anchor_y is None:
                             midpoint =  ((self.y+ax.bbox.bounds[3] + ax.bbox.bounds[1]) + (self.y+ax.bbox.bounds[1]))/2
                             if event.y  > midpoint:
-                                self.anchor_y='top'
+                                if inverted_y:
+                                    self.anchor_y='bottom' 
+                                else:
+                                    self.anchor_y='top'
                             else:
-                                self.anchor_y='bottom'               
+                                if inverted_y:
+                                    self.anchor_y='top' 
+                                else:
+                                    self.anchor_y='bottom'               
                         
                         if self.anchor_y=='top':
                             if ydata> cur_ylim[0]:
