@@ -11,7 +11,7 @@ from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty
+    NumericProperty, OptionProperty
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -73,6 +73,9 @@ class MatplotFigure(Widget):
     auto_zoom = BooleanProperty(False)
     zoom_angle_detection=NumericProperty(15) #in degree
     auto_cursor = BooleanProperty(False)
+    autoscale_visible_only = BooleanProperty(True)
+    autoscale_axis = OptionProperty("both", options=["both", "x", "y"])
+    autoscale_tight = BooleanProperty(False)
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -468,6 +471,20 @@ class MatplotFigure(Widget):
                     self.hover_instance.show_cursor=False
                     self.x_hover_data = None
                     self.y_hover_data = None
+
+    def autoscale(self):
+        ax=self.axes
+        ax.relim(visible_only=self.autoscale_visible_only)
+        ax.autoscale_view(tight=self.autoscale_tight,
+                          scalex=True if self.autoscale_axis!="y" else False, 
+                          scaley=True if self.autoscale_axis!="x" else False)
+        ax.autoscale(axis=self.autoscale_axis,tight=self.autoscale_tight)                        
+        ax.figure.canvas.draw_idle()
+        ax.figure.canvas.flush_events() 
+        ax.set_autoscale_on(False)
+
+        self.xmin,self.xmax = ax.get_xlim()
+        self.ymin,self.ymax = ax.get_ylim()              
 
     def home(self) -> None:
         """ reset data axis

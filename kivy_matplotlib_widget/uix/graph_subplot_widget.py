@@ -14,6 +14,10 @@ from kivy.metrics import dp
 from kivy_matplotlib_widget.tools.cursors import cursor
 from kivy.properties import NumericProperty,BooleanProperty
 from kivy.graphics.texture import Texture
+import matplotlib.image as mimage
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+import matplotlib.transforms as mtransforms
 
 def _iter_axes_subartists(ax):
     r"""Yield all child `Artist`\s (*not* `Container`\s) of *ax*."""
@@ -169,6 +173,180 @@ class MatplotFigureSubplot(MatplotFigure):
             
         self.cursor_cls = cursor(self.figure,pickables=pickables,remove_artists=remove_artists)
 
+    def autoscale(self):
+        axes=self.figure.axes
+        for i,ax in enumerate(axes):
+            twinx = any(ax.get_shared_x_axes().joined(ax, prev)
+                        for prev in axes[:i])
+            
+            twiny = any(ax.get_shared_y_axes().joined(ax, prev)
+                        for prev in axes[:i])
+            
+            autoscale_axis = self.autoscale_axis
+            if twinx:
+                autoscale_axis = "y"
+            if twiny:
+                autoscale_axis = "x"
+            no_visible = self.myrelim(ax,visible_only=self.autoscale_visible_only)
+            ax.autoscale_view(tight=self.autoscale_tight,
+                              scalex=True if autoscale_axis!="y" else False, 
+                              scaley=True if autoscale_axis!="x" else False)
+            ax.autoscale(axis=autoscale_axis,tight=self.autoscale_tight)  
+    
+            current_xlim = ax.get_xlim()
+            current_ylim = ax.get_ylim()
+            lim_collection,invert_xaxis,invert_yaxis = self.data_limit_collection(ax,visible_only=self.autoscale_visible_only)
+            if lim_collection:
+                xchanged=False
+                if self.autoscale_tight:
+                    current_margins = (0,0)
+                else:
+                    current_margins = ax.margins()
+                
+                if self.autoscale_axis!="y":
+                    if invert_xaxis:
+                        if lim_collection[0]>current_xlim[0] or no_visible:
+                            ax.set_xlim(left=lim_collection[0])
+                            xchanged=True
+                        if lim_collection[2]<current_xlim[1] or no_visible:
+                            ax.set_xlim(right=lim_collection[2])
+                            xchanged=True                
+                    else:
+                        if lim_collection[0]<current_xlim[0] or no_visible:
+                            ax.set_xlim(left=lim_collection[0])
+                            xchanged=True
+                        if lim_collection[2]>current_xlim[1] or no_visible:
+                            ax.set_xlim(right=lim_collection[2])
+                            xchanged=True
+                    
+                #recalculed margin
+                if xchanged:
+                    xlim =  ax.get_xlim()
+                    ax.set_xlim(left=xlim[0] - current_margins[0]*(xlim[1]-xlim[0]))
+                    ax.set_xlim(right=xlim[1] + current_margins[0]*(xlim[1]-xlim[0]))
+                    
+                ychanged=False 
+                
+                if self.autoscale_axis!="x":
+                    if invert_yaxis:
+                        if lim_collection[1]>current_ylim[0] or no_visible:
+                            ax.set_ylim(bottom=lim_collection[1])
+                            ychanged=True
+                        if lim_collection[3]<current_ylim[1] or no_visible:
+                            ax.set_ylim(top=lim_collection[3]) 
+                            ychanged=True
+                    else:
+                        if lim_collection[1]<current_ylim[0] or no_visible:
+                            ax.set_ylim(bottom=lim_collection[1])
+                            ychanged=True
+                        if lim_collection[3]>current_ylim[1] or no_visible:
+                            ax.set_ylim(top=lim_collection[3]) 
+                            ychanged=True
+                    
+                if ychanged:
+                    ylim =  ax.get_ylim()
+                    ax.set_ylim(bottom=ylim[0] - current_margins[1]*(ylim[1]-ylim[0]))
+                    ax.set_ylim(top=ylim[1] + current_margins[1]*(ylim[1]-ylim[0]))   
+    
+            index = self.figure.axes.index(ax)
+            self.xmin[index],self.xmax[index] = ax.get_xlim()
+            self.ymin[index],self.ymax[index] = ax.get_ylim()
+        ax.set_autoscale_on(False)
+            
+        ax.figure.canvas.draw_idle()
+        ax.figure.canvas.flush_events() 
+        
+
+    def myrelim(self,ax, visible_only=False):
+       """
+       Recompute the data limits based on current artists.
+
+       At present, `.Collection` instances are not supported.
+
+       Parameters
+       ----------
+       visible_only : bool, default: False
+           Whether to exclude invisible artists.
+       """
+       # Collections are deliberately not supported (yet); see
+       # the TODO note in artists.py.
+       ax.dataLim.ignore(True)
+       ax.dataLim.set_points(mtransforms.Bbox.null().get_points())
+       ax.ignore_existing_data_limits = True
+       no_visible=True
+       for artist in ax._children:
+           if not visible_only or artist.get_visible():
+               if isinstance(artist, mlines.Line2D):
+                   ax._update_line_limits(artist)
+                   no_visible=False
+               elif isinstance(artist, mpatches.Patch):
+                   ax._update_patch_limits(artist)
+                   no_visible=False
+               elif isinstance(artist, mimage.AxesImage):
+                   ax._update_image_limits(artist)   
+                   no_visible=False
+        
+       return no_visible
+   
+    def data_limit_collection(self,ax,visible_only=False):
+        datalim = None
+        datalim_list = []
+        for collection in ax.collections:
+            eval_lim=True
+            if visible_only:
+                if not collection.get_visible():
+                    eval_lim=False
+                    
+            if eval_lim:
+                datalim_list.append(collection.get_datalim(ax.transData))
+
+        invert_xaxis=False
+        invert_yaxis=False
+        if datalim_list:
+            if ax.xaxis_inverted():
+                invert_xaxis=True
+            if ax.yaxis_inverted():
+                invert_yaxis=True              
+            for i,current_datalim in enumerate(datalim_list):
+                if i==0:
+                    if invert_xaxis:
+                        xleft = current_datalim.x1
+                        xright = current_datalim.x0
+                    else:
+                        xleft = current_datalim.x0
+                        xright = current_datalim.x1 
+                    if invert_yaxis:
+                        ybottom = current_datalim.y1
+                        ytop = current_datalim.y0  
+                    else:
+                        ybottom = current_datalim.y0
+                        ytop = current_datalim.y1
+                      
+                else:                   
+                    if invert_xaxis:
+                        if current_datalim.x1>xleft:
+                            xleft = current_datalim.x1
+                        if current_datalim.x0<xright:
+                            xright = current_datalim.x0                       
+                    else:
+                        if current_datalim.x0<xleft:
+                            xleft = current_datalim.x0
+                        if current_datalim.x1>xright:
+                            xright = current_datalim.x1
+                    if invert_yaxis:
+                        if current_datalim.y1>ybottom:
+                            ybottom = current_datalim.y1
+                        if current_datalim.y0<ytop:    
+                            ytop = current_datalim.y0                        
+                    else:
+                        if current_datalim.y0<ybottom:
+                            ybottom = current_datalim.y0
+                        if current_datalim.y1>ytop:    
+                            ytop = current_datalim.y1                    
+
+            datalim = [xleft,ybottom,xright,ytop]
+               
+        return datalim,invert_xaxis,invert_yaxis   
 
     def main_home(self, *args):
         """
