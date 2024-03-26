@@ -31,7 +31,7 @@ class MatplotlibEvent:
     projection:False
     compare_xdata:False
 
-class MatplotFigureSubplot2(MatplotFigure):
+class MatplotFigureSubplot(MatplotFigure):
     """Custom MatplotFigure
     """
     cursor_cls=None
@@ -163,7 +163,7 @@ class MatplotFigureSubplot2(MatplotFigure):
         
     def __init__(self, **kwargs):
         
-        super(MatplotFigureSubplot2, self).__init__(**kwargs)
+        super(MatplotFigureSubplot, self).__init__(**kwargs)
         self.background_patch_copy=[] 
 
     def register_cursor(self,pickables=None):
