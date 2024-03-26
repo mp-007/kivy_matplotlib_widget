@@ -47,10 +47,7 @@ class MatplotFigureSubplot(MatplotFigure):
     cursor_last_axis=None
     current_anchor_axis=None
     min_max_option = BooleanProperty(False)
-    box_axes=[]
-    autoscale_visible_only = BooleanProperty(True)
-    autoscale_axis = OptionProperty("both", options=["both", "x", "y"])
-    autoscale_tight = BooleanProperty(False)    
+    box_axes=[]  
 
     def my_in_axes(self,ax, mouseevent):
         """
