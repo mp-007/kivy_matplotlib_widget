@@ -560,7 +560,12 @@ class CellLegendHorizontal(LegendGestures, BoxLayout):
         #double tap
         self.legend_rv.doubletap(self.row_index)
         
-def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto',delay=None):
+def MatplotlibInteractiveLegend(figure_wgt,
+                                legend_handles='auto',
+                                delay=None,
+                                legend_instance=None,
+                                custom_handlers=None,
+                                multi_legend=False):
     """ transform matplotlib legend to interactive legend
     
     Args:
@@ -571,12 +576,15 @@ def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto',delay=None):
     """
     
     #check if the figure has a legend
-    leg = figure_wgt.figure.axes[0].get_legend()
-    if leg is None:
-        #create a defaut legend if no figure exist
-        ax=figure_wgt.figure.axes[0]
-        ax.legend()
-        leg = figure_wgt.figure.axes[0].get_legend()   
+    if legend_instance is None:
+        leg = figure_wgt.figure.axes[0].get_legend()
+        if leg is None:
+            #create a defaut legend if no figure exist
+            ax=figure_wgt.figure.axes[0]
+            ax.legend()
+            leg = figure_wgt.figure.axes[0].get_legend()   
+    else:
+        leg = legend_instance
         
     #put the legend on top (useful for drag behavior)
     leg.set_zorder(20)
@@ -594,21 +602,42 @@ def MatplotlibInteractiveLegend(figure_wgt,legend_handles='auto',delay=None):
     else:
         ncol=None
         
-    create_touch_legend(figure_wgt,leg,ncol,legend_handles,0)
+    # create_touch_legend(figure_wgt,leg,ncol,legend_handles,0)
     if delay is None:
         #no delay case
-        create_touch_legend(figure_wgt,leg,ncol,legend_handles,0)
+        create_touch_legend(figure_wgt,
+                            leg,ncol,
+                            legend_handles,
+                            legend_instance,
+                            custom_handlers,
+                            multi_legend,
+                            0)
     else:
         #get legend bbox position atfer delay (sometime needed if 'best position' was used)
-        Clock.schedule_once(partial(create_touch_legend,figure_wgt,leg,ncol,legend_handles),delay)
+        Clock.schedule_once(partial(create_touch_legend,
+                                    figure_wgt,leg,ncol,
+                                    legend_handles,
+                                    legend_instance,
+                                    custom_handlers,
+                                    multi_legend),
+                            delay)
     
 
-def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):    
+def create_touch_legend(figure_wgt,
+                        leg,ncol,
+                        legend_handles,
+                        legend_instance,
+                        custom_handlers,
+                        multi_legend,
+                        _):    
     """ create touch legend """
     
     bbox = leg.get_window_extent()
     
-    ax=figure_wgt.figure.axes[0]
+    if legend_instance is None:
+        ax=figure_wgt.figure.axes[0]
+    else:
+        ax=figure_wgt.figure.axes
     legend_x0 = bbox.x0  
     legend_y0 = bbox.y0 
     legend_x1 = bbox.x1 
@@ -628,9 +657,21 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
     y1_pos=int(legend_y1)+pos_y
     instance_dict = dict()
      
-    #get legend handles and labels
-    current_handles, current_labels = ax.get_legend_handles_labels()
-    nb_group=len(current_labels)
+    if custom_handlers:
+        current_handles=custom_handlers
+    else:
+        #get legend handles and labels
+        if legend_instance is None:
+            current_handles, current_labels = ax.get_legend_handles_labels()
+        else:
+            current_handles=[]
+            current_labels=[]
+            for current_ax in ax:
+                current_handles0, current_labels0 = current_ax.get_legend_handles_labels()
+                current_handles+=current_handles0
+                current_labels+=current_labels0
+            
+    nb_group=len(current_handles)
     
     if nb_group==0:
         print('no legend available')
@@ -642,10 +683,12 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
         have_title=True
       
     figure_wgt_as_legend=False
-    if figure_wgt.legend_instance:
-        figure_wgt.legend_instance.reset_legend()
-        matplotlib_legend_box = figure_wgt.legend_instance
+    if figure_wgt.legend_instance and not multi_legend:
+        for current_legend in figure_wgt.legend_instance:
+            current_legend.reset_legend()
+        matplotlib_legend_box = current_legend
         figure_wgt_as_legend=True
+        print('allo')
     else:
         matplotlib_legend_box = MatplotlibLegendGrid()
 
@@ -679,6 +722,8 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
     matplotlib_legend_box.x_pos = x0_pos
     matplotlib_legend_box.y_pos = y0_pos
     matplotlib_legend_box.legend_height = y1_pos-y0_pos
+    if legend_instance:
+        matplotlib_legend_box.legend_instance = legend_instance
     
     if have_title:
         
@@ -718,11 +763,12 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
 
     else:
         ##general purpose interactive position        
-        #get matplotlib text object
-        legeng_marker=[]
-        for i,current_instance in enumerate(leg.findobj()):
-            if current_instance in leg.get_texts()[:]:
-                legeng_marker.append(leg.findobj()[i-2])
+        #get matplotlib text object   
+        if hasattr(leg,'legend_handles'):
+            #matplotlib>3.7
+            legeng_marker = leg.legend_handles
+        else:
+            legeng_marker = leg.legendHandles
 
         label_text_list=leg.get_texts()[:]
         if ncol:
@@ -732,7 +778,6 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
 
         #create all legend cell in kivy
         for i,leg_instance in enumerate(label_text_list):
-
             current_legend_cell = CellLegendMatplotlib()
             if ncol:
                 current_legend_cell.height=int(matplotlib_legend_box.legend_height/(ceil((nb_group-1)/ncol)))
@@ -743,6 +788,8 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
                 
             if isinstance(current_handles[i],mpl.container.BarContainer):
                 instance_dict[legeng_marker[i]] = list(current_handles[i][:])
+            elif isinstance(current_handles[i],list):
+                instance_dict[legeng_marker[i]] = current_handles[i]               
             else:
                 instance_dict[legeng_marker[i]] = [current_handles[i]]
             current_legend_cell.matplotlib_line = legeng_marker[i]
@@ -761,7 +808,7 @@ def create_touch_legend(figure_wgt,leg,ncol,legend_handles,_):
     #add kivy legend widget in figure if needed
     if not figure_wgt_as_legend:
         figure_wgt.parent.add_widget(matplotlib_legend_box)
-        figure_wgt.legend_instance=matplotlib_legend_box
+        figure_wgt.legend_instance.append(matplotlib_legend_box)
     
         
 class MatplotlibLegendGrid(FloatLayout):
@@ -772,6 +819,7 @@ class MatplotlibLegendGrid(FloatLayout):
     legend_height = NumericProperty(1)
     legend_width = NumericProperty(1) 
     title_padding = NumericProperty(0)  
+    legend_instance = ObjectProperty(None,allow_none=True)
     
     instance_dict=dict()
     
@@ -782,11 +830,13 @@ class MatplotlibLegendGrid(FloatLayout):
     def update_size(self):
         """ update size """
         if self.figure_wgt:
-            leg = self.figure_wgt.figure.axes[0].get_legend()
+            if self.legend_instance:
+                leg = self.legend_instance
+            else:
+                leg = self.figure_wgt.figure.axes[0].get_legend()
             if leg:
                 bbox = leg.get_window_extent()
                 
-                ax=self.figure_wgt.figure.axes[0]
                 legend_x0 = bbox.x0  
                 legend_y0 = bbox.y0 
                 legend_x1 = bbox.x1 
@@ -804,8 +854,14 @@ class MatplotlibLegendGrid(FloatLayout):
                 if leg.get_title().get_text():
                     have_title=True            
                 if have_title:
-                    current_handles, current_labels = ax.get_legend_handles_labels()
-                    nb_group=len(current_labels)                
+                    if hasattr(leg,'legend_handles'):
+                        #matplotlib>3.7
+                        current_handles = leg.legend_handles
+                    else:
+                        current_handles = leg.legendHandles
+                            
+                    nb_group=len(current_handles)
+                    
                     if hasattr(leg,'_ncols'):
                         #matplotlib version >3.6
                         legend_ncol = leg._ncols
@@ -966,8 +1022,8 @@ Builder.load_string('''
     size_hint: None,None
     width: dp(0.01) 
     height: dp(0.01) 
-    
-    GridLayout:
+  
+    GridLayout:        
         id:box         
         x:root.x_pos
         y:root.y_pos

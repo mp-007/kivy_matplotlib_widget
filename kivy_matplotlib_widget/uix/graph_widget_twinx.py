@@ -51,7 +51,6 @@ class MatplotFigureTwinx(Widget):
     pos_y_rect_ver=NumericProperty(0)  
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)
-    legend_instance = ObjectProperty(None, allownone=True)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
     interactive_axis = BooleanProperty(False) 
@@ -118,8 +117,10 @@ class MatplotFigureTwinx(Widget):
                 self.ymax2 = None  
                 
         if self.legend_instance:
-            self.legend_instance.reset_legend()
-            self.legend_instance=None
+            #remove all legend_instance from parent widget
+            for current_legend in self.legend_instance:
+                current_legend.parent.remove_widget(current_legend)
+            self.legend_instance=[]
             
         if self.auto_cursor:
             if len(self.figure.axes)==2:
@@ -199,7 +200,11 @@ class MatplotFigureTwinx(Widget):
 
         #manage back and next event
         self._nav_stack = cbook.Stack()
-        self.set_history_buttons()              
+        self.set_history_buttons()  
+
+        #legend management
+        self.legend_instance = []
+        self.current_legend=None            
         
         self.bind(size=self._onSize)
 
@@ -919,7 +924,13 @@ class MatplotFigureTwinx(Widget):
             self._pressed = True
             self.show_compare_cursor=False
             if self.legend_instance:
-                if self.legend_instance.box.collide_point(x, y):
+                select_legend=False
+                for current_legend in self.legend_instance:
+                    if current_legend.box.collide_point(x, y):
+                        select_legend=True
+                        self.current_legend = current_legend
+                        break
+                if select_legend:
                     if self.touch_mode!='drag_legend':
                         return False   
                     else:
@@ -930,7 +941,9 @@ class MatplotFigureTwinx(Widget):
                             #new touch, reset background
                             self.background=None
                             
-                        return True             
+                        return True 
+                else:
+                    self.current_legend = None    
             
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
@@ -1888,7 +1901,12 @@ class MatplotFigureTwinx(Widget):
         dy = event.y - self._last_touch_pos[event][1]      
         if not self.legend_do_scroll_y:
             dy=0        
-        legend = ax.get_legend()
+        legend=None
+        if self.current_legend:
+            if self.current_legend.legend_instance:
+                legend = self.current_legend.legend_instance
+            else:
+                legend = ax.get_legend()
         if legend is not None:
         
             bbox = legend.get_window_extent()
@@ -1901,11 +1919,11 @@ class MatplotFigureTwinx(Widget):
             
             #use blit method               
             if self.background is None:
-                ax.get_legend().set_visible(False)
+                legend.set_visible(False)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
-                ax.get_legend().set_visible(True)
+                legend.set_visible(True)
             ax.figure.canvas.restore_region(self.background)   
     
             ax.draw_artist(legend)
@@ -1913,7 +1931,7 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.blit(ax.bbox)
             ax.figure.canvas.flush_events() 
 
-            self.legend_instance.update_size()
+            self.current_legend.update_size()
             
     def zoom_factory(self, event, ax, base_scale=1.1):
         """ zoom with scrolling mouse method """
@@ -2142,7 +2160,8 @@ class MatplotFigureTwinx(Widget):
 
         self.figcanvas.draw() 
         if self.legend_instance:
-            self.legend_instance.update_size()  
+            for current_legend in self.legend_instance:
+                current_legend.update_size()
         if self.hover_instance:
             self.hover_instance.figwidth = self.width            
 

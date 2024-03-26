@@ -12,7 +12,7 @@ from kivy.utils import get_color_from_hex
 from matplotlib.colors import to_hex
 from kivy.metrics import dp
 from kivy_matplotlib_widget.tools.cursors import cursor
-from kivy.properties import NumericProperty,BooleanProperty
+from kivy.properties import NumericProperty,BooleanProperty,OptionProperty
 from kivy.graphics.texture import Texture
 import matplotlib.image as mimage
 import matplotlib.lines as mlines
@@ -31,7 +31,7 @@ class MatplotlibEvent:
     projection:False
     compare_xdata:False
 
-class MatplotFigureSubplot(MatplotFigure):
+class MatplotFigureSubplot2(MatplotFigure):
     """Custom MatplotFigure
     """
     cursor_cls=None
@@ -48,6 +48,9 @@ class MatplotFigureSubplot(MatplotFigure):
     current_anchor_axis=None
     min_max_option = BooleanProperty(False)
     box_axes=[]
+    autoscale_visible_only = BooleanProperty(True)
+    autoscale_axis = OptionProperty("both", options=["both", "x", "y"])
+    autoscale_tight = BooleanProperty(False)    
 
     def my_in_axes(self,ax, mouseevent):
         """
@@ -143,8 +146,10 @@ class MatplotFigureSubplot(MatplotFigure):
                 self.ymax.append(ymax)
         
         if self.legend_instance:
-            self.legend_instance.reset_legend()
-            self.legend_instance=None
+            #remove all legend_instance from parent widget
+            for current_legend in self.legend_instance:
+                current_legend.parent.remove_widget(current_legend)
+            self.legend_instance=[]
             
         if self.auto_cursor:
             self.register_lines([]) #create maplotlib text and cursor (if needed)
@@ -158,7 +163,7 @@ class MatplotFigureSubplot(MatplotFigure):
         
     def __init__(self, **kwargs):
         
-        super(MatplotFigureSubplot, self).__init__(**kwargs)
+        super(MatplotFigureSubplot2, self).__init__(**kwargs)
         self.background_patch_copy=[] 
 
     def register_cursor(self,pickables=None):
@@ -448,7 +453,13 @@ class MatplotFigureSubplot(MatplotFigure):
             self._pressed = True
             self.show_compare_cursor=False
             if self.legend_instance:
-                if self.legend_instance.box.collide_point(x, y):
+                select_legend=False
+                for current_legend in self.legend_instance:
+                    if current_legend.box.collide_point(x, y):
+                        select_legend=True
+                        self.current_legend = current_legend
+                        break
+                if select_legend:
                     if self.touch_mode!='drag_legend':
                         return False   
                     else:
@@ -460,6 +471,8 @@ class MatplotFigureSubplot(MatplotFigure):
                             self.background=None
                             
                         return True 
+                else:
+                    self.current_legend = None
                        
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
