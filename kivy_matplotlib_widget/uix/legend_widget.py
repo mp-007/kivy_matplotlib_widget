@@ -572,6 +572,10 @@ def MatplotlibInteractiveLegend(figure_wgt,
         figure_wgt: figure widget from kivy_matplotlib_widget package
         legend_handles : 'auto' (general purpose) or variante (ex: for seaborn legend)
         delay: create legend touch after a delay (None or int)
+        legend_instance (object): matplotlib legend instance (optional)
+        custom_handlers (list): list of matplotlib plot instances (line,scatter,bar...)
+                                    linked to the legend labels (optional)
+        multi_legend (bool): Set it True if you have multiple legend in graph
 
     """
     
@@ -688,7 +692,6 @@ def create_touch_legend(figure_wgt,
             current_legend.reset_legend()
         matplotlib_legend_box = current_legend
         figure_wgt_as_legend=True
-        print('allo')
     else:
         matplotlib_legend_box = MatplotlibLegendGrid()
 
