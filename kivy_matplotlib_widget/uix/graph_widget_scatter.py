@@ -945,6 +945,10 @@ class MatplotFigureScatter(Widget):
                 FakeEventScatter.x=x
                 FakeEventScatter.y=y
                 self.hover(FakeEventScatter)
+
+    def get_data_xy(self,x,y):
+        """ manage x y data in navigation bar TODO"""
+        return None,None
                 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """

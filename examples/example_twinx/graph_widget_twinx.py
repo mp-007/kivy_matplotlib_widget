@@ -912,6 +912,10 @@ class MatplotFigureTwinx(Widget):
                 FakeEventTwinx.x=x
                 FakeEventTwinx.y=y
                 self.hover(FakeEventTwinx)
+
+    def get_data_xy(self,x,y):
+        """ manage x y data in navigation bar TODO"""
+        return None,None
                 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
