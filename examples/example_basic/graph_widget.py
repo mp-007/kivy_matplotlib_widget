@@ -762,6 +762,23 @@ class MatplotFigure(Widget):
                 FakeEvent.x=x
                 FakeEvent.y=y
                 self.hover(FakeEvent)
+                
+    def get_data_xy(self,x,y):
+        """ manage x y data in navigation bar """
+        trans = self.axes.transData.inverted()
+        xdata, ydata = trans.transform_point((x - self.pos[0],
+                                              y - self.pos[1]))
+        if self.cursor_xaxis_formatter:
+            x_format = self.cursor_xaxis_formatter.format_data(xdata) 
+        else:
+            x_format = self.axes.xaxis.get_major_formatter().format_data_short(xdata)
+        
+        if self.cursor_yaxis_formatter:
+            y_format = self.cursor_yaxis_formatter.format_data(ydata) 
+        else:
+            y_format = self.axes.yaxis.get_major_formatter().format_data_short(ydata)
+            
+        return x_format,y_format
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
