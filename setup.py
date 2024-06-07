@@ -36,6 +36,9 @@ setup(
     author_email='current.address@unknown.invalid',
     license='MIT',
     packages=find_packages(),
+    package_data={
+    'kivy_matplotlib_widget': ['fonts/*.ttf'],
+    },
     install_requires=['kivy>=1.11.1',
                       'matplotlib',                     
                       ],

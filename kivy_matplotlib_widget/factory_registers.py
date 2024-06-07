@@ -9,5 +9,6 @@ r("MatplotFigureGeneral", module="kivy_matplotlib_widget.uix.graph_widget_genera
 r("MatplotFigureTwinx", module="kivy_matplotlib_widget.uix.graph_widget_twinx")
 r("MatplotFigureSubplot", module="kivy_matplotlib_widget.uix.graph_subplot_widget")
 r("MatplotNavToolbar", module="kivy_matplotlib_widget.uix.navigation_bar_widget")
+r("KivyMatplotNavToolbar", module="kivy_matplotlib_widget.uix.navigation_bar_widget")
 r("LegendRv", module="kivy_matplotlib_widget.uix.legend_widget")
 r("LegendRvHorizontal", module="kivy_matplotlib_widget.uix.legend_widget")

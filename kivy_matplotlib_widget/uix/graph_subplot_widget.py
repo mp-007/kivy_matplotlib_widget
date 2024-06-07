@@ -39,6 +39,7 @@ class MatplotFigureSubplot(MatplotFigure):
     projection = BooleanProperty(False)
     hist_range = BooleanProperty(True)
     myevent = MatplotlibEvent()
+    myevent_cursor = MatplotlibEvent()
     interactive_axis_pad= NumericProperty(dp(100))
     _pick_info = None
     draw_all_axes = BooleanProperty(False)
@@ -439,6 +440,35 @@ class MatplotFigureSubplot(MatplotFigure):
     
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
+
+    def get_data_xy(self,x,y):
+        """ manage x y data in navigation bar """
+        self.myevent_cursor.x=x - self.pos[0]
+        self.myevent_cursor.y=y - self.pos[1]
+        self.myevent_cursor.inaxes=self.figure.canvas.inaxes((x - self.pos[0],
+                                                              y - self.pos[1]))               
+        #find all axis
+        axes = [a for a in self.figure.canvas.figure.get_axes()
+                if a.in_axes(self.myevent_cursor)]  
+        
+        if axes:
+            trans = axes[0].transData.inverted() #always use first axis
+            xdata, ydata = trans.transform_point((x - self.pos[0],
+                                                  y - self.pos[1]))
+    
+            if self.cursor_xaxis_formatter:
+                x_format = self.cursor_xaxis_formatter.format_data(xdata) 
+            else:
+                x_format = self.axes.xaxis.get_major_formatter().format_data_short(xdata)
+            
+            if self.cursor_yaxis_formatter:
+                y_format = self.cursor_yaxis_formatter.format_data(ydata) 
+            else:
+                y_format = self.axes.yaxis.get_major_formatter().format_data_short(ydata)
+                
+            return x_format,y_format
+        else:
+            return None,None
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
