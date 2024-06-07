@@ -22,5 +22,6 @@ See examples for more informations
  - interactive axis like plotly library
  - min/max touch option to easily change axis limit
 
-![image](https://user-images.githubusercontent.com/19823482/146577068-026a9608-a9df-4d59-a548-8b81f9b85574.png)
+![image](https://github.com/mp-007/kivy_matplotlib_widget/assets/19823482/7709886e-0891-4fb7-a95d-eee790a6c57c)
+
 
