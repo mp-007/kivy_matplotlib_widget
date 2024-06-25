@@ -108,7 +108,7 @@ class MatplotFigure(Widget):
                 current_legend.parent.remove_widget(current_legend)
             self.legend_instance=[]
             
-        if self.auto_cursor:
+        if self.auto_cursor and len(self.figure.axes) > 0:
             self.register_lines(list(self.axes.lines))
             
         # Texture

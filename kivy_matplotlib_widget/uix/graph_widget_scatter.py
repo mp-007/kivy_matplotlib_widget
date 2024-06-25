@@ -91,7 +91,7 @@ class MatplotFigureScatter(Widget):
         self.width = w
         self.height = h
 
-        if self.figure.axes[0]:
+        if len(self.figure.axes) > 0 and self.figure.axes[0]:
             #add copy patch
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
@@ -114,7 +114,7 @@ class MatplotFigureScatter(Widget):
                 current_legend.parent.remove_widget(current_legend)
             self.legend_instance=[]
             
-        if self.auto_cursor:
+        if self.auto_cursor and len(self.figure.axes) > 0:
             self.register_lines(list(self.axes.lines))
             self.register_scatters(list(self.axes.collections))
             
@@ -410,8 +410,8 @@ class MatplotFigureScatter(Widget):
                     self.set_cross_hair_visible(True)
                 
                 # update the cursor x,y data
-                self.horizontal_line.set_ydata(y)
-                self.vertical_line.set_xdata(x)
+                self.horizontal_line.set_ydata([y,])
+                self.vertical_line.set_xdata([x,])
 
                 #x y label
                 if self.hover_instance:                     

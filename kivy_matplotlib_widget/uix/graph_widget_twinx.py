@@ -86,7 +86,7 @@ class MatplotFigureTwinx(Widget):
         self.width = w
         self.height = h
 
-        if self.figure.axes[0]:
+        if len(self.figure.axes) > 0 and self.figure.axes[0]:
             #add copy patch
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
@@ -125,7 +125,7 @@ class MatplotFigureTwinx(Widget):
         if self.auto_cursor:
             if len(self.figure.axes)==2:
                 self.register_lines(list(self.figure.axes[0].lines+self.figure.axes[1].lines))
-            else:
+            elif len(self.figure.axes) > 0:
                 self.register_lines(list(self.figure.axes[0].lines))
             
         # Texture
@@ -272,8 +272,8 @@ class MatplotFigureTwinx(Widget):
                         x=self.vertical_line.get_xdata()  
                         trans = self.figure.axes[0].transData.inverted()
                         xy_pos = self.figure.axes[1].transData.transform([(x,new_y)])
-                        xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))                        
-                        self.horizontal_line.set_ydata(ydata)
+                        xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))
+                        self.horizontal_line.set_ydata([ydata,])
                     
 
     def hover(self, event) -> None:
@@ -497,25 +497,26 @@ class MatplotFigureTwinx(Widget):
         
                             ratio = (cur_ylim2[1] - cur_ylim2[0]) / (cur_ylim[1] - cur_ylim[0])
                             new_y = (y-cur_ylim2[0])/ ratio + cur_ylim[0]                
-                            self.horizontal_line.set_ydata(new_y)
+                            self.horizontal_line.set_ydata([new_y,])
+                            
                             self.cursor_last_y=new_y
                             if self.cursor_yaxis2_formatter and not self.hover_instance:
                                 y = self.cursor_yaxis2_formatter.format_data(y)
                             elif not self.hover_instance:
                                 y = ax.yaxis.get_major_formatter().format_data_short(y)                                 
                         else:
-                            self.horizontal_line.set_ydata(y) 
+                            self.horizontal_line.set_ydata([y,])
                             if self.cursor_yaxis_formatter and not self.hover_instance:
                                 y = self.cursor_yaxis_formatter.format_data(y) 
                             elif not self.hover_instance:
                                 y = ax.yaxis.get_major_formatter().format_data_short(y)                         
                     else:
-                        self.horizontal_line.set_ydata(y)  
+                        self.horizontal_line.set_ydata([y,])
                         if self.cursor_yaxis_formatter and not self.hover_instance:
                             y = self.cursor_yaxis_formatter.format_data(y)                       
                         elif not self.hover_instance:
                             y = ax.yaxis.get_major_formatter().format_data_short(y)                      
-                    self.vertical_line.set_xdata(x)
+                    self.vertical_line.set_xdata([x,])
                     if self.cursor_xaxis_formatter and not self.hover_instance:
                         x = self.cursor_xaxis_formatter.format_data(x)
                     elif not self.hover_instance:

@@ -115,7 +115,7 @@ class MatplotFigureSubplot(MatplotFigure):
         self.width = w
         self.height = h
 
-        if self.figure.axes[0]:
+        if len(self.figure.axes) > 0 and self.figure.axes[0]:
             #add copy patch
             for ax in self.figure.axes:
                 # ax=self.figure.axes[0]
@@ -149,7 +149,7 @@ class MatplotFigureSubplot(MatplotFigure):
                 current_legend.parent.remove_widget(current_legend)
             self.legend_instance=[]
             
-        if self.auto_cursor:
+        if self.auto_cursor and len(self.figure.axes) > 0:
             self.register_lines([]) #create maplotlib text and cursor (if needed)
             self.register_cursor()
             
@@ -720,9 +720,10 @@ class MatplotFigureSubplot(MatplotFigure):
                 self.cursor_last_axis=ax
                 
                 if hasattr(self,'horizontal_line'):
-                    self.horizontal_line.set_ydata(y)
+                    self.horizontal_line.set_ydata([y,])
+                    
                 if hasattr(self,'vertical_line'):
-                    self.vertical_line.set_xdata(x)
+                    self.vertical_line.set_xdata([x,])
     
                 #x y label
                 if self.hover_instance:                     
