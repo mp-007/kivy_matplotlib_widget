@@ -85,7 +85,7 @@ class MatplotFigure(Widget):
         self.width = w
         self.height = h
 
-        if self.figure.axes[0]:
+        if len(self.figure.axes) > 0 and self.figure.axes[0]:
             #add copy patch
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
