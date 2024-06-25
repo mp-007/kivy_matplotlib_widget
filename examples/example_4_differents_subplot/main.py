@@ -382,7 +382,11 @@ class Test(App):
         ax3 = ax2.twinx()
         
         # share the secondary axes
-        ax1.get_shared_y_axes().join(ax1, ax3)
+        if hasattr(ax1,'sharey'):
+            ax1.sharey(ax3)
+        else:
+            ax1.get_shared_y_axes().join(ax1, ax3)
+            
         
         ax0.plot(rand(1) * rand(10),'r')
         ax1.plot(10*rand(1) * rand(10),'b')
