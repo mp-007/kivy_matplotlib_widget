@@ -400,8 +400,8 @@ class MatplotFigure(Widget):
                     
                     # update the cursor x,y data               
                     ax=line.axes
-                    self.horizontal_line.set_ydata(y)
-                    self.vertical_line.set_xdata(x)
+                    self.horizontal_line.set_ydata([y,])
+                    self.vertical_line.set_xdata([x,])
     
                     #x y label
                     if self.hover_instance:                     
