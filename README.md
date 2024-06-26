@@ -21,6 +21,7 @@ See examples for more informations
  - legend widget like plotly library
  - interactive axis like plotly library
  - min/max touch option to easily change axis limit
+ - autoscale option
 
 ![image](https://github.com/mp-007/kivy_matplotlib_widget/assets/19823482/7709886e-0891-4fb7-a95d-eee790a6c57c)
 
