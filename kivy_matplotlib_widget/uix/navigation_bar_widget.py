@@ -192,6 +192,11 @@ class KivyMatplotNavToolbar(RelativeLayout):
             btn.bind(on_release=lambda x:fct(mode))
         else:
             btn.bind(on_release=lambda x:fct())
+            
+        if mode == 'pan':
+            #by default pan button is press down
+            btn.state='down'
+
         self.ids.container.add_widget(btn)        
           
     def set_touch_mode(self,mode):
