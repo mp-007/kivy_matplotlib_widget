@@ -1,6 +1,12 @@
+
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,disable_on_activity') #avoid double-click on touch device
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand') #disable red dot (user use mouse scroll for zooming)
+Config.set('kivy', 'keyboard_mode', '') #disable keyboard mode
+
 from kivy.lang import Builder
 from kivy.app import App
-from kivy.properties import ColorProperty,NumericProperty,StringProperty
+from kivy.properties import ColorProperty,NumericProperty,StringProperty,BooleanProperty
 from kivy.metrics import dp
 
 import matplotlib.pyplot as plt
@@ -26,7 +32,9 @@ Screen
         KivyMatplotNavToolbar:
             id:nav_bar
             nav_icon:'all'
-            show_cursor_data:'desktop'
+            hover_mode:'desktop'
+            show_cursor_data:app.show_cursor_data
+            compare_hover:app.compare_hover
             figure_wgt:figure_wgt
 
         MatplotFigureSubplot:
@@ -122,12 +130,21 @@ class PlotlyHover2(BaseHoverFloatLayout):
 
 class Test(App):
     figure = None
+    compare_hover = BooleanProperty(False)
+    show_cursor_data = BooleanProperty(True)
 
-    def __init__(self, figure=None, **kwargs):
+    def __init__(self, figure,show_cursor_data=True,hover_widget=PlotlyHover2,compare_hover=False,legend_instance=None, custom_handlers=None,multi_legend=False, **kwargs):
         """__init__ function class"""
         self.figure=figure
+        self.hover_widget=hover_widget
+        self.legend_instance=legend_instance
+        self.custom_handlers=custom_handlers
+        self.multi_legend=multi_legend
         # print(self.figure.get())
         super(Test, self).__init__(**kwargs)
+        
+        self.show_cursor_data=show_cursor_data
+        self.compare_hover=compare_hover
         
     def build(self):
         self.screen=Builder.load_string(KV)
@@ -145,16 +162,40 @@ class Test(App):
         else:
             self.screen.figure_wgt.figure = figure
             
-        add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=PlotlyHover2())
+        if self.hover_widget:
+            add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=self.hover_widget())
+        else:
+            add_hover(self.screen.figure_wgt,mode='desktop')
         add_minmax(self.screen.figure_wgt)
-        if len(self.screen.figure_wgt.figure.axes) > 0  and self.screen.figure_wgt.figure.axes[0].get_legend():
-            MatplotlibInteractiveLegend(self.screen.figure_wgt)
+        if len(self.screen.figure_wgt.figure.axes) > 0  and \
+            (self.screen.figure_wgt.figure.axes[0].get_legend() or \
+             self.legend_instance):
 
-def main(plot_queue):
+            if self.multi_legend:
+                for i,current_legend_instance in enumerate(self.legend_instance):
+                    if i==0:
+                        MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                                    legend_instance=current_legend_instance,
+                                                    custom_handlers=self.custom_handlers[i])
+                    else:
+                        MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                                    legend_instance=current_legend_instance,
+                                                    custom_handlers=self.custom_handlers[i],
+                                                    multi_legend=True)                        
 
-    Test(figure=plot_queue).run()
+            else:   
+                MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                            legend_instance=self.legend_instance,
+                                            custom_handlers=self.custom_handlers)
+
+def main(plot_queue,**kwargs):
+
+    Test(plot_queue,**kwargs).run()
     
-def interactive_graph(fig):
+def interactive_graph(fig,**kwargs):
+    """ Interactive grpah using multiprocessing method. 
+    function need to be call in if __name__ == "__main__": method
+    """
     # Create a queue to pass the Matplotlib instance object
     plot_queue = mp.Queue()
     
@@ -165,11 +206,11 @@ def interactive_graph(fig):
     plot_queue.put((fig,))
 
     # Create and start the subprocess
-    p = mp.Process(target=main, args=(plot_queue,))
+    p = mp.Process(target=main, args=(plot_queue,), kwargs=kwargs)
     p.start()
     
-def interactive_graph_ipython(fig):
-    main(fig)
+def interactive_graph_ipython(fig,**kwargs):
+    main(fig,**kwargs)
     
 if __name__ == "__main__":
     fig, ax1 = plt.subplots(1, 1)
@@ -179,7 +220,8 @@ if __name__ == "__main__":
     
     ax1.legend()
     
-    interactive_graph(fig)
+    interactive_graph(fig,show_cursor_data=False)
     
-    interactive_graph_ipython(fig)
+    interactive_graph_ipython(fig,show_cursor_data=False)
+
     
