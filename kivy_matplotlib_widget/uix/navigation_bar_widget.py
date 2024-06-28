@@ -90,6 +90,7 @@ class KivyMatplotNavToolbar(RelativeLayout):
     cursor_data_font=StringProperty("Roboto")
     icon_font_size = NumericProperty(dp(36))
     nav_btn_size = NumericProperty(dp(80))
+    compare_hover = BooleanProperty(False)
 
 
     def __init__(self, figure_wgt=None, *args, **kwargs):
@@ -116,8 +117,20 @@ class KivyMatplotNavToolbar(RelativeLayout):
             #zoombox button
             self.add_nav_btn("zoom",self.set_touch_mode,mode='zoombox',btn_type='group')
 
-            #cursor button
-            self.add_nav_btn("cursor",self.set_touch_mode,mode='cursor',btn_type='group')
+            if self.hover_mode=="touch" and not self.compare_hover:
+                #cursor button
+                self.add_nav_btn("cursor",self.set_touch_mode,mode='cursor',btn_type='group')
+            elif self.hover_mode=="touch":
+                #nearest hover button
+                self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='hover_type')
+                #compare hover button
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type')                
+                
+            elif self.compare_hover:
+                #nearest hover button
+                self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='hover_type')
+                #compare hover button
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type') 
 
         elif self.nav_icon=="all" and not self.custom_icon:
 
@@ -136,8 +149,21 @@ class KivyMatplotNavToolbar(RelativeLayout):
             #zoombox button
             self.add_nav_btn("zoom",self.set_touch_mode,mode='zoombox',btn_type='group')
 
-            #cursor button
-            self.add_nav_btn("cursor",self.set_touch_mode,mode='cursor',btn_type='group')
+            if self.hover_mode=="touch" and not self.compare_hover:
+                #cursor button
+                self.add_nav_btn("cursor",self.set_touch_mode,mode='cursor',btn_type='group')
+
+            elif self.hover_mode=="touch":
+                #nearest hover button
+                self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='group')
+                #compare hover button
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group')                
+                
+            elif self.compare_hover:
+                #nearest hover button
+                self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='group')
+                #compare hover button
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group') 
 
             #minmax button
             self.add_nav_btn("minmax",self.set_touch_mode,mode='minmax',btn_type='group')
@@ -180,7 +206,17 @@ class KivyMatplotNavToolbar(RelativeLayout):
                 
     def add_nav_btn(self,icon,fct,mode=None,btn_type=None):
         if btn_type=='group':
-            btn = Factory.NavToggleButton(group= "toolbar_btn")
+            if 'hover' in icon:
+                btn = Factory.NavToggleButton(group= "hover_type")
+                if self.hover_mode=="touch":
+                    btn.bind(on_release=lambda x:self.set_touch_mode('cursor'))
+                    
+                elif mode == 'nearest':
+                    btn.state='down'
+                    
+                    
+            else:
+                btn = Factory.NavToggleButton(group= "toolbar_btn")
             btn.orientation_type=self.orientation_type
         else:
             btn = Factory.NavButton()  
@@ -212,7 +248,6 @@ class KivyMatplotNavToolbar(RelativeLayout):
         
     def change_hover_type(self,hover_type):
         add_hover(self.figure_wgt,mode=self.hover_mode,hover_type=hover_type)
-        add_hover(self.figure_wgt,mode=self.hover_mod,hover_type=hover_type)
 
 
 Factory.register('MatplotNavToolbar', MatplotNavToolbar)
