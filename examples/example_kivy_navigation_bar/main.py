@@ -36,7 +36,8 @@ Screen
             KivyMatplotNavToolbar:
                 id:nav_bar
                 nav_icon:'all'
-                show_cursor_data:'desktop'
+                hover_mode:'desktop'
+                show_cursor_data:True
                 figure_wgt:figure_wgt
     
             MatplotFigureSubplot:
@@ -123,7 +124,7 @@ class Test(App):
         ###adjust graph
         ax = self.screen.figure_wgt.figure.axes[0]
 
-        add_hover(self.screen.figure_wgt,mode='touch')
+        add_hover(self.screen.figure_wgt,mode='desktop')
         add_minmax(self.screen.figure_wgt)
         
         ax.legend(loc=4)
