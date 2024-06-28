@@ -14,7 +14,7 @@ import multiprocessing as mp
 
 from kivy_matplotlib_widget.uix.legend_widget import MatplotlibInteractiveLegend
 from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
-from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout
+from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout,TagCompareHover
 
 KV = '''
 Screen
@@ -161,6 +161,9 @@ class Test(App):
 
         else:
             self.screen.figure_wgt.figure = figure
+            
+        if self.compare_hover:
+            add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare',hover_widget=TagCompareHover()) 
             
         if self.hover_widget:
             add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=self.hover_widget())
