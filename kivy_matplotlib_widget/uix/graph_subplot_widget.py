@@ -150,7 +150,11 @@ class MatplotFigureSubplot(MatplotFigure):
             self.legend_instance=[]
             
         if self.auto_cursor and len(self.figure.axes) > 0:
-            self.register_lines([]) #create maplotlib text and cursor (if needed)
+            lines=[]
+            for ax in self.figure.axes:
+                if ax.lines:
+                    lines.extend(ax.lines)
+            self.register_lines(lines) #create maplotlib text and cursor (if needed)
             self.register_cursor()
             
         # Texture
