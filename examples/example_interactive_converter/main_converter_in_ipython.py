@@ -1,5 +1,5 @@
 """
-important note: interactive_graph_ipython is use to generate kivy interactive 
+important note: interactive_graph_ipython is used to generate kivy interactive 
 graph directly in python interactive console (ipython) oy directly in the code
 if you have only 1 figure. You can generate only 1 figure at a time with this
 function. You can close your kivy graph (or ctrl+c) if you wnt to resume your
