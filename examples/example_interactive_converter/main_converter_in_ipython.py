@@ -1,8 +1,8 @@
 """
 important note: interactive_graph_ipython is used to generate kivy interactive 
-graph directly in python interactive console (ipython) oy directly in the code
+graph directly in python interactive console (ipython) or directly in the code
 if you have only 1 figure. You can generate only 1 figure at a time with this
-function. You can close your kivy graph (or ctrl+c) if you wnt to resume your
+function. You can close your kivy graph (or ctrl+c) if you want to resume your
 code and then you can call interactive_graph_ipython again.
 
 If you need to generate multiple figure with a no blocking method, please see
