@@ -1,3 +1,14 @@
+"""
+important note: interactive_graph_ipython is use to generate kivy interactive 
+graph directly in python interactive console (ipython) oy directly in the code
+if you have only 1 figure. You can generate only 1 figure at a time with this
+function. You can close your kivy graph (or ctrl+c) if you wnt to resume your
+code and then you can call interactive_graph_ipython again.
+
+If you need to generate multiple figure with a no blocking method, please see
+interactive_graph function.
+"""
+
 # =============================================================================
 # 
 # example from https://matplotlib.org/stable/gallery/text_labels_and_annotations/legend.html#sphx-glr-gallery-text-labels-and-annotations-legend-py
@@ -24,6 +35,7 @@ legend = ax.legend(loc='upper center', shadow=True, fontsize='x-large')
 legend.get_frame().set_facecolor('C0')
 
 
+#these 2 lines can be call in your ipython console
 from kivy_matplotlib_widget.tools.interactive_converter import interactive_graph_ipython
 
 interactive_graph_ipython(fig,compare_hover=True)
