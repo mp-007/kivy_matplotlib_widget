@@ -91,7 +91,7 @@ class KivyMatplotNavToolbar(RelativeLayout):
     icon_font_size = NumericProperty(dp(36))
     nav_btn_size = NumericProperty(dp(80))
     compare_hover = BooleanProperty(False)
-
+    drag_legend = BooleanProperty(False) #only if nav_icon is 'all'
 
     def __init__(self, figure_wgt=None, *args, **kwargs):
         super(KivyMatplotNavToolbar, self).__init__(*args, **kwargs)
@@ -170,6 +170,10 @@ class KivyMatplotNavToolbar(RelativeLayout):
 
             #home button
             self.add_nav_btn("autoscale",self.autoscale)
+            
+            #add_drag_legend
+            if self.drag_legend:
+                self.add_nav_btn("drag_legend",self.set_touch_mode,mode='drag_legend',btn_type='group')
 
         elif self.custom_icon:
             pass
@@ -238,7 +242,10 @@ class KivyMatplotNavToolbar(RelativeLayout):
     def set_touch_mode(self,mode):
         self.figure_wgt.touch_mode=mode
     def home(self):
-        self.figure_wgt.home()
+        if hasattr(self.figure_wgt,'main_home'):
+            self.figure_wgt.main_home()
+        else:
+            self.figure_wgt.home()
     def back(self):
         self.figure_wgt.back()   
     def forward(self):
