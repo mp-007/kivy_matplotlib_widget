@@ -35,12 +35,14 @@ Screen
             hover_mode:'desktop'
             show_cursor_data:app.show_cursor_data
             compare_hover:app.compare_hover
+            drag_legend:app.drag_legend
             figure_wgt:figure_wgt
 
         MatplotFigureSubplot:
             id:figure_wgt
             auto_cursor:True
             interactive_axis:True
+            legend_do_scroll_x:app.legend_do_scroll_x
             
 <PlotlyHover2>
     custom_color: [0,0,0,1]
@@ -132,19 +134,36 @@ class Test(App):
     figure = None
     compare_hover = BooleanProperty(False)
     show_cursor_data = BooleanProperty(True)
+    drag_legend = BooleanProperty(False)
+    legend_do_scroll_x = BooleanProperty(True)
 
-    def __init__(self, figure,show_cursor_data=True,hover_widget=PlotlyHover2,compare_hover=False,legend_instance=None, custom_handlers=None,multi_legend=False, **kwargs):
+    def __init__(self, 
+                 figure,
+                 show_cursor_data=True,
+                 hover_widget=PlotlyHover2,
+                 compare_hover=False,
+                 legend_instance=None, 
+                 custom_handlers=None,
+                 multi_legend=False,
+                 drag_legend=False,
+                 legend_do_scroll_x=True,
+                 disable_interactive_legend=False,
+                 **kwargs):
         """__init__ function class"""
         self.figure=figure
         self.hover_widget=hover_widget
         self.legend_instance=legend_instance
         self.custom_handlers=custom_handlers
         self.multi_legend=multi_legend
+        self.disable_interactive_legend=disable_interactive_legend
+        
         # print(self.figure.get())
         super(Test, self).__init__(**kwargs)
         
+        self.drag_legend=drag_legend
         self.show_cursor_data=show_cursor_data
         self.compare_hover=compare_hover
+        self.legend_do_scroll_x=legend_do_scroll_x
         
     def build(self):
         self.screen=Builder.load_string(KV)
@@ -170,26 +189,28 @@ class Test(App):
         else:
             add_hover(self.screen.figure_wgt,mode='desktop')
         add_minmax(self.screen.figure_wgt)
-        if len(self.screen.figure_wgt.figure.axes) > 0  and \
-            (self.screen.figure_wgt.figure.axes[0].get_legend() or \
-             self.legend_instance):
-
-            if self.multi_legend:
-                for i,current_legend_instance in enumerate(self.legend_instance):
-                    if i==0:
-                        MatplotlibInteractiveLegend(self.screen.figure_wgt,
-                                                    legend_instance=current_legend_instance,
-                                                    custom_handlers=self.custom_handlers[i])
-                    else:
-                        MatplotlibInteractiveLegend(self.screen.figure_wgt,
-                                                    legend_instance=current_legend_instance,
-                                                    custom_handlers=self.custom_handlers[i],
-                                                    multi_legend=True)                        
-
-            else:   
-                MatplotlibInteractiveLegend(self.screen.figure_wgt,
-                                            legend_instance=self.legend_instance,
-                                            custom_handlers=self.custom_handlers)
+        
+        if not self.disable_interactive_legend:
+            if len(self.screen.figure_wgt.figure.axes) > 0  and \
+                (self.screen.figure_wgt.figure.axes[0].get_legend() or \
+                 self.legend_instance):
+    
+                if self.multi_legend:
+                    for i,current_legend_instance in enumerate(self.legend_instance):
+                        if i==0:
+                            MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                                        legend_instance=current_legend_instance,
+                                                        custom_handlers=self.custom_handlers[i])
+                        else:
+                            MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                                        legend_instance=current_legend_instance,
+                                                        custom_handlers=self.custom_handlers[i],
+                                                        multi_legend=True)                        
+    
+                else:   
+                    MatplotlibInteractiveLegend(self.screen.figure_wgt,
+                                                legend_instance=self.legend_instance,
+                                                custom_handlers=self.custom_handlers)
 
 def main(plot_queue,**kwargs):
 
@@ -223,8 +244,8 @@ if __name__ == "__main__":
     
     ax1.legend()
     
-    interactive_graph(fig,show_cursor_data=False)
+    interactive_graph(fig,show_cursor_data=False,drag_legend=True)
     
-    interactive_graph_ipython(fig,show_cursor_data=False)
+    interactive_graph_ipython(fig,show_cursor_data=True)
 
     
