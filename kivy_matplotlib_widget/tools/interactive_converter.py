@@ -42,6 +42,7 @@ Screen
             id:figure_wgt
             auto_cursor:True
             interactive_axis:True
+            max_hover_rate:app.max_hover_rate
             legend_do_scroll_x:app.legend_do_scroll_x
             
 <PlotlyHover2>
@@ -136,6 +137,7 @@ class Test(App):
     show_cursor_data = BooleanProperty(True)
     drag_legend = BooleanProperty(False)
     legend_do_scroll_x = BooleanProperty(True)
+    max_hover_rate = NumericProperty(5/60,allownone=True) 
 
     def __init__(self, 
                  figure,
@@ -148,6 +150,7 @@ class Test(App):
                  drag_legend=False,
                  legend_do_scroll_x=True,
                  disable_interactive_legend=False,
+                 max_hover_rate=5/60,
                  **kwargs):
         """__init__ function class"""
         self.figure=figure
@@ -164,6 +167,7 @@ class Test(App):
         self.show_cursor_data=show_cursor_data
         self.compare_hover=compare_hover
         self.legend_do_scroll_x=legend_do_scroll_x
+        self.max_hover_rate=max_hover_rate
         
     def build(self):
         self.screen=Builder.load_string(KV)
