@@ -451,7 +451,10 @@ class Test(App):
 
     def home(self):
         screen=self.graph_app.ids.sm.current_screen
-        screen.figure_wgt.main_home()
+        if hasattr(screen.figure_wgt,'main_home'):
+            screen.figure_wgt.main_home()
+        else:
+            screen.figure_wgt.home()
         
     def previous_screen(self):
         screen_name=self.graph_app.ids.sm.current
