@@ -40,10 +40,12 @@ Screen
 
         MatplotFigureSubplot:
             id:figure_wgt
+            fast_draw:app.fast_draw
             auto_cursor:True
             interactive_axis:True
             max_hover_rate:app.max_hover_rate
             legend_do_scroll_x:app.legend_do_scroll_x
+            hist_range:app.hist_range
             
 <PlotlyHover2>
     custom_color: [0,0,0,1]
@@ -138,6 +140,8 @@ class Test(App):
     drag_legend = BooleanProperty(False)
     legend_do_scroll_x = BooleanProperty(True)
     max_hover_rate = NumericProperty(5/60,allownone=True) 
+    fast_draw = BooleanProperty(False)
+    hist_range = BooleanProperty(True)
 
     def __init__(self, 
                  figure,
@@ -151,6 +155,9 @@ class Test(App):
                  legend_do_scroll_x=True,
                  disable_interactive_legend=False,
                  max_hover_rate=5/60,
+                 disable_hover=False,
+                 fast_draw=True,
+                 hist_range=True,
                  **kwargs):
         """__init__ function class"""
         self.figure=figure
@@ -159,6 +166,7 @@ class Test(App):
         self.custom_handlers=custom_handlers
         self.multi_legend=multi_legend
         self.disable_interactive_legend=disable_interactive_legend
+        self.disable_hover=disable_hover
         
         # print(self.figure.get())
         super(Test, self).__init__(**kwargs)
@@ -168,6 +176,8 @@ class Test(App):
         self.compare_hover=compare_hover
         self.legend_do_scroll_x=legend_do_scroll_x
         self.max_hover_rate=max_hover_rate
+        self.fast_draw=fast_draw
+        self.hist_range=hist_range
         
     def build(self):
         self.screen=Builder.load_string(KV)
@@ -188,10 +198,11 @@ class Test(App):
         if self.compare_hover:
             add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare',hover_widget=TagCompareHover()) 
             
-        if self.hover_widget:
-            add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=self.hover_widget())
-        else:
-            add_hover(self.screen.figure_wgt,mode='desktop')
+        if not self.disable_hover:
+            if self.hover_widget:
+                add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=self.hover_widget())
+            else:
+                add_hover(self.screen.figure_wgt,mode='desktop')
         add_minmax(self.screen.figure_wgt)
         
         if not self.disable_interactive_legend:
