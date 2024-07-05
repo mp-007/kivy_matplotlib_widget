@@ -703,7 +703,6 @@ class MatplotFigureSubplot(MatplotFigure):
                    if hasattr(line,'_ContainerArtist__keep_alive'): 
                        
                        if self.hist_range and isinstance(line,BarContainer):
-                           print(line)
                            x_hist, y_hist, width_hist, height_hist = line[sel.index].get_bbox().bounds
                            if line._ContainerArtist__keep_alive[0].container.orientation=='horizontal':
                                x_hist = y_hist
