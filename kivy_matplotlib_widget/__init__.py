@@ -14,6 +14,6 @@ fonts_path = os.path.join(path, f"fonts{os.sep}")
 
 import kivy_matplotlib_widget.factory_registers  # NOQA
 
-__version__ = "0.12.2"
+__version__ = "0.12.3"
 __description__ = "A Matplotlib interactive widget for kivy"
 __author__ = "mp-007"
