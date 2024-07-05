@@ -902,7 +902,7 @@ class MatplotlibLegendGrid(FloatLayout):
             
             hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
             for current_hist in hist:
-                current_hist.set_visible(True)
+                self.set_visible(current_hist,True)
             self.figure_wgt.figure.canvas.draw_idle()
             self.figure_wgt.figure.canvas.flush_events()             
         else:
@@ -913,7 +913,7 @@ class MatplotlibLegendGrid(FloatLayout):
             
             hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
             for current_hist in hist:
-                current_hist.set_visible(False)
+                self.set_visible(current_hist,False)
             self.figure_wgt.figure.canvas.draw_idle()
             self.figure_wgt.figure.canvas.flush_events()
            
@@ -924,11 +924,11 @@ class MatplotlibLegendGrid(FloatLayout):
             current_line = hist[self.box.children[::-1][row_index].matplotlib_line][0]
             hist_keys= list(self.instance_dict.keys())           
             
-            if current_line.get_visible():
+            if self.get_visible(current_line):
                 #check if we isolate line or show all lines
                 need_isolate = False
                 for line in hist_keys:
-                    if hist[line][0] != current_line and hist[line][0].get_visible():
+                    if hist[line][0] != current_line and self.get_visible(hist[line][0]):
                         need_isolate=True
                         break            
             
@@ -937,7 +937,7 @@ class MatplotlibLegendGrid(FloatLayout):
                    for idx,line in enumerate(hist_keys):
                        if hist[line][0] != current_line:
                            for current_hist in hist[line]:
-                               current_hist.set_visible(False)                           
+                               self.set_visible(current_hist,False)                          
                            self.box.children[::-1][idx].selected = True
                            self.box.children[::-1][idx].matplotlib_line.set_alpha(0.5)
                            self.box.children[::-1][idx].matplotlib_text.set_alpha(0.5)
@@ -949,7 +949,7 @@ class MatplotlibLegendGrid(FloatLayout):
                     #show all lines'
                     for idx,line in enumerate(hist_keys):                     
                         for current_hist in hist[line]:
-                            current_hist.set_visible(True) 
+                            self.set_visible(current_hist,True)
                         self.box.children[::-1][idx].selected = False  
                         self.box.children[::-1][idx].matplotlib_line.set_alpha(1)  
                         self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                                   
@@ -958,14 +958,51 @@ class MatplotlibLegendGrid(FloatLayout):
             #show all lines
             for idx,line in enumerate(hist): 
                 for current_hist in hist[line]:
-                    current_hist.set_visible(True)                   
+                    self.set_visible(current_hist,True)                   
                 self.box.children[::-1][idx].selected = False 
                 self.box.children[::-1][idx].matplotlib_line.set_alpha(1) 
                 self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                   
                
         self.figure_wgt.figure.canvas.draw_idle()
         self.figure_wgt.figure.canvas.flush_events()  
-         
+
+    def set_visible(self,instance,value) -> None:
+        """set visible method
+        
+        Args:
+            instance: matplotlib instance
+            value: True or False
+            
+        Returns:
+            None
+        """   
+        if hasattr(instance,'set_visible'):
+            instance.set_visible(value)
+        elif hasattr(instance,'get_children'):
+            all_child = instance.get_children()
+            for child in all_child:
+                child.set_visible(value)
+
+    def get_visible(self,instance) -> bool:
+        """get visible method
+        
+        Args:
+            instance: matplotlib instance
+            
+        Returns:
+            bool
+        """   
+        if hasattr(instance,'get_visible'):
+            return instance.get_visible()
+        elif hasattr(instance,'get_children'):
+            return_value=False
+            all_child = instance.get_children()
+            for child in all_child[:1]:
+                return_value = child.get_visible()
+            return return_value
+        else:
+            return False
+                            
 from kivy.factory import Factory
 
 Factory.register('LegendRv', LegendRv)
