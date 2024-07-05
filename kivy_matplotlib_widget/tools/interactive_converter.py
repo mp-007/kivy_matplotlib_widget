@@ -147,6 +147,7 @@ class Test(App):
                  figure,
                  show_cursor_data=True,
                  hover_widget=PlotlyHover2,
+                 compare_hover_widget=TagCompareHover,
                  compare_hover=False,
                  legend_instance=None, 
                  custom_handlers=None,
@@ -162,6 +163,7 @@ class Test(App):
         """__init__ function class"""
         self.figure=figure
         self.hover_widget=hover_widget
+        self.compare_hover_widget=compare_hover_widget
         self.legend_instance=legend_instance
         self.custom_handlers=custom_handlers
         self.multi_legend=multi_legend
@@ -196,7 +198,10 @@ class Test(App):
             self.screen.figure_wgt.figure = figure
             
         if self.compare_hover:
-            add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare',hover_widget=TagCompareHover()) 
+            if self.compare_hover_widget:
+                add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare',hover_widget=self.compare_hover_widget())
+            else:
+                add_hover(self.screen.figure_wgt,mode='desktop',hover_type='compare')
             
         if not self.disable_hover:
             if self.hover_widget:
