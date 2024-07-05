@@ -671,7 +671,10 @@ class MatplotFigureSubplot(MatplotFigure):
                  else:
                      x = ax.xaxis.get_major_formatter().format_data_short(x)
                  self.hover_instance.label_x_value=f"{x}"
-            
+
+                 if hasattr(self.hover_instance,'overlap_check'):
+                     self.hover_instance.overlap_check()
+                            
                  self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                  self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                 
