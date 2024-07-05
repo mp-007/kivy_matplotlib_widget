@@ -789,9 +789,7 @@ def create_touch_legend(figure_wgt,
                 current_legend_cell.height=int(matplotlib_legend_box.legend_height/max(nb_group,1))
                 current_legend_cell.width=matplotlib_legend_box.legend_width
                 
-            if isinstance(current_handles[i],mpl.container.BarContainer):
-                instance_dict[legeng_marker[i]] = list(current_handles[i][:])
-            elif isinstance(current_handles[i],list):
+            if isinstance(current_handles[i],list):
                 instance_dict[legeng_marker[i]] = current_handles[i]               
             else:
                 instance_dict[legeng_marker[i]] = [current_handles[i]]
