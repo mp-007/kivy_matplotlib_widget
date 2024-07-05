@@ -596,7 +596,7 @@ class MatplotFigureSubplot(MatplotFigure):
                  custom_x=None
                  if not hasattr(line,'axes'):
                      if hasattr(line,'_ContainerArtist__keep_alive'): 
-                         if self.hist_range:
+                         if self.hist_range and isinstance(line,list):
                             x_hist, y_hist, width_hist, height_hist = line[sel.index].get_bbox().bounds
                             if self.cursor_xaxis_formatter:
                                 custom_x = f"{self.cursor_xaxis_formatter.format_data(x_hist)}-{self.cursor_xaxis_formatter.format_data(x_hist+ width_hist)}" 
@@ -700,7 +700,7 @@ class MatplotFigureSubplot(MatplotFigure):
                 invert_xy = False
                 if not hasattr(line,'axes'):
                    if hasattr(line,'_ContainerArtist__keep_alive'): 
-                       if self.hist_range:
+                       if self.hist_range and isinstance(line,list):
                            
                            x_hist, y_hist, width_hist, height_hist = line[sel.index].get_bbox().bounds
                            if line._ContainerArtist__keep_alive[0].container.orientation=='horizontal':
