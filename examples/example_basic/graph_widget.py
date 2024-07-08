@@ -61,7 +61,7 @@ class MatplotFigure(Widget):
     do_zoom_y = BooleanProperty(True)  
     fast_draw = BooleanProperty(True) #True will don't draw axis
     xsorted = BooleanProperty(False) #to manage x sorted data
-    minzoom = NumericProperty(dp(40))
+    minzoom = NumericProperty(dp(20))
     compare_xdata = BooleanProperty(False)   
     hover_instance = ObjectProperty(None, allownone=True)
     nearest_hover_instance = ObjectProperty(None, allownone=True)

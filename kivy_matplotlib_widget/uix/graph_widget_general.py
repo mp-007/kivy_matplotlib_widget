@@ -81,7 +81,7 @@ class MatplotFigureGeneral(Widget):
         self.touch_mode='pan'
         self.hover_on = False
         self.xsorted = True #to manage x sorted data (if numpy is used)
-        self.minzoom = dp(40) #minimum pixel distance to apply zoom
+        self.minzoom = dp(20) #minimum pixel distance to apply zoom
 
         #zoom box coordonnate
         self.x0_box = None

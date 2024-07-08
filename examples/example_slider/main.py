@@ -78,6 +78,7 @@ Screen
                 padding:-dp(20),0,0,0
                 MatplotFigure:
                     id:figure_wgt
+                    minzoom:dp(20)
         BoxLayout:
             size_hint_y:0.2
             canvas.before:
