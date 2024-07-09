@@ -5,6 +5,7 @@ from kivy.utils import platform
 if platform != 'android':
     from kivy.config import Config
     Config.set('input', 'mouse', 'mouse,disable_on_activity')
+    Config.set('input', 'mouse', 'mouse,multitouch_on_demand') #disable red dot
 
 from kivy.lang import Builder
 from kivy.app import App
