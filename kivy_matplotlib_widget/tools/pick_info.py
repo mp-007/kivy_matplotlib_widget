@@ -367,14 +367,18 @@ def _(artist, event):
         #     return
         # inds = info["ind"]
         offsets = artist.get_offsets()#[inds]
-        offsets_screen = artist.get_offset_transform().transform(offsets)
-        ds = np.hypot(*(offsets_screen - [event.x, event.y]).T)
-        argmin = ds.argmin()
-        target = _untransform(
-            offsets[argmin], offsets_screen[argmin], artist.axes)
-        # return Selection(artist, target, inds[argmin], ds[argmin], None, None)
-        sel = Selection(artist, target, argmin, ds[argmin], None, None)
-        return sel if sel and sel.dist < event.pickradius else None
+        if offsets.any():
+            offsets_screen = artist.get_offset_transform().transform(offsets)
+            ds = np.hypot(*(offsets_screen - [event.x, event.y]).T)
+        
+            argmin = ds.argmin()
+            target = _untransform(
+                offsets[argmin], offsets_screen[argmin], artist.axes)
+            # return Selection(artist, target, inds[argmin], ds[argmin], None, None)
+            sel = Selection(artist, target, argmin, ds[argmin], None, None)
+            return sel if sel and sel.dist < event.pickradius else None
+        else:
+            return None
     elif len(paths) and len(offsets):
         # Note that this won't select implicitly closed paths.
         sels = [*filter(None, [
