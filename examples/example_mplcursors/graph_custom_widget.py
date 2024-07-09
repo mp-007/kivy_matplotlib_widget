@@ -11,6 +11,7 @@ from matplotlib.colors import to_hex
 from kivy.metrics import dp
 from kivy_matplotlib_widget.tools.cursors import cursor
 from kivy.properties import NumericProperty,BooleanProperty
+from matplotlib.container import BarContainer
 
 
 class MatplotlibEvent:
@@ -92,7 +93,7 @@ class MatplotFigureCustom(MatplotFigure):
                  custom_x=None
                  if not hasattr(line,'axes'):
                      if hasattr(line,'_ContainerArtist__keep_alive'): 
-                         if self.hist_range:
+                         if self.hist_range and isinstance(line,BarContainer):
                             x_hist, y_hist, width_hist, height_hist = line[sel.index].get_bbox().bounds
                             if self.cursor_xaxis_formatter:
                                 custom_x = f"{self.cursor_xaxis_formatter.format_data(x_hist)}-{self.cursor_xaxis_formatter.format_data(x_hist+ width_hist)}" 
@@ -191,7 +192,7 @@ class MatplotFigureCustom(MatplotFigure):
                 custom_x=None
                 if not hasattr(line,'axes'):
                    if hasattr(line,'_ContainerArtist__keep_alive'): 
-                       if self.hist_range:
+                       if self.hist_range and isinstance(line,BarContainer):
                            x_hist, y_hist, width_hist, height_hist = line[sel.index].get_bbox().bounds
                            if self.cursor_xaxis_formatter:
                                custom_x = f"{self.cursor_xaxis_formatter.format_data(x_hist)}-{self.cursor_xaxis_formatter.format_data(x_hist+ width_hist)}" 
@@ -205,9 +206,9 @@ class MatplotFigureCustom(MatplotFigure):
                     return
                 
                 if hasattr(self,'horizontal_line'):
-                    self.horizontal_line.set_ydata(y)
+                    self.horizontal_line.set_ydata([y,])
                 if hasattr(self,'vertical_line'):
-                    self.vertical_line.set_xdata(x)
+                    self.vertical_line.set_xdata([x,])
     
                 #x y label
                 if self.hover_instance:                     
@@ -220,8 +221,12 @@ class MatplotFigureCustom(MatplotFigure):
                         
                     if self.cursor_xaxis_formatter:
                         x = self.cursor_xaxis_formatter.format_data(x)
+                    else:
+                        x = ax.xaxis.get_major_formatter().format_data_short(x)                        
                     if self.cursor_yaxis_formatter:
                         y = self.cursor_yaxis_formatter.format_data(y) 
+                    else:
+                        y = ax.yaxis.get_major_formatter().format_data_short(y)                         
                     if custom_x:
                         self.hover_instance.label_x_value=custom_x
                     else:
@@ -248,8 +253,12 @@ class MatplotFigureCustom(MatplotFigure):
                 else:
                     if self.cursor_xaxis_formatter:
                         x = self.cursor_xaxis_formatter.format_data(x)
+                    else:
+                        x = ax.xaxis.get_major_formatter().format_data_short(x)                        
                     if self.cursor_yaxis_formatter:
                         y = self.cursor_yaxis_formatter.format_data(y) 
+                    else:
+                        y = ax.yaxis.get_major_formatter().format_data_short(y)                          
                     self.text.set_text(f"x={x}, y={y}")
     
                 #blit method (always use because same visual effect as draw)                  
