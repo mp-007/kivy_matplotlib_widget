@@ -11,6 +11,7 @@ import copy
 import weakref
 from weakref import WeakKeyDictionary
 
+import matplotlib as mpl
 from matplotlib.axes import Axes
 from matplotlib.container import Container
 from matplotlib.figure import Figure
@@ -35,11 +36,15 @@ def _iter_axes_subartists(ax):
 
 def _is_alive(artist):
     """Check whether *artist* is still present on its parent axes."""
-    return bool(artist
-                and artist.axes
-                and (artist.container in artist.axes.containers
-                     if isinstance(artist, pick_info.ContainerArtist) else
-                     artist in _iter_axes_subartists(artist.axes)))
+    return bool(
+        artist
+        and artist.axes
+        # `cla()` clears `.axes` since matplotlib/matplotlib#24627 (3.7);
+        # iterating over subartists can be very slow.
+        and (getattr(mpl, "__version_info__", ()) >= (3, 7)
+             or (artist.container in artist.axes.containers
+                 if isinstance(artist, pick_info.ContainerArtist) else
+                 artist in _iter_axes_subartists(artist.axes))))
 
 
 def _reassigned_axes_event(event, ax):
@@ -104,8 +109,6 @@ class Cursor:
     @property
     def artists(self):
         """The tuple of selectable artists."""
-        # Work around matplotlib/matplotlib#6982: `cla()` does not clear
-        # `.axes`.
         return tuple(filter(_is_alive, (ref() for ref in self._artists)))
 
     @property
