@@ -26,7 +26,7 @@ See interactive_converter folder in the examples for more details.
  - reset axis on double-click (home button)
  - fast rendering mode (axis not updated for faster draw)
  - use only 2 packages (kivy + matplotlib) and no additional backend
- - cursor and hover option (touch or desktop mode)
+ - matplotlib cursor and kivy hover option (touch or desktop mode)
  - legend widget like plotly library
  - interactive axis like plotly library
  - min/max touch option to easily change axis limit
