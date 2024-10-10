@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jul 19 11:04:07 2024
-
-@author: Manu
-"""
-
 import matplotlib.pyplot as plt
 import numpy as np
 from kivy.lang import Builder
