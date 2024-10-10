@@ -116,7 +116,7 @@ class MatplotFigureCustom(MatplotFigureSubplot):
         """ update hover on fast draw (if exist)"""
         if self.selector:
             #update selector pos if needed
-            if self.selector.resize_wgt.verts: 
+            if self.selector.resize_wgt.verts and self.touch_mode!='selector': 
                 resize_wgt = self.selector.resize_wgt
                 #update all selector pts
                 xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
