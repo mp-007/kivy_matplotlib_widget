@@ -128,6 +128,9 @@ class MatplotFigureCustom(MatplotFigureSubplot):
             #update selector pos if needed
             if self.selector.resize_wgt.verts and self.touch_mode!='selector': 
                 resize_wgt = self.selector.resize_wgt
+                if not (resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1):
+                    return
+                
                 #update all selector pts
                 #recalcul pos
                 xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
@@ -142,7 +145,6 @@ class MatplotFigureCustom(MatplotFigureSubplot):
                     
                 if self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0],resize_wgt.pos[1])) and \
                     self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0] + resize_wgt.size[0],resize_wgt.pos[1]+ resize_wgt.size[1])):
-                    if resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1:
-                        resize_wgt.opacity = 1
+                    resize_wgt.opacity = 1
                 else:
                     resize_wgt.opacity = 0
