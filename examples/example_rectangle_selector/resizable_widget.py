@@ -290,9 +290,9 @@ class ResizeRelativeLayout(RelativeLayout):
 
 class ResizeSelect(FloatLayout):
     top_color = ColorProperty("black")
-    bottom_color = ColorProperty("red")
-    left_color = ColorProperty("red")
-    right_color = ColorProperty("red")
+    bottom_color = ColorProperty("black")
+    left_color = ColorProperty("black")
+    right_color = ColorProperty("black")
     highlight_color = ColorProperty("red")
     bg_color = ColorProperty([1,1,1,1])
     figure_wgt = ObjectProperty()
@@ -329,8 +329,15 @@ class ResizeSelect(FloatLayout):
         rgb_fig_bg_color = mcolors.to_rgb(fig_bg_color)
         if (rgb_fig_bg_color[0]*0.299 + rgb_fig_bg_color[1]*0.587 + rgb_fig_bg_color[2]*0.114) > 186/255:
             self.bg_color = [1,1,1,1]
+            self.bottom_color = (
+                self.top_colors
+            ) = self.left_color = self.right_color = [1,1,1,1]
+            
         else:
             self.bg_color = [0,0,0,1]
+            self.bottom_color = (
+                self.top_colors
+            ) = self.left_color = self.right_color = [0,0,0,1]
         
     def set_collection(self,collection):
         self.collection = collection
@@ -352,7 +359,7 @@ class ResizeSelect(FloatLayout):
         When the mouse moves, we check the position of the mouse
         and update the cursor accordingly.
         """
-        if self.opacity and self.collide_point(*self.to_widget(*touch)):
+        if self.opacity and self.figure_wgt.touch_mode=='selector' and self.collide_point(*self.to_widget(*touch)):
             
             collision = self.collides_with_control_points(something, self.to_widget(*touch))
             if collision in ["top left", "bottom right"]:
@@ -404,7 +411,10 @@ class ResizeSelect(FloatLayout):
                 return "top right"
 
     def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
+        if self.figure_wgt.touch_mode != 'selector':
+            return
+        
+        if self.collide_point(*touch.pos) and self.opacity:
             touch.grab(self)
             x, y = touch.pos[0], touch.pos[1]
 
@@ -459,7 +469,8 @@ class ResizeSelect(FloatLayout):
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
-        # if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
+        if self.figure_wgt.touch_mode != 'selector':
+            return
         
         if touch.grab_current is self:
             x, y = self.to_window(*self.pos)
@@ -560,12 +571,21 @@ class ResizeSelect(FloatLayout):
         return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
+        if self.figure_wgt.touch_mode != 'selector':
+            return
+        
         if touch.grab_current is self:
             touch.ungrab(self)
             self.alpha = 1
-            # self.bottom_color = (
-            #     self.top_colors
-            # ) = self.left_color = self.right_color = "white"
+            if (self.bg_color[0]*0.299 + \
+            self.bg_color[1]*0.587 + self.bg_color[2]*0.114) > 186/255:
+                self.bottom_color = (
+                    self.top_colors
+                ) = self.left_color = self.right_color = [0,0,0,1]
+            else:
+                self.bottom_color = (
+                    self.top_colors
+                ) = self.left_color = self.right_color = [1,1,1,1]                
             
             if self.first_touch and self.selected_side == "new select":
                 self.check_if_reverse_selection(touch)

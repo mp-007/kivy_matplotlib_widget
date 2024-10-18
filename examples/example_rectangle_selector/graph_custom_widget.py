@@ -44,13 +44,21 @@ class MatplotFigureCustom(MatplotFigureSubplot):
 
     def on_touch_down(self, event):
         """ Manage Mouse/touch press """
-        
-
+        if self.disabled:
+            return
         x, y = event.x, event.y
 
         if self.collide_point(x, y) and self.figure:
+            self._pressed = True
+            self.show_compare_cursor=False
             if self.legend_instance:
-                if self.legend_instance.box.collide_point(x, y):
+                select_legend=False
+                for current_legend in self.legend_instance:
+                    if current_legend.box.collide_point(x, y):
+                        select_legend=True
+                        self.current_legend = current_legend
+                        break
+                if select_legend:
                     if self.touch_mode!='drag_legend':
                         return False   
                     else:
@@ -62,17 +70,17 @@ class MatplotFigureCustom(MatplotFigureSubplot):
                             self.background=None
                             
                         return True 
+                else:
+                    self.current_legend = None
                        
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
-                    ax = self.axes
-                    ax = self.axes
-                    self.zoom_factory(event, ax, base_scale=1.2)
+                    self.zoom_factory(event, base_scale=1.2)
                 return True
 
             elif event.is_double_tap:
                 if not self.disable_double_tap:
-                    self.home()
+                    self.home(event)
                 return True
                   
             else:
@@ -83,7 +91,9 @@ class MatplotFigureCustom(MatplotFigureSubplot):
                     real_x, real_y = x - self.pos[0], y - self.pos[1]
                     self.x_init=x
                     self.y_init=real_y
-                    self.draw_box(event, x, real_y, x, real_y) 
+                    self.draw_box(event, x, real_y, x, real_y,onpress=True) 
+                elif self.touch_mode=='minmax':
+                    self.min_max(event) 
                 elif self.touch_mode=='selector':
                     pass
                     
@@ -119,10 +129,17 @@ class MatplotFigureCustom(MatplotFigureSubplot):
             if self.selector.resize_wgt.verts and self.touch_mode!='selector': 
                 resize_wgt = self.selector.resize_wgt
                 #update all selector pts
+                #recalcul pos
                 xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
                 new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
                 resize_wgt.pos[0] = new_pos[0] + self.x
                 resize_wgt.pos[1] = new_pos[1] + self.y
+                
+                #recalcul size
+                xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[2][0],resize_wgt.verts[2][1])]) 
+                resize_wgt.size[0] = float(xy_pos2[0][0] - xy_pos[0][0])
+                resize_wgt.size[1] = float(xy_pos2[0][1] - xy_pos[0][1])
+                    
                 if self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0],resize_wgt.pos[1])) and \
                     self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0] + resize_wgt.size[0],resize_wgt.pos[1]+ resize_wgt.size[1])):
                     if resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1:
