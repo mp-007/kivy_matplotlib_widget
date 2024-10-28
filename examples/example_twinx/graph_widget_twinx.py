@@ -1004,9 +1004,7 @@ class MatplotFigureTwinx(Widget):
 
         # scale/translate
         if event in self._touches and event.grab_current == self:
-
-            if self.transform_with_touch(event):
-                self.transform_with_touch(event)
+            self.transform_with_touch(event)
             self._last_touch_pos[event] = event.pos
 
         # stop propagating if its within our bounds
@@ -1068,7 +1066,7 @@ class MatplotFigureTwinx(Widget):
         y = anchor[1]-self.pos[1]
 
         trans = ax.transData.inverted()
-        xdata, ydata = trans.transform_point((x+new_line.x/2, y+new_line.y/2))        
+        xdata, ydata = trans.transform_point((x+new_line.x, y+new_line.y))        
         
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim() 
@@ -1158,9 +1156,9 @@ class MatplotFigureTwinx(Widget):
         y = anchor[1]-self.pos[1]
 
         trans = ax.transData.inverted()
-        xdata, ydata = trans.transform_point((x+new_line.x/2, y+new_line.y/2))
+        xdata, ydata = trans.transform_point((x+new_line.x, y+new_line.y))
         trans2 = ax2.transData.inverted()
-        xdata2, ydata2 = trans2.transform_point((x+new_line.x/2, y+new_line.y/2))
+        xdata2, ydata2 = trans2.transform_point((x+new_line.x, y+new_line.y))
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
@@ -1355,11 +1353,11 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
                         if scale == 'linear':
-                            cur_xlim -= dx/2
+                            cur_xlim -= dx
                         else:
                             try:
-                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits                                  
                         if inverted_x:
@@ -1369,11 +1367,11 @@ class MatplotFigureTwinx(Widget):
                 else:
                     if xdata< cur_xlim[1]:
                         if scale == 'linear':
-                            cur_xlim -= dx/2
+                            cur_xlim -= dx
                         else:
                             try:
-                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits  
                         if inverted_x:
@@ -1382,11 +1380,11 @@ class MatplotFigureTwinx(Widget):
                             ax.set_xlim(cur_xlim[0],None)
             else:
                 if scale == 'linear':
-                    cur_xlim -= dx/2
+                    cur_xlim -= dx
                 else:
                     try:
-                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits                   
                 if inverted_x:
@@ -1406,12 +1404,12 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
                         if yscale == 'linear':
-                            cur_ylim -= dy/2 
+                            cur_ylim -= dy
                         
                         else:
                             try:
-                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits                        
                         
@@ -1422,12 +1420,12 @@ class MatplotFigureTwinx(Widget):
                 else:
                     if ydata< cur_ylim[1]:
                         if yscale == 'linear':
-                            cur_ylim -= dy/2 
+                            cur_ylim -= dy 
                         
                         else:
                             try:
-                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:
@@ -1436,12 +1434,12 @@ class MatplotFigureTwinx(Widget):
                             ax.set_ylim(cur_ylim[0],None)
             else:            
                 if yscale == 'linear':
-                    cur_ylim -= dy/2 
+                    cur_ylim -= dy 
                 
                 else:
                     try:
-                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits 
                 if inverted_y:
@@ -1565,11 +1563,11 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_x=='left':                
                     if xdata> cur_xlim[0]:
                         if scale == 'linear':
-                            cur_xlim -= dx/2
+                            cur_xlim -= dx
                         else:
                             try:
-                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits 
                         if inverted_x:
@@ -1580,11 +1578,11 @@ class MatplotFigureTwinx(Widget):
                 else:
                     if xdata< cur_xlim[1]:
                         if scale == 'linear':
-                            cur_xlim -= dx/2
+                            cur_xlim -= dx
                         else:
                             try:
-                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -1594,11 +1592,11 @@ class MatplotFigureTwinx(Widget):
                             
             else:
                 if scale == 'linear':
-                    cur_xlim -= dx/2
+                    cur_xlim -= dx
                 else:
                     try:
-                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits
                 if inverted_x:
@@ -1634,12 +1632,12 @@ class MatplotFigureTwinx(Widget):
                 if self.anchor_y=='top_left':
                     if ydata > cur_ylim[0]:
                         if yscale == 'linear':
-                            cur_ylim -= dy/2 
+                            cur_ylim -= dy
                         
                         else:
                             try:
-                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:
@@ -1652,12 +1650,12 @@ class MatplotFigureTwinx(Widget):
                 elif self.anchor_y=='top_right':
                     if ydata_ax2 > cur_ylim2[0]:
                         if yscale2 == 'linear':
-                            cur_ylim2 -= dy2/2 
+                            cur_ylim2 -= dy2 
                         
                         else:
                             try:
-                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2),ax2.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2),ax2.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim2 = cur_ylim2  # Keep previous limits                        
                         
@@ -1671,12 +1669,12 @@ class MatplotFigureTwinx(Widget):
                 elif self.anchor_y=='bottom_left':
                     if ydata < cur_ylim[1]:
                         if yscale == 'linear':
-                            cur_ylim -= dy/2 
+                            cur_ylim -= dy
                         
                         else:
                             try:
-                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits   
                         if inverted_y:
@@ -1688,12 +1686,12 @@ class MatplotFigureTwinx(Widget):
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
                         if yscale2 == 'linear':
-                            cur_ylim2 -= dy2/2 
+                            cur_ylim2 -= dy2 
                         
                         else:
                             try:
-                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                                cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2),ax2.yaxis),
+                                           self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2),ax2.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim2 = cur_ylim2  # Keep previous limits 
                         # ax2.set_ylim(cur_ylim2[0],None)  
@@ -1705,22 +1703,22 @@ class MatplotFigureTwinx(Widget):
                         update_cursor=True
             else:            
                 if yscale == 'linear':
-                    cur_ylim -= dy/2 
+                    cur_ylim -= dy 
                 
                 else:
                     try:
-                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits
                         
                 if yscale2 == 'linear':
-                    cur_ylim2 -= dy2/2 
+                    cur_ylim2 -= dy2 
                 
                 else:
                     try:
-                        cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2/2),ax2.yaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2/2),ax2.yaxis)]
+                        cur_ylim2 = [self.inv_transform_eval((self.transform_eval(cur_ylim2[0],ax2.yaxis) - dy2),ax2.yaxis),
+                                   self.inv_transform_eval((self.transform_eval(cur_ylim2[1],ax2.yaxis) - dy2),ax2.yaxis)]
                     except (ValueError, OverflowError):
                         cur_ylim2 = cur_ylim2  # Keep previous limits
                 # ax.set_ylim(cur_ylim)
@@ -1918,7 +1916,7 @@ class MatplotFigureTwinx(Widget):
             legend_x = bbox.xmin
             legend_y = bbox.ymin
                
-            loc_in_canvas = legend_x +dx/2, legend_y+dy/2
+            loc_in_canvas = legend_x +dx, legend_y+dy
             loc_in_norm_axes = legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
             legend._loc = tuple(loc_in_norm_axes)
             

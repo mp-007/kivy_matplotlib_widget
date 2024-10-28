@@ -951,7 +951,7 @@ class MatplotFigureSubplot(MatplotFigure):
             artists.extend(_iter_axes_subartists(ax))
 
             trans = ax.transData.inverted()
-            xdata, ydata = trans.transform_point((x+new_line.x/2, y+new_line.y/2))        
+            xdata, ydata = trans.transform_point((x+new_line.x, y+new_line.y))        
             
             cur_xlim = ax.get_xlim()
             cur_ylim = ax.get_ylim() 
@@ -1225,11 +1225,11 @@ class MatplotFigureSubplot(MatplotFigure):
                         if self.anchor_x=='left':                
                             if xdata> cur_xlim[0]:
                                 if scale == 'linear':
-                                    cur_xlim -= dx/2
+                                    cur_xlim -= dx
                                 else:
                                     try:
-                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                                     except (ValueError, OverflowError):
                                         cur_xlim = cur_xlim  # Keep previous limits                                  
                                 if inverted_x:
@@ -1239,11 +1239,11 @@ class MatplotFigureSubplot(MatplotFigure):
                         else:
                             if xdata< cur_xlim[1]:
                                 if scale == 'linear':
-                                    cur_xlim -= dx/2
+                                    cur_xlim -= dx
                                 else:
                                     try:
-                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                        cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                                     except (ValueError, OverflowError):
                                         cur_xlim = cur_xlim  # Keep previous limits  
                                 if inverted_x:
@@ -1253,11 +1253,11 @@ class MatplotFigureSubplot(MatplotFigure):
                 else:
                    if not twinx:
                         if scale == 'linear':
-                            cur_xlim -= dx/2
+                            cur_xlim -= dx
                         else:
                             try:
-                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx/2),ax.xaxis),
-                                            self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx/2),ax.xaxis)]  
+                                cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
+                                            self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits                   
                         if inverted_x:
@@ -1284,12 +1284,12 @@ class MatplotFigureSubplot(MatplotFigure):
                         if self.anchor_y=='top':
                             if ydata> cur_ylim[0]:
                                 if yscale == 'linear':
-                                    cur_ylim -= dy/2 
+                                    cur_ylim -= dy
                                 
                                 else:
                                     try:
-                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                                     except (ValueError, OverflowError):
                                         cur_ylim = cur_ylim  # Keep previous limits                        
                                 
@@ -1300,12 +1300,12 @@ class MatplotFigureSubplot(MatplotFigure):
                         else:
                             if ydata< cur_ylim[1]:
                                 if yscale == 'linear':
-                                    cur_ylim -= dy/2 
+                                    cur_ylim -= dy/
                                 
                                 else:
                                     try:
-                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                        cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                                     except (ValueError, OverflowError):
                                         cur_ylim = cur_ylim  # Keep previous limits 
                                 if inverted_y:
@@ -1315,12 +1315,12 @@ class MatplotFigureSubplot(MatplotFigure):
                 else:     
                     if not twiny:
                         if yscale == 'linear':
-                            cur_ylim -= dy/2 
+                            cur_ylim -= dy
                         
                         else:
                             try:
-                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy/2),ax.yaxis),
-                                            self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy/2),ax.yaxis)]
+                                cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
+                                            self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits 
                         if inverted_y:

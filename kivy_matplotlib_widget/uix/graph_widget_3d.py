@@ -499,7 +499,7 @@ class MatplotFigure3D(Widget):
         y = anchor[1]-self.pos[1]
 
         trans = ax.transData.inverted()
-        xdata, ydata = trans.transform_point((x+new_line.x/2, y+new_line.y/2))        
+        xdata, ydata = trans.transform_point((x+new_line.x, y+new_line.y))        
         
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim() 
