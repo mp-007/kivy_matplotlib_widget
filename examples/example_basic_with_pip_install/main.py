@@ -7,12 +7,15 @@ Note:
 
 """
 from kivy.utils import platform
+from kivy.config import Config
 
 #avoid conflict between mouse provider and touch (very important with touch device)
 #no need for android platform
 if platform != 'android':
-    from kivy.config import Config
     Config.set('input', 'mouse', 'mouse,disable_on_activity')
+else:
+    #for android, we remove mouse input to not get extra touch 
+    Config.remove_option('input', 'mouse')
 
 from kivy.lang import Builder
 from kivy.app import App
