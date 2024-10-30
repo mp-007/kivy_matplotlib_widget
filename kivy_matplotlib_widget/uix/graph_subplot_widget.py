@@ -1300,7 +1300,7 @@ class MatplotFigureSubplot(MatplotFigure):
                         else:
                             if ydata< cur_ylim[1]:
                                 if yscale == 'linear':
-                                    cur_ylim -= dy/
+                                    cur_ylim -= dy
                                 
                                 else:
                                     try:
