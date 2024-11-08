@@ -165,7 +165,8 @@ class MatplotFigureSubplot(MatplotFigure):
         matplotlib.pyplot.close()
         
     def __init__(self, **kwargs):
-        
+        self.kv_post_done = False
+        self.selector = None        
         super(MatplotFigureSubplot, self).__init__(**kwargs)
         self.background_patch_copy=[] 
 
@@ -513,7 +514,8 @@ class MatplotFigureSubplot(MatplotFigure):
 
             elif event.is_double_tap:
                 if not self.disable_double_tap:
-                    self.home(event)
+                    if self.touch_mode!='selector':                     
+                        self.home(event)
                 return True
                   
             else:
@@ -527,6 +529,8 @@ class MatplotFigureSubplot(MatplotFigure):
                     self.draw_box(event, x, real_y, x, real_y,onpress=True) 
                 elif self.touch_mode=='minmax':
                     self.min_max(event) 
+                elif self.touch_mode=='selector':
+                    pass                      
                                      
                 event.grab(self)
                 self._touches.append(event)
@@ -919,6 +923,8 @@ class MatplotFigureSubplot(MatplotFigure):
 
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0),new_line=None):
         """ zoom touch method """
+        if self.touch_mode=='selector':
+            return
                 
         x = anchor[0]-self.pos[0]
         y = anchor[1]-self.pos[1]
@@ -1781,3 +1787,4 @@ class MatplotFigureSubplot(MatplotFigure):
         self._img_texture.flip_vertical()
         
         self.update_hover() 
+        self.update_selector() 

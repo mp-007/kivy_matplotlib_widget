@@ -4,12 +4,12 @@
 import matplotlib
 matplotlib.use('Agg')
 import numpy as np
-# selector_widgets_available = False
-# try:
-selector_widgets_available = True
-from selector_widget import ResizeRelativeLayout,LassoRelativeLayout,EllipseRelativeLayout,SpanRelativeLayout
-# except ImportError:
-#     raise ImportError('Selector widgets are not available')
+selector_widgets_available = False
+try:
+    selector_widgets_available = True
+    from selector_widget import ResizeRelativeLayout,LassoRelativeLayout,EllipseRelativeLayout,SpanRelativeLayout
+except ImportError:
+    print('Selector widgets are not available')
     
 from kivy_matplotlib_widget.uix.graph_subplot_widget import MatplotFigureSubplot
 from kivy.properties import BooleanProperty,OptionProperty
