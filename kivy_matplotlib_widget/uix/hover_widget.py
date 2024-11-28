@@ -93,8 +93,10 @@ class BaseHoverFloatLayout(FloatLayout):
     figure_wgt = ObjectProperty(None)
     x_hover_pos = NumericProperty(1)
     y_hover_pos = NumericProperty(1)  
+    xmin_line = NumericProperty(1) 
+    xmax_line = NumericProperty(1) 
     ymin_line = NumericProperty(1) 
-    ymax_line = NumericProperty(1) 
+    ymax_line = NumericProperty(1)     
     hover_outside_bound = BooleanProperty(False)
     show_cursor = BooleanProperty(False)
     label_x = StringProperty('x')  
@@ -275,7 +277,22 @@ class InfoHover(BaseHoverFloatLayout):
     
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)             
+        super().__init__(**kwargs) 
+
+class MatplotlibStyleHover(BaseHoverFloatLayout):
+    """MatplotlibStyleHover look like matplotlib cursor but do not use matplotlib draw.
+        Usefull in live blit drawing
+    
+    """ 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    hover_height = NumericProperty(dp(48))
+    background_color=ColorProperty([1,1,1,1])
+    
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs)              
 
 Builder.load_string('''
 
@@ -705,6 +722,63 @@ Builder.load_string('''
                     text: root.label_y 
                     font_size:root.text_size
                     color: [0,0,0,1]
-                    font_name : root.text_font              
+                    font_name : root.text_font  
+                    
+<MatplotlibStyleHover>
+    custom_color: [0,0,0,1]    
+    
+    BoxLayout:
+        id:main_box
+        x:root.xmin_line
+        y: root.ymax_line + dp(4) 
+        size_hint: None, None
+        height: self.minimum_height
+        width: 
+            self.minimum_width + dp(12) if root.show_cursor \
+            else dp(0.0001)
+        orientation:'vertical'
+        padding: 0,dp(4),0,dp(4)
+        
+        canvas:            
+            Color:
+                rgba: root.background_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                        
+        canvas.after:  
+            Color:
+                rgba: 0,0,0,1
+            Line:
+                width: dp(1)
+        		points: 
+                    root.x_hover_pos, \
+           			root.ymin_line, \
+       				root.x_hover_pos, \
+       				root.ymax_line
+                dash_offset: 2
+                dash_length: 10
+                
+            Line:
+                width: dp(1)
+        		points: 
+                    root.xmin_line, \
+           			root.y_hover_pos, \
+       				root.xmax_line, \
+       				root.y_hover_pos 
+                dash_offset: 2
+                dash_length: 10                
+        
+        BoxLayout:
+            size_hint:None,None
+            width:label.texture_size[0] + dp(12)
+            height:label.texture_size[1] + dp(12)
+            Label:
+                id:label
+                text: 
+                    root.label_x + ': ' + root.label_x_value + '  ' + root.label_y + ': ' + root.label_y_value   
+                font_size:root.text_size
+                font_name : root.text_font
+                color: root.text_color
               
         ''')
