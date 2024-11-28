@@ -552,7 +552,9 @@ class MatplotFigureTwinx(Widget):
 
                         if hasattr(self.hover_instance,'overlap_check'):
                             self.hover_instance.overlap_check()
-                    
+
+                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
+                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                     
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
@@ -645,7 +647,9 @@ class MatplotFigureTwinx(Widget):
                                 
                         self.hover_instance.label_x_value=f"{x}"
                         self.hover_instance.label_y_value=f"{y}"
-                
+
+                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
+                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                  
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
@@ -1884,7 +1888,9 @@ class MatplotFigureTwinx(Widget):
                     xy_pos = self.figure.axes[0].transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
+
+                self.hover_instance.xmin_line = float(self.figure.axes[0].bbox.bounds[0]) + self.x
+                self.hover_instance.xmax_line = float(self.figure.axes[0].bbox.bounds[0] + self.figure.axes[0].bbox.bounds[2]) + self.x  
                 self.hover_instance.ymin_line = float(self.figure.axes[0].bbox.bounds[1]) + self.y
                 self.hover_instance.ymax_line = float(self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] )+ self.y
     
