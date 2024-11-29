@@ -14,11 +14,10 @@ import numpy as np
 from kivy.lang import Builder
 from kivy.properties import NumericProperty,StringProperty
 from kivy.app import App
+import kivy_matplotlib_widget
     
 
 KV = """
-#:import MatplotFigureSelector graph_selector_widget
-
 Screen
     figure_wgt:figure_wgt
     figure_wgt2:figure_wgt2
@@ -76,12 +75,11 @@ Screen
                 on_release:app.clear_selection()                    
             
         BoxLayout:
-            MatplotFigureSelector:
+            MatplotFigureSubplot:
                 id:figure_wgt
-                fast_draw:False
                 current_selector:'lasso'
 
-            MatplotFigureSelector:
+            MatplotFigure:
                 id:figure_wgt2 
                 current_selector:'lasso'
         
