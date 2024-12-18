@@ -7,6 +7,12 @@ import copy
 
 import matplotlib
 matplotlib.use('Agg')
+selector_widgets_available = False
+try:
+    selector_widgets_available = True
+    from kivy_matplotlib_widget.uix.selector_widget import ResizeRelativeLayout,LassoRelativeLayout,EllipseRelativeLayout,SpanRelativeLayout
+except ImportError:
+    print('Selector widgets are not available')
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
@@ -22,7 +28,8 @@ from weakref import WeakKeyDictionary
 from kivy.metrics import dp
 import numpy as np
 from kivy.utils import get_color_from_hex
-
+from kivy.core.window import Window
+from kivy.clock import Clock
 
 class MatplotFigure(Widget):
     """Widget to show a matplotlib figure in kivy.
@@ -75,6 +82,9 @@ class MatplotFigure(Widget):
     autoscale_visible_only = BooleanProperty(True)
     autoscale_axis = OptionProperty("both", options=["both", "x", "y"])
     autoscale_tight = BooleanProperty(False)
+    desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
+    current_selector = OptionProperty("None",
+                                     options = ["None",'rectangle','lasso','ellipse','span','custom'])    
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -174,8 +184,25 @@ class MatplotFigure(Widget):
         self.legend_instance = []
         self.current_legend=None
         
+        #selector management
+        self.kv_post_done = False
+        self.selector = None        
+        
         self.bind(size=self._onSize)
-      
+
+    def on_kv_post(self,_):
+        # if not self.selector:
+        if self.current_selector != "None" and selector_widgets_available:
+            if self.current_selector == 'rectangle':
+                self.set_selector(ResizeRelativeLayout)
+            elif self.current_selector == 'lasso':
+                self.set_selector(LassoRelativeLayout) 
+            elif self.current_selector == 'ellipse':
+                self.set_selector(EllipseRelativeLayout)     
+            elif self.current_selector == 'span':
+                self.set_selector(SpanRelativeLayout)                  
+        self.kv_post_done=True
+        
     def transform_eval(self,x,axis):
         custom_transform=axis.get_transform()
         return custom_transform.transform_non_affine(np.array([x]))[0]
@@ -183,6 +210,67 @@ class MatplotFigure(Widget):
     def inv_transform_eval(self,x,axis):
         inv_custom_transform=axis.get_transform().inverted()
         return inv_custom_transform.transform_non_affine(np.array([x]))[0]
+    
+    def on_current_selector(self,instance,value,*args):
+        
+        if self.kv_post_done and selector_widgets_available:
+
+            if value == 'rectangle':
+                self.set_selector(ResizeRelativeLayout)
+            elif value == 'lasso':
+                self.set_selector(LassoRelativeLayout)   
+            elif value == 'ellipse':
+                self.set_selector(EllipseRelativeLayout) 
+            elif self.current_selector == 'span':
+                self.set_selector(SpanRelativeLayout)                   
+            elif value == "None":
+                if self.selector:
+                    Window.unbind(mouse_pos=self.selector.resize_wgt.on_mouse_pos)
+                    self.parent.remove_widget(self.selector)
+                self.selector = None
+        
+    def set_selector(self,selector,*args):
+        selector_collection=None
+        selector_line=None
+        callback = None
+        callback_clear = None
+        if self.selector:
+            selector_collection = self.selector.resize_wgt.collection
+            selector_line = self.selector.resize_wgt.line
+            callback = self.selector.resize_wgt.callback
+            callback_clear  = self.selector.resize_wgt.callback_clear
+            Window.unbind(mouse_pos=self.selector.resize_wgt.on_mouse_pos)
+            self.parent.remove_widget(self.selector)
+            
+        self.selector = selector(figure_wgt=self,desktop_mode=self.desktop_mode)
+        self.selector.resize_wgt.ax = self.axes
+        if selector_collection:
+            self.set_collection()
+        if selector_line:
+            self.set_line(selector_line)
+        if callback:
+            self.set_callback(callback)
+        if callback_clear:
+            self.set_callback_clear(callback_clear)
+            
+        self.parent.add_widget(self.selector)  
+        
+    def set_collection(self):          
+        self.selector.resize_wgt.ax = self.axes
+        collections = self.axes.collections      
+        
+        if collections:
+           self.selector.resize_wgt.set_collection(collections[0]) 
+           
+    def set_line(self,line):
+        self.selector.resize_wgt.ax = self.axes  
+        self.selector.resize_wgt.set_line(line) 
+           
+    def set_callback(self,callback):
+        self.selector.resize_wgt.set_callback(callback)
+        
+    def set_callback_clear(self,callback):
+        self.selector.resize_wgt.set_callback_clear(callback)    
     
     def register_lines(self,lines:list) -> None:
         """ register lines method
@@ -373,7 +461,9 @@ class MatplotFigure(Widget):
                         
                         if hasattr(self.hover_instance,'overlap_check'):
                             self.hover_instance.overlap_check()
-                    
+
+                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
+                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                      
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
@@ -422,7 +512,9 @@ class MatplotFigure(Widget):
                             y = ax.yaxis.get_major_formatter().format_data_short(y)
                         self.hover_instance.label_x_value=f"{x}"
                         self.hover_instance.label_y_value=f"{y}"
-                
+
+                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
+                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                  
                         self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
                         self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
                         
@@ -638,7 +730,8 @@ class MatplotFigure(Widget):
             bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
         self._img_texture.flip_vertical()
         
-        self.update_hover()           
+        self.update_hover() 
+        self.update_selector()            
         
 
     def transform_with_touch(self, event):
@@ -814,13 +907,13 @@ class MatplotFigure(Widget):
             if event.is_mouse_scrolling:
                 if not self.disable_mouse_scrolling:
                     ax = self.axes
-                    ax = self.axes
                     self.zoom_factory(event, ax, base_scale=1.2)
                 return True
 
             elif event.is_double_tap:
                 if not self.disable_double_tap:
-                    self.home()
+                    if self.touch_mode!='selector': 
+                        self.home()
                 return True
                   
             else:
@@ -835,6 +928,8 @@ class MatplotFigure(Widget):
 
                 elif self.touch_mode=='minmax':
                     self.min_max(event)
+                elif self.touch_mode=='selector':
+                    pass                     
                     
                 event.grab(self)
                 self._touches.append(event)
@@ -856,7 +951,8 @@ class MatplotFigure(Widget):
 
         if event.is_double_tap:
             if not self.disable_double_tap:
-                self.home()               
+                if self.touch_mode!='selector': 
+                    self.home()               
             return True
 
         # scale/translate
@@ -920,6 +1016,8 @@ class MatplotFigure(Widget):
 
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0),new_line=None):
         """ zoom touch method """
+        if self.touch_mode=='selector':
+            return
                 
         x = anchor[0]-self.pos[0]
         y = anchor[1]-self.pos[1]
@@ -1215,7 +1313,9 @@ class MatplotFigure(Widget):
                 xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-     
+
+                self.hover_instance.xmin_line = float(self.axes.bbox.bounds[0]) + self.x
+                self.hover_instance.xmax_line = float(self.axes.bbox.bounds[0] + self.axes.bbox.bounds[2]) + self.x
                 self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1]) + self.y
                 self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] )+ self.y
     
@@ -1226,6 +1326,159 @@ class MatplotFigure(Widget):
                     self.hover_instance.hover_outside_bound=True
                 else:
                     self.hover_instance.hover_outside_bound=False 
+                    
+    def update_selector(self,*args):
+        """ update selector on fast draw (if exist)"""
+        if self.selector:
+            #update selector pos if needed
+            if self.selector.resize_wgt.verts and (len(args)!=0 or self.touch_mode!='selector'): 
+                resize_wgt = self.selector.resize_wgt
+
+                if hasattr(resize_wgt,'shapes'):
+                    #lasso widget or ellipse
+                    if resize_wgt.shapes:
+                        if hasattr(resize_wgt.shapes[0],'radius_x'):
+                            #ellipse widget
+                            xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[1][0],resize_wgt.verts[1][1])])
+                            new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
+                            pos0 = new_pos[0] + self.x
+                            pos1 = new_pos[1] + self.y 
+                            
+                            xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[2][0],resize_wgt.verts[2][1])])
+                            new_pos2=resize_wgt.to_widget(*(float(xy_pos2[0][0]),float(xy_pos2[0][1])))
+                            pos0_2 = new_pos2[0] + self.x
+                            pos1_2 = new_pos2[1] + self.y 
+    
+                            current_shape=resize_wgt.shapes[0]
+                            dataxy1 = current_shape.selection_point_inst.points
+                            dataxy2 = current_shape.selection_point_inst2.points 
+                            
+                            #note: the 2 first points are the same in current_shape.points
+                            pos0_old = dataxy1[0]
+                            pos1_old = dataxy1[1]
+    
+                            pos0_2_old = dataxy2[0]
+                            pos1_2_old = dataxy2[1]                            
+                            
+                            old_length = np.sqrt((pos0_2_old - pos0_old)**2 + (pos1_2_old - pos1_old)**2)
+                            new_length = np.sqrt((pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                            
+                            scale = float(new_length / old_length)
+                            
+                            xy_pos3 = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])])
+                            new_pos3=resize_wgt.to_widget(*(float(xy_pos3[0][0]),float(xy_pos3[0][1])))
+                            pos0_c = new_pos3[0] + self.x
+                            pos1_c = new_pos3[1] + self.y
+                            
+                            for s in resize_wgt.shapes:
+                                s.rescale(scale)
+                                
+                            for s in resize_wgt.shapes:
+                                s.translate(pos=(pos0_c,pos1_c))                            
+                            
+                            xmin,xmax,ymin,ymax = resize_wgt.shapes[0].get_min_max()
+                        else:
+                            #lasso widget
+                            xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])])
+                            new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
+                            pos0 = new_pos[0] + self.x
+                            pos1 = new_pos[1] + self.y 
+                            
+                            xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[1][0],resize_wgt.verts[1][1])])
+                            new_pos2=resize_wgt.to_widget(*(float(xy_pos2[0][0]),float(xy_pos2[0][1])))
+                            pos0_2 = new_pos2[0] + self.x
+                            pos1_2 = new_pos2[1] + self.y 
+    
+                            current_shape=resize_wgt.shapes[0]
+                            dataxy = np.array(current_shape.points).reshape(-1,2) 
+                            
+                            #note: the 2 first points are the same in current_shape.points
+                            pos0_old = dataxy[1][0]
+                            pos1_old = dataxy[1][1]
+    
+                            pos0_2_old = dataxy[2][0]
+                            pos1_2_old = dataxy[2][1]
+                            
+                            old_length = np.sqrt((pos0_2_old - pos0_old)**2 + (pos1_2_old - pos1_old)**2)
+                            new_length = np.sqrt((pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                            
+                            scale = new_length / old_length
+                            
+                            for s in resize_wgt.shapes:
+                                s.rescale(scale)
+                                
+                            for s in resize_wgt.shapes:
+                                s.translate(pos=(pos0,pos1))                            
+    
+                            xmax, ymax = dataxy.max(axis=0)
+                            xmin, ymin = dataxy.min(axis=0)                    
+                        
+                        if self.collide_point(*resize_wgt.to_window(xmin,ymin)) and \
+                            self.collide_point(*resize_wgt.to_window(xmax,ymax)):
+                            resize_wgt.opacity = 1
+                        else:
+                            resize_wgt.opacity = 0                   
+     
+                elif self.selector.resize_wgt.verts and (len(args)!=0 or self.touch_mode!='selector'): 
+                    resize_wgt = self.selector.resize_wgt
+                    if not (resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1):
+                        return
+                    
+                    #rectangle or spann selector
+                    if hasattr(resize_wgt,'span_orientation'):
+                        #span selector
+                        if resize_wgt.span_orientation == 'vertical':
+                            xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
+                            new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
+                            resize_wgt.pos[0] = new_pos[0] + self.x
+                            
+                            top_bound = float(self.y +resize_wgt.ax.bbox.bounds[3] + resize_wgt.ax.bbox.bounds[1])
+                            bottom_bound = float(self.y +resize_wgt.ax.bbox.bounds[1])
+                            resize_wgt.pos[1] = bottom_bound - self.y
+                            
+                            #recalcul size
+                            xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[3][0],resize_wgt.verts[3][1])]) 
+                            resize_wgt.size[0] = float(xy_pos2[0][0] - xy_pos[0][0])
+                            resize_wgt.size[1] = top_bound-bottom_bound
+                        
+                        elif resize_wgt.span_orientation == 'horizontal':
+                            xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
+                            new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
+                            left_bound = float(self.x +resize_wgt.ax.bbox.bounds[0])
+                            right_bound = float(self.x +resize_wgt.ax.bbox.bounds[2] +resize_wgt.ax.bbox.bounds[0] )
+                            
+                            width = right_bound-left_bound
+                            
+                            left_bound,right_bound = resize_wgt.to_widget(left_bound,right_bound)
+                            
+                            resize_wgt.pos[0] = left_bound
+                            resize_wgt.pos[1] = new_pos[1] + self.y
+
+                            #recalcul size
+                            xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][1],resize_wgt.verts[1][1])]) 
+                            resize_wgt.size[0] = width
+                            resize_wgt.size[1] = float(xy_pos2[0][1] - xy_pos[0][1])                        
+                        
+                    else:
+                        #rectangle selector
+                        
+                        #update all selector pts
+                        #recalcul pos
+                        xy_pos = resize_wgt.ax.transData.transform([(resize_wgt.verts[0][0],resize_wgt.verts[0][1])]) 
+                        new_pos=resize_wgt.to_widget(*(float(xy_pos[0][0]),float(xy_pos[0][1])))
+                        resize_wgt.pos[0] = new_pos[0] + self.x
+                        resize_wgt.pos[1] = new_pos[1] + self.y
+                        
+                        #recalcul size
+                        xy_pos2 = resize_wgt.ax.transData.transform([(resize_wgt.verts[2][0],resize_wgt.verts[2][1])]) 
+                        resize_wgt.size[0] = float(xy_pos2[0][0] - xy_pos[0][0])
+                        resize_wgt.size[1] = float(xy_pos2[0][1] - xy_pos[0][1])
+                        
+                    if self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0],resize_wgt.pos[1])) and \
+                        self.collide_point(*resize_wgt.to_window(resize_wgt.pos[0] + resize_wgt.size[0],resize_wgt.pos[1]+ resize_wgt.size[1])):
+                        resize_wgt.opacity = 1
+                    else:
+                        resize_wgt.opacity = 0                    
 
     def min_max(self, event):
         """ manage min/max touch mode """
@@ -1449,7 +1702,10 @@ class MatplotFigure(Widget):
                 current_legend.update_size()
         if self.hover_instance:
             self.hover_instance.figwidth = self.width
-
+        if self.selector and self.selector.resize_wgt.verts:
+            #update selector next frame to have correct position
+            Clock.schedule_once(self.update_selector)  
+            
     def update_lim(self):
         """ update axis lim if zoombox is used"""
         ax=self.axes
