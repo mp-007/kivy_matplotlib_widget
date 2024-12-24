@@ -152,7 +152,7 @@ class MatplotFigureCropFactor(Widget):
         self.anchor_y = None
 
         # manage back and next event
-        self._nav_stack = cbook.Stack()
+        self._nav_stack = cbook._Stack()
 
         self.bind(size=self._onSize)
 

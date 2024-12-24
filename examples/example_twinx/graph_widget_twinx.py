@@ -210,7 +210,7 @@ class MatplotFigureTwinx(Widget):
         self.show_compare_cursor=False
 
         #manage back and next event
-        self._nav_stack = cbook.Stack()
+        self._nav_stack = cbook._Stack()
         self.set_history_buttons()  
 
         #legend management

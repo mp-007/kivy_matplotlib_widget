@@ -184,7 +184,7 @@ class MatplotFigureScatter(Widget):
         self.first_touch_pan = None
         
         #manage back and next event
-        self._nav_stack = cbook.Stack()
+        self._nav_stack = cbook._Stack()
         self.set_history_buttons()  
         
         #legend management
