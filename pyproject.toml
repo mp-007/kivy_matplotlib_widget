@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "kivy>=2.0.0",
-    "matplotlib>=3.7.3"
+    "matplotlib>=3.5.2"
 ]
 keywords = ['android', 'python3', 'kivy', 'matplotlib']
 
