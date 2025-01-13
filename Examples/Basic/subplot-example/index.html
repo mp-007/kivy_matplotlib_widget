@@ -1,0 +1,1906 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../basic-example/">
+      
+      
+        <link rel="next" href="../../Hover/matplotlib-cursor/">
+      
+      
+      <link rel="icon" href="../../../assets/logo.PNG">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Subplot - Kivy Matplotlib Widget</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="Subplot - Kivy Matplotlib Widget" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="./assets/images/social/Examples/Basic/subplot-example.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="None" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="Subplot - Kivy Matplotlib Widget" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="./assets/images/social/Examples/Basic/subplot-example.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Kivy Matplotlib Widget" class="md-header__button md-logo" aria-label="Kivy Matplotlib Widget" data-md-component="logo">
+      
+  <img src="../../../assets/logo.PNG" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Kivy Matplotlib Widget
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Subplot
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mp-007/kivy_matplotlib_widget" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Kivy Matplotlib Widget" class="md-nav__button md-logo" aria-label="Kivy Matplotlib Widget" data-md-component="logo">
+      
+  <img src="../../../assets/logo.PNG" alt="logo">
+
+    </a>
+    Kivy Matplotlib Widget
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mp-007/kivy_matplotlib_widget" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to install
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Widgets
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Widgets
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/graph-subplot-widget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MatplotFigureSubplot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/graph-widget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MatplotFigure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/graph-widget-3D/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MatplotFigure3D
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/navigation-bar-widget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    KivyMatplotNavToolbar
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/legend-widget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LegendRv
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Widgets/others-widget/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Others
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Interactive behaviour
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Interactive behaviour
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Behaviour/interactive-axes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Interactive axes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Behaviour/min-max/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Min/Max
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Behaviour/zoom/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zoom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Basic
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basic-example/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Lines plot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Subplot
+  </span>
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Hover/Cursor
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Hover/Cursor
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Hover/matplotlib-cursor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Matplotlib cursor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Hover/kivy-hover/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kivy hover
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Matplotlib interactive legend
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Matplotlib interactive legend
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Legend/matplotlib-legend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic legend
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Legend/advanced-matplotlib-legend/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Advanced legend
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Selectors/kivy_selectors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Selectors tools
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../List/list_examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    List of all available examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Interactive converter
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Interactive converter
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Converter/converter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Convert any matplotlib figure with 1 function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tips
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Tips
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Tips/agg-opt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Agg backend optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../Tips/pyinstaller-tips/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pyinstaller
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            FAQ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../FAQ/seaborn/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Seaborn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../FAQ/matplotlib-events/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Matplotlib events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../FAQ/faq-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Others
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Subplot</h1>
+
+<p>This example show how to used MatplotFigureSubplot widget when you have multiple axes or any kind of other matplotlib figure with no lines only.</p>
+<p><img alt="MatplotFigureSubplot example" src="../../../assets/example_4_differents_subplot.PNG" /></p>
+<p>example folder: 'example_4_differents_subplot'</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>from kivy.utils import platform
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>from kivy.config import Config
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>#avoid conflict between mouse provider and touch (very important with touch device)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>#no need for android platform
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>if platform != &#39;android&#39;:
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    Config.set(&#39;input&#39;, &#39;mouse&#39;, &#39;mouse,disable_on_activity&#39;)
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>else:
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    #for android, we remove mouse input to not get extra touch 
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    Config.remove_option(&#39;input&#39;, &#39;mouse&#39;)
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>from kivy.lang import Builder
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>from kivy.app import App
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>import matplotlib.pyplot as plt
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>from kivy.metrics import dp
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>import numpy as np
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>from matplotlib.ticker import FormatStrFormatter
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>from kivy.properties import ColorProperty,NumericProperty,StringProperty
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>from matplotlib import gridspec
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>from numpy.random import rand
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>from matplotlib.ticker import NullFormatter, MaxNLocator
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>from numpy import linspace
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>KV = &#39;&#39;&#39;
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>BoxLayout:
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>    orientation:&#39;vertical&#39;
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>    BoxLayout:
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        size_hint_y:0.2
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        Button:
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>            text:&quot;home&quot;
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>            on_release:app.home()
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>        ToggleButton:
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>            group:&#39;touch_mode&#39;
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>            state:&#39;down&#39;
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>            text:&quot;pan&quot; 
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>            on_release:
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>                app.set_touch_mode(&#39;pan&#39;)
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>                self.state=&#39;down&#39;    
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>        ToggleButton:
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>            group:&#39;touch_mode&#39;
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>            text: &#39;ZoomBox&#39;
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>            on_press: 
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>                app.set_touch_mode(&#39;zoombox&#39;)
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>                self.state=&#39;down&#39;
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>    BoxLayout: 
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>        ScreenManager:
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>            id:sm
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>            Screen1:
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>            Screen2:
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>            Screen3:
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>            Screen4:
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>    BoxLayout:
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>        size_hint_y:0.1
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>        Button:
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>            text:&quot;previous screen&quot;
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>            on_release:app.previous_screen()
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>        Button:
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>            text:&quot;next screen&quot;
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>            on_release:app.next_screen()
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>&lt;Screen1@Screen&gt;
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a>    name:&#39;screen1&#39;  
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>    figure_wgt:figure_wgt                  
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>    MatplotFigureSubplot:
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>        id:figure_wgt
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>        fast_draw:True
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>        interactive_axis:True
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>&lt;Screen2@Screen&gt; 
+<a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>    name:&#39;screen2&#39;  
+<a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a>    figure_wgt:figure_wgt                  
+<a id="__codelineno-0-81" name="__codelineno-0-81" href="#__codelineno-0-81"></a>    MatplotFigureSubplot:
+<a id="__codelineno-0-82" name="__codelineno-0-82" href="#__codelineno-0-82"></a>        id:figure_wgt
+<a id="__codelineno-0-83" name="__codelineno-0-83" href="#__codelineno-0-83"></a>        fast_draw:True
+<a id="__codelineno-0-84" name="__codelineno-0-84" href="#__codelineno-0-84"></a>        interactive_axis:True
+<a id="__codelineno-0-85" name="__codelineno-0-85" href="#__codelineno-0-85"></a>        draw_all_axes:True
+<a id="__codelineno-0-86" name="__codelineno-0-86" href="#__codelineno-0-86"></a>
+<a id="__codelineno-0-87" name="__codelineno-0-87" href="#__codelineno-0-87"></a>&lt;Screen3@Screen&gt; 
+<a id="__codelineno-0-88" name="__codelineno-0-88" href="#__codelineno-0-88"></a>    name:&#39;screen3&#39;  
+<a id="__codelineno-0-89" name="__codelineno-0-89" href="#__codelineno-0-89"></a>    figure_wgt:figure_wgt                  
+<a id="__codelineno-0-90" name="__codelineno-0-90" href="#__codelineno-0-90"></a>    MatplotFigureSubplot:
+<a id="__codelineno-0-91" name="__codelineno-0-91" href="#__codelineno-0-91"></a>        id:figure_wgt
+<a id="__codelineno-0-92" name="__codelineno-0-92" href="#__codelineno-0-92"></a>        fast_draw:True
+<a id="__codelineno-0-93" name="__codelineno-0-93" href="#__codelineno-0-93"></a>        interactive_axis:True
+<a id="__codelineno-0-94" name="__codelineno-0-94" href="#__codelineno-0-94"></a>        draw_all_axes:True
+<a id="__codelineno-0-95" name="__codelineno-0-95" href="#__codelineno-0-95"></a>
+<a id="__codelineno-0-96" name="__codelineno-0-96" href="#__codelineno-0-96"></a>&lt;Screen4@Screen&gt; 
+<a id="__codelineno-0-97" name="__codelineno-0-97" href="#__codelineno-0-97"></a>    name:&#39;screen4&#39;  
+<a id="__codelineno-0-98" name="__codelineno-0-98" href="#__codelineno-0-98"></a>    figure_wgt:figure_wgt                  
+<a id="__codelineno-0-99" name="__codelineno-0-99" href="#__codelineno-0-99"></a>    MatplotFigureSubplot:
+<a id="__codelineno-0-100" name="__codelineno-0-100" href="#__codelineno-0-100"></a>        id:figure_wgt
+<a id="__codelineno-0-101" name="__codelineno-0-101" href="#__codelineno-0-101"></a>        max_hover_rate:5/60
+<a id="__codelineno-0-102" name="__codelineno-0-102" href="#__codelineno-0-102"></a>        fast_draw:True
+<a id="__codelineno-0-103" name="__codelineno-0-103" href="#__codelineno-0-103"></a>        interactive_axis:True
+<a id="__codelineno-0-104" name="__codelineno-0-104" href="#__codelineno-0-104"></a>        draw_all_axes:True
+<a id="__codelineno-0-105" name="__codelineno-0-105" href="#__codelineno-0-105"></a>
+<a id="__codelineno-0-106" name="__codelineno-0-106" href="#__codelineno-0-106"></a>&lt;PlotlyHover2&gt;
+<a id="__codelineno-0-107" name="__codelineno-0-107" href="#__codelineno-0-107"></a>    custom_color: [0,0,0,1]
+<a id="__codelineno-0-108" name="__codelineno-0-108" href="#__codelineno-0-108"></a>    BoxLayout:
+<a id="__codelineno-0-109" name="__codelineno-0-109" href="#__codelineno-0-109"></a>        id:main_box
+<a id="__codelineno-0-110" name="__codelineno-0-110" href="#__codelineno-0-110"></a>        x:
+<a id="__codelineno-0-111" name="__codelineno-0-111" href="#__codelineno-0-111"></a>            root.x_hover_pos + dp(4)
+<a id="__codelineno-0-112" name="__codelineno-0-112" href="#__codelineno-0-112"></a>        y:
+<a id="__codelineno-0-113" name="__codelineno-0-113" href="#__codelineno-0-113"></a>            root.y_hover_pos - root.hover_height/2
+<a id="__codelineno-0-114" name="__codelineno-0-114" href="#__codelineno-0-114"></a>        size_hint: None, None
+<a id="__codelineno-0-115" name="__codelineno-0-115" href="#__codelineno-0-115"></a>        height: label.texture_size[1]+ dp(4)
+<a id="__codelineno-0-116" name="__codelineno-0-116" href="#__codelineno-0-116"></a>        width: 
+<a id="__codelineno-0-117" name="__codelineno-0-117" href="#__codelineno-0-117"></a>            self.minimum_width + dp(12) if root.show_cursor \
+<a id="__codelineno-0-118" name="__codelineno-0-118" href="#__codelineno-0-118"></a>            else dp(0.0001)            
+<a id="__codelineno-0-119" name="__codelineno-0-119" href="#__codelineno-0-119"></a>        orientation:&#39;vertical&#39;
+<a id="__codelineno-0-120" name="__codelineno-0-120" href="#__codelineno-0-120"></a>        padding: 0,-dp(1),0,0
+<a id="__codelineno-0-121" name="__codelineno-0-121" href="#__codelineno-0-121"></a>
+<a id="__codelineno-0-122" name="__codelineno-0-122" href="#__codelineno-0-122"></a>        canvas:            
+<a id="__codelineno-0-123" name="__codelineno-0-123" href="#__codelineno-0-123"></a>            Color:
+<a id="__codelineno-0-124" name="__codelineno-0-124" href="#__codelineno-0-124"></a>                rgba: root.custom_color if root.custom_color else [0,0,0,1]
+<a id="__codelineno-0-125" name="__codelineno-0-125" href="#__codelineno-0-125"></a>            Rectangle:
+<a id="__codelineno-0-126" name="__codelineno-0-126" href="#__codelineno-0-126"></a>                pos: self.pos
+<a id="__codelineno-0-127" name="__codelineno-0-127" href="#__codelineno-0-127"></a>                size: self.size
+<a id="__codelineno-0-128" name="__codelineno-0-128" href="#__codelineno-0-128"></a>            Triangle:
+<a id="__codelineno-0-129" name="__codelineno-0-129" href="#__codelineno-0-129"></a>                points:
+<a id="__codelineno-0-130" name="__codelineno-0-130" href="#__codelineno-0-130"></a>                    [ \
+<a id="__codelineno-0-131" name="__codelineno-0-131" href="#__codelineno-0-131"></a>                    root.x_hover_pos, root.y_hover_pos, \
+<a id="__codelineno-0-132" name="__codelineno-0-132" href="#__codelineno-0-132"></a>                    main_box.x, root.y_hover_pos+ dp(4), \
+<a id="__codelineno-0-133" name="__codelineno-0-133" href="#__codelineno-0-133"></a>                    main_box.x, root.y_hover_pos- dp(4)  \
+<a id="__codelineno-0-134" name="__codelineno-0-134" href="#__codelineno-0-134"></a>                    ]
+<a id="__codelineno-0-135" name="__codelineno-0-135" href="#__codelineno-0-135"></a>            SmoothLine:
+<a id="__codelineno-0-136" name="__codelineno-0-136" href="#__codelineno-0-136"></a>                width:dp(1)
+<a id="__codelineno-0-137" name="__codelineno-0-137" href="#__codelineno-0-137"></a>                points:
+<a id="__codelineno-0-138" name="__codelineno-0-138" href="#__codelineno-0-138"></a>                    [ \
+<a id="__codelineno-0-139" name="__codelineno-0-139" href="#__codelineno-0-139"></a>                    root.x_hover_pos, root.y_hover_pos, \
+<a id="__codelineno-0-140" name="__codelineno-0-140" href="#__codelineno-0-140"></a>                    main_box.x, root.y_hover_pos \
+<a id="__codelineno-0-141" name="__codelineno-0-141" href="#__codelineno-0-141"></a>                    ]                           
+<a id="__codelineno-0-142" name="__codelineno-0-142" href="#__codelineno-0-142"></a>
+<a id="__codelineno-0-143" name="__codelineno-0-143" href="#__codelineno-0-143"></a>        BoxLayout:
+<a id="__codelineno-0-144" name="__codelineno-0-144" href="#__codelineno-0-144"></a>            size_hint_x:None
+<a id="__codelineno-0-145" name="__codelineno-0-145" href="#__codelineno-0-145"></a>            width:label.texture_size[0]
+<a id="__codelineno-0-146" name="__codelineno-0-146" href="#__codelineno-0-146"></a>            padding: dp(12),0,0,0
+<a id="__codelineno-0-147" name="__codelineno-0-147" href="#__codelineno-0-147"></a>            Label:
+<a id="__codelineno-0-148" name="__codelineno-0-148" href="#__codelineno-0-148"></a>                id:label
+<a id="__codelineno-0-149" name="__codelineno-0-149" href="#__codelineno-0-149"></a>                text: 
+<a id="__codelineno-0-150" name="__codelineno-0-150" href="#__codelineno-0-150"></a>                    &#39;(&#39; + root.label_x_value  +&#39;,&#39;+ root.label_y_value +&#39;)&#39;
+<a id="__codelineno-0-151" name="__codelineno-0-151" href="#__codelineno-0-151"></a>                font_size:root.text_size
+<a id="__codelineno-0-152" name="__codelineno-0-152" href="#__codelineno-0-152"></a>                color:
+<a id="__codelineno-0-153" name="__codelineno-0-153" href="#__codelineno-0-153"></a>                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
+<a id="__codelineno-0-154" name="__codelineno-0-154" href="#__codelineno-0-154"></a>                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) &gt; 186/255 \
+<a id="__codelineno-0-155" name="__codelineno-0-155" href="#__codelineno-0-155"></a>                    else [1,1,1,1]
+<a id="__codelineno-0-156" name="__codelineno-0-156" href="#__codelineno-0-156"></a>                font_name : root.text_font
+<a id="__codelineno-0-157" name="__codelineno-0-157" href="#__codelineno-0-157"></a>
+<a id="__codelineno-0-158" name="__codelineno-0-158" href="#__codelineno-0-158"></a>                font_name : root.text_font
+<a id="__codelineno-0-159" name="__codelineno-0-159" href="#__codelineno-0-159"></a>
+<a id="__codelineno-0-160" name="__codelineno-0-160" href="#__codelineno-0-160"></a>        FloatLayout:
+<a id="__codelineno-0-161" name="__codelineno-0-161" href="#__codelineno-0-161"></a>            size_hint: None,None
+<a id="__codelineno-0-162" name="__codelineno-0-162" href="#__codelineno-0-162"></a>            width: dp(0.01) 
+<a id="__codelineno-0-163" name="__codelineno-0-163" href="#__codelineno-0-163"></a>            height: dp(0.01) 
+<a id="__codelineno-0-164" name="__codelineno-0-164" href="#__codelineno-0-164"></a>            BoxLayout:
+<a id="__codelineno-0-165" name="__codelineno-0-165" href="#__codelineno-0-165"></a>                size_hint:None,None
+<a id="__codelineno-0-166" name="__codelineno-0-166" href="#__codelineno-0-166"></a>                x:main_box.x + main_box.width + dp(4)
+<a id="__codelineno-0-167" name="__codelineno-0-167" href="#__codelineno-0-167"></a>                y:main_box.y + main_box.height/2 - label3.texture_size[1]/2
+<a id="__codelineno-0-168" name="__codelineno-0-168" href="#__codelineno-0-168"></a>                width:label3.texture_size[0]
+<a id="__codelineno-0-169" name="__codelineno-0-169" href="#__codelineno-0-169"></a>                height:label3.texture_size[1]
+<a id="__codelineno-0-170" name="__codelineno-0-170" href="#__codelineno-0-170"></a>                Label:
+<a id="__codelineno-0-171" name="__codelineno-0-171" href="#__codelineno-0-171"></a>                    id:label3
+<a id="__codelineno-0-172" name="__codelineno-0-172" href="#__codelineno-0-172"></a>                    text: 
+<a id="__codelineno-0-173" name="__codelineno-0-173" href="#__codelineno-0-173"></a>                        root.custom_label if root.custom_label and not &#39;_child&#39; in root.custom_label else &#39;&#39;  
+<a id="__codelineno-0-174" name="__codelineno-0-174" href="#__codelineno-0-174"></a>                    font_size:root.text_size
+<a id="__codelineno-0-175" name="__codelineno-0-175" href="#__codelineno-0-175"></a>                    color: root.text_color
+<a id="__codelineno-0-176" name="__codelineno-0-176" href="#__codelineno-0-176"></a>                    font_name : root.text_font      
+<a id="__codelineno-0-177" name="__codelineno-0-177" href="#__codelineno-0-177"></a>
+<a id="__codelineno-0-178" name="__codelineno-0-178" href="#__codelineno-0-178"></a>&lt;InfoHover2&gt;
+<a id="__codelineno-0-179" name="__codelineno-0-179" href="#__codelineno-0-179"></a>    custom_color: [0,0,0,1]
+<a id="__codelineno-0-180" name="__codelineno-0-180" href="#__codelineno-0-180"></a>    BoxLayout:
+<a id="__codelineno-0-181" name="__codelineno-0-181" href="#__codelineno-0-181"></a>        id:main_box
+<a id="__codelineno-0-182" name="__codelineno-0-182" href="#__codelineno-0-182"></a>        x:
+<a id="__codelineno-0-183" name="__codelineno-0-183" href="#__codelineno-0-183"></a>            root.x_hover_pos + dp(4) if root.x_hover_pos + dp(4) &lt; root.figwidth - label.texture_size[0] - self.padding[0] * 2 \
+<a id="__codelineno-0-184" name="__codelineno-0-184" href="#__codelineno-0-184"></a>            else root.x_hover_pos - dp(4) - max(label.texture_size[0],label2.texture_size[0]) - self.padding[0] * 2
+<a id="__codelineno-0-185" name="__codelineno-0-185" href="#__codelineno-0-185"></a>        y:
+<a id="__codelineno-0-186" name="__codelineno-0-186" href="#__codelineno-0-186"></a>            root.y_hover_pos + dp(4)
+<a id="__codelineno-0-187" name="__codelineno-0-187" href="#__codelineno-0-187"></a>        size_hint: None, None
+<a id="__codelineno-0-188" name="__codelineno-0-188" href="#__codelineno-0-188"></a>        height: root.hover_height
+<a id="__codelineno-0-189" name="__codelineno-0-189" href="#__codelineno-0-189"></a>        width: 
+<a id="__codelineno-0-190" name="__codelineno-0-190" href="#__codelineno-0-190"></a>            max(label.texture_size[0],label2.texture_size[0]) + dp(12) if root.show_cursor \
+<a id="__codelineno-0-191" name="__codelineno-0-191" href="#__codelineno-0-191"></a>            else dp(0.0001)            
+<a id="__codelineno-0-192" name="__codelineno-0-192" href="#__codelineno-0-192"></a>        orientation:&#39;vertical&#39;
+<a id="__codelineno-0-193" name="__codelineno-0-193" href="#__codelineno-0-193"></a>        padding: 0,dp(4),0,dp(4)
+<a id="__codelineno-0-194" name="__codelineno-0-194" href="#__codelineno-0-194"></a>
+<a id="__codelineno-0-195" name="__codelineno-0-195" href="#__codelineno-0-195"></a>        canvas:            
+<a id="__codelineno-0-196" name="__codelineno-0-196" href="#__codelineno-0-196"></a>            Color:
+<a id="__codelineno-0-197" name="__codelineno-0-197" href="#__codelineno-0-197"></a>                rgba: root.custom_color if root.custom_color else [0,0,0,1]
+<a id="__codelineno-0-198" name="__codelineno-0-198" href="#__codelineno-0-198"></a>            Rectangle:
+<a id="__codelineno-0-199" name="__codelineno-0-199" href="#__codelineno-0-199"></a>                pos: self.pos
+<a id="__codelineno-0-200" name="__codelineno-0-200" href="#__codelineno-0-200"></a>                size: self.size
+<a id="__codelineno-0-201" name="__codelineno-0-201" href="#__codelineno-0-201"></a>            Color:
+<a id="__codelineno-0-202" name="__codelineno-0-202" href="#__codelineno-0-202"></a>                rgba: 0,0,0,1
+<a id="__codelineno-0-203" name="__codelineno-0-203" href="#__codelineno-0-203"></a>
+<a id="__codelineno-0-204" name="__codelineno-0-204" href="#__codelineno-0-204"></a>            Line:
+<a id="__codelineno-0-205" name="__codelineno-0-205" href="#__codelineno-0-205"></a>                width: 1    
+<a id="__codelineno-0-206" name="__codelineno-0-206" href="#__codelineno-0-206"></a>                rounded_rectangle:
+<a id="__codelineno-0-207" name="__codelineno-0-207" href="#__codelineno-0-207"></a>                    (self.x, self.y, self.width, self.height,\
+<a id="__codelineno-0-208" name="__codelineno-0-208" href="#__codelineno-0-208"></a>                    dp(4), dp(4), dp(4), dp(4),\
+<a id="__codelineno-0-209" name="__codelineno-0-209" href="#__codelineno-0-209"></a>                    self.height)                 
+<a id="__codelineno-0-210" name="__codelineno-0-210" href="#__codelineno-0-210"></a>
+<a id="__codelineno-0-211" name="__codelineno-0-211" href="#__codelineno-0-211"></a>
+<a id="__codelineno-0-212" name="__codelineno-0-212" href="#__codelineno-0-212"></a>        canvas.after:            
+<a id="__codelineno-0-213" name="__codelineno-0-213" href="#__codelineno-0-213"></a>            Color:
+<a id="__codelineno-0-214" name="__codelineno-0-214" href="#__codelineno-0-214"></a>                rgba: 0,0,0,1
+<a id="__codelineno-0-215" name="__codelineno-0-215" href="#__codelineno-0-215"></a>            Rectangle:
+<a id="__codelineno-0-216" name="__codelineno-0-216" href="#__codelineno-0-216"></a>                size: (dp(8),dp(8))
+<a id="__codelineno-0-217" name="__codelineno-0-217" href="#__codelineno-0-217"></a>                pos: 
+<a id="__codelineno-0-218" name="__codelineno-0-218" href="#__codelineno-0-218"></a>                    (root.x_hover_pos-dp(8/2), \
+<a id="__codelineno-0-219" name="__codelineno-0-219" href="#__codelineno-0-219"></a>                     root.y_hover_pos-dp(8/2))
+<a id="__codelineno-0-220" name="__codelineno-0-220" href="#__codelineno-0-220"></a>
+<a id="__codelineno-0-221" name="__codelineno-0-221" href="#__codelineno-0-221"></a>        BoxLayout:
+<a id="__codelineno-0-222" name="__codelineno-0-222" href="#__codelineno-0-222"></a>            size_hint_x:None
+<a id="__codelineno-0-223" name="__codelineno-0-223" href="#__codelineno-0-223"></a>            width:label.texture_size[0]
+<a id="__codelineno-0-224" name="__codelineno-0-224" href="#__codelineno-0-224"></a>            padding: dp(12),0,0,0
+<a id="__codelineno-0-225" name="__codelineno-0-225" href="#__codelineno-0-225"></a>            Label:
+<a id="__codelineno-0-226" name="__codelineno-0-226" href="#__codelineno-0-226"></a>                id:label
+<a id="__codelineno-0-227" name="__codelineno-0-227" href="#__codelineno-0-227"></a>                text: 
+<a id="__codelineno-0-228" name="__codelineno-0-228" href="#__codelineno-0-228"></a>                    root.label_x + &#39;: &#39; + root.label_x_value  
+<a id="__codelineno-0-229" name="__codelineno-0-229" href="#__codelineno-0-229"></a>                font_size:root.text_size
+<a id="__codelineno-0-230" name="__codelineno-0-230" href="#__codelineno-0-230"></a>                color:
+<a id="__codelineno-0-231" name="__codelineno-0-231" href="#__codelineno-0-231"></a>                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
+<a id="__codelineno-0-232" name="__codelineno-0-232" href="#__codelineno-0-232"></a>                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) &gt; 186/255 \
+<a id="__codelineno-0-233" name="__codelineno-0-233" href="#__codelineno-0-233"></a>                    else [1,1,1,1]
+<a id="__codelineno-0-234" name="__codelineno-0-234" href="#__codelineno-0-234"></a>                font_name : root.text_font
+<a id="__codelineno-0-235" name="__codelineno-0-235" href="#__codelineno-0-235"></a>
+<a id="__codelineno-0-236" name="__codelineno-0-236" href="#__codelineno-0-236"></a>        BoxLayout:
+<a id="__codelineno-0-237" name="__codelineno-0-237" href="#__codelineno-0-237"></a>            size_hint_x:None
+<a id="__codelineno-0-238" name="__codelineno-0-238" href="#__codelineno-0-238"></a>            width:label2.texture_size[0]   
+<a id="__codelineno-0-239" name="__codelineno-0-239" href="#__codelineno-0-239"></a>            padding: dp(12),0,0,0
+<a id="__codelineno-0-240" name="__codelineno-0-240" href="#__codelineno-0-240"></a>            Label:
+<a id="__codelineno-0-241" name="__codelineno-0-241" href="#__codelineno-0-241"></a>                id:label2
+<a id="__codelineno-0-242" name="__codelineno-0-242" href="#__codelineno-0-242"></a>                text:
+<a id="__codelineno-0-243" name="__codelineno-0-243" href="#__codelineno-0-243"></a>                    root.label_y + &#39;: &#39; + root.label_y_value    
+<a id="__codelineno-0-244" name="__codelineno-0-244" href="#__codelineno-0-244"></a>                font_size:root.text_size
+<a id="__codelineno-0-245" name="__codelineno-0-245" href="#__codelineno-0-245"></a>                color:
+<a id="__codelineno-0-246" name="__codelineno-0-246" href="#__codelineno-0-246"></a>                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
+<a id="__codelineno-0-247" name="__codelineno-0-247" href="#__codelineno-0-247"></a>                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) &gt; 186/255 \
+<a id="__codelineno-0-248" name="__codelineno-0-248" href="#__codelineno-0-248"></a>                    else [1,1,1,1]
+<a id="__codelineno-0-249" name="__codelineno-0-249" href="#__codelineno-0-249"></a>                font_name : root.text_font
+<a id="__codelineno-0-250" name="__codelineno-0-250" href="#__codelineno-0-250"></a>        FloatLayout:
+<a id="__codelineno-0-251" name="__codelineno-0-251" href="#__codelineno-0-251"></a>            size_hint: None,None
+<a id="__codelineno-0-252" name="__codelineno-0-252" href="#__codelineno-0-252"></a>            width: dp(0.01) 
+<a id="__codelineno-0-253" name="__codelineno-0-253" href="#__codelineno-0-253"></a>            height: dp(0.01) 
+<a id="__codelineno-0-254" name="__codelineno-0-254" href="#__codelineno-0-254"></a>            BoxLayout:
+<a id="__codelineno-0-255" name="__codelineno-0-255" href="#__codelineno-0-255"></a>                size_hint:None,None
+<a id="__codelineno-0-256" name="__codelineno-0-256" href="#__codelineno-0-256"></a>                x:main_box.x + main_box.width + dp(4)
+<a id="__codelineno-0-257" name="__codelineno-0-257" href="#__codelineno-0-257"></a>                y:main_box.y + main_box.height - label3.texture_size[1]
+<a id="__codelineno-0-258" name="__codelineno-0-258" href="#__codelineno-0-258"></a>                width:label3.texture_size[0]
+<a id="__codelineno-0-259" name="__codelineno-0-259" href="#__codelineno-0-259"></a>                height:label3.texture_size[1]
+<a id="__codelineno-0-260" name="__codelineno-0-260" href="#__codelineno-0-260"></a>                Label:
+<a id="__codelineno-0-261" name="__codelineno-0-261" href="#__codelineno-0-261"></a>                    id:label3
+<a id="__codelineno-0-262" name="__codelineno-0-262" href="#__codelineno-0-262"></a>                    text: 
+<a id="__codelineno-0-263" name="__codelineno-0-263" href="#__codelineno-0-263"></a>                        root.custom_label if root.custom_label and not &#39;_child&#39; in root.custom_label else &#39;&#39;  
+<a id="__codelineno-0-264" name="__codelineno-0-264" href="#__codelineno-0-264"></a>                    font_size:root.text_size
+<a id="__codelineno-0-265" name="__codelineno-0-265" href="#__codelineno-0-265"></a>                    color: root.text_color
+<a id="__codelineno-0-266" name="__codelineno-0-266" href="#__codelineno-0-266"></a>                    font_name : root.text_font  
+<a id="__codelineno-0-267" name="__codelineno-0-267" href="#__codelineno-0-267"></a>
+<a id="__codelineno-0-268" name="__codelineno-0-268" href="#__codelineno-0-268"></a>&#39;&#39;&#39;
+<a id="__codelineno-0-269" name="__codelineno-0-269" href="#__codelineno-0-269"></a>
+<a id="__codelineno-0-270" name="__codelineno-0-270" href="#__codelineno-0-270"></a>class PlotlyHover2(BaseHoverFloatLayout):
+<a id="__codelineno-0-271" name="__codelineno-0-271" href="#__codelineno-0-271"></a>    &quot;&quot;&quot; PlotlyHover adapt the background and the font color with the line or scatter color&quot;&quot;&quot; 
+<a id="__codelineno-0-272" name="__codelineno-0-272" href="#__codelineno-0-272"></a>    text_color=ColorProperty([0,0,0,1])
+<a id="__codelineno-0-273" name="__codelineno-0-273" href="#__codelineno-0-273"></a>    text_font=StringProperty(&quot;Roboto&quot;)
+<a id="__codelineno-0-274" name="__codelineno-0-274" href="#__codelineno-0-274"></a>    text_size = NumericProperty(dp(14))
+<a id="__codelineno-0-275" name="__codelineno-0-275" href="#__codelineno-0-275"></a>    hover_height = NumericProperty(dp(24))
+<a id="__codelineno-0-276" name="__codelineno-0-276" href="#__codelineno-0-276"></a>
+<a id="__codelineno-0-277" name="__codelineno-0-277" href="#__codelineno-0-277"></a>
+<a id="__codelineno-0-278" name="__codelineno-0-278" href="#__codelineno-0-278"></a>    def __init__(self, **kwargs):
+<a id="__codelineno-0-279" name="__codelineno-0-279" href="#__codelineno-0-279"></a>        &quot;&quot;&quot; init class &quot;&quot;&quot;
+<a id="__codelineno-0-280" name="__codelineno-0-280" href="#__codelineno-0-280"></a>        super().__init__(**kwargs)  
+<a id="__codelineno-0-281" name="__codelineno-0-281" href="#__codelineno-0-281"></a>
+<a id="__codelineno-0-282" name="__codelineno-0-282" href="#__codelineno-0-282"></a>class InfoHover2(BaseHoverFloatLayout):
+<a id="__codelineno-0-283" name="__codelineno-0-283" href="#__codelineno-0-283"></a>    &quot;&quot;&quot; InfoHover adapt the background and the font color with the line or scatter color&quot;&quot;&quot; 
+<a id="__codelineno-0-284" name="__codelineno-0-284" href="#__codelineno-0-284"></a>    text_color=ColorProperty([0,0,0,1])
+<a id="__codelineno-0-285" name="__codelineno-0-285" href="#__codelineno-0-285"></a>    text_font=StringProperty(&quot;Roboto&quot;)
+<a id="__codelineno-0-286" name="__codelineno-0-286" href="#__codelineno-0-286"></a>    text_size = NumericProperty(dp(14))
+<a id="__codelineno-0-287" name="__codelineno-0-287" href="#__codelineno-0-287"></a>    hover_height = NumericProperty(dp(48))
+<a id="__codelineno-0-288" name="__codelineno-0-288" href="#__codelineno-0-288"></a>
+<a id="__codelineno-0-289" name="__codelineno-0-289" href="#__codelineno-0-289"></a>    def __init__(self, **kwargs):
+<a id="__codelineno-0-290" name="__codelineno-0-290" href="#__codelineno-0-290"></a>        &quot;&quot;&quot; init class &quot;&quot;&quot;
+<a id="__codelineno-0-291" name="__codelineno-0-291" href="#__codelineno-0-291"></a>        super().__init__(**kwargs)     
+<a id="__codelineno-0-292" name="__codelineno-0-292" href="#__codelineno-0-292"></a>
+<a id="__codelineno-0-293" name="__codelineno-0-293" href="#__codelineno-0-293"></a>class Test(App):
+<a id="__codelineno-0-294" name="__codelineno-0-294" href="#__codelineno-0-294"></a>    lines = []
+<a id="__codelineno-0-295" name="__codelineno-0-295" href="#__codelineno-0-295"></a>
+<a id="__codelineno-0-296" name="__codelineno-0-296" href="#__codelineno-0-296"></a>    def build(self):
+<a id="__codelineno-0-297" name="__codelineno-0-297" href="#__codelineno-0-297"></a>        self.graph_app = Builder.load_string(KV)
+<a id="__codelineno-0-298" name="__codelineno-0-298" href="#__codelineno-0-298"></a>        return self.graph_app
+<a id="__codelineno-0-299" name="__codelineno-0-299" href="#__codelineno-0-299"></a>
+<a id="__codelineno-0-300" name="__codelineno-0-300" href="#__codelineno-0-300"></a>
+<a id="__codelineno-0-301" name="__codelineno-0-301" href="#__codelineno-0-301"></a>    def on_start(self, *args):
+<a id="__codelineno-0-302" name="__codelineno-0-302" href="#__codelineno-0-302"></a>
+<a id="__codelineno-0-303" name="__codelineno-0-303" href="#__codelineno-0-303"></a># =============================================================================
+<a id="__codelineno-0-304" name="__codelineno-0-304" href="#__codelineno-0-304"></a>#         figure 1 - screen1
+<a id="__codelineno-0-305" name="__codelineno-0-305" href="#__codelineno-0-305"></a># =============================================================================
+<a id="__codelineno-0-306" name="__codelineno-0-306" href="#__codelineno-0-306"></a>        x = np.linspace(0, 2 * np.pi, 400)
+<a id="__codelineno-0-307" name="__codelineno-0-307" href="#__codelineno-0-307"></a>        y = np.sin(x ** 2)
+<a id="__codelineno-0-308" name="__codelineno-0-308" href="#__codelineno-0-308"></a>
+<a id="__codelineno-0-309" name="__codelineno-0-309" href="#__codelineno-0-309"></a>        fig, axs = plt.subplots(2, 2)
+<a id="__codelineno-0-310" name="__codelineno-0-310" href="#__codelineno-0-310"></a>        axs[0, 0].plot(x, y)
+<a id="__codelineno-0-311" name="__codelineno-0-311" href="#__codelineno-0-311"></a>        axs[0, 0].set_title(&#39;Axis [0, 0]&#39;)
+<a id="__codelineno-0-312" name="__codelineno-0-312" href="#__codelineno-0-312"></a>        axs[0, 1].plot(x, y, &#39;tab:orange&#39;)
+<a id="__codelineno-0-313" name="__codelineno-0-313" href="#__codelineno-0-313"></a>        axs[0, 1].set_title(&#39;Axis [0, 1]&#39;)
+<a id="__codelineno-0-314" name="__codelineno-0-314" href="#__codelineno-0-314"></a>        axs[1, 0].plot(x, -y, &#39;tab:green&#39;)
+<a id="__codelineno-0-315" name="__codelineno-0-315" href="#__codelineno-0-315"></a>        axs[1, 0].set_title(&#39;Axis [1, 0]&#39;)
+<a id="__codelineno-0-316" name="__codelineno-0-316" href="#__codelineno-0-316"></a>        axs[1, 1].plot(x, -y, &#39;tab:red&#39;)
+<a id="__codelineno-0-317" name="__codelineno-0-317" href="#__codelineno-0-317"></a>        axs[1, 1].set_title(&#39;Axis [1, 1]&#39;)
+<a id="__codelineno-0-318" name="__codelineno-0-318" href="#__codelineno-0-318"></a>
+<a id="__codelineno-0-319" name="__codelineno-0-319" href="#__codelineno-0-319"></a>        axs[1, 1].set_xlim(2,10)
+<a id="__codelineno-0-320" name="__codelineno-0-320" href="#__codelineno-0-320"></a>
+<a id="__codelineno-0-321" name="__codelineno-0-321" href="#__codelineno-0-321"></a>        for ax in axs.flat:
+<a id="__codelineno-0-322" name="__codelineno-0-322" href="#__codelineno-0-322"></a>            ax.set(xlabel=&#39;x-label&#39;, ylabel=&#39;y-label&#39;)
+<a id="__codelineno-0-323" name="__codelineno-0-323" href="#__codelineno-0-323"></a>
+<a id="__codelineno-0-324" name="__codelineno-0-324" href="#__codelineno-0-324"></a>        # Hide x labels and tick labels for top plots and y ticks for right plots.
+<a id="__codelineno-0-325" name="__codelineno-0-325" href="#__codelineno-0-325"></a>        for ax in axs.flat:
+<a id="__codelineno-0-326" name="__codelineno-0-326" href="#__codelineno-0-326"></a>            ax.label_outer()
+<a id="__codelineno-0-327" name="__codelineno-0-327" href="#__codelineno-0-327"></a>
+<a id="__codelineno-0-328" name="__codelineno-0-328" href="#__codelineno-0-328"></a>        screen1=self.graph_app.ids.sm.get_screen(&#39;screen1&#39;)
+<a id="__codelineno-0-329" name="__codelineno-0-329" href="#__codelineno-0-329"></a>        screen1.figure_wgt.figure = fig
+<a id="__codelineno-0-330" name="__codelineno-0-330" href="#__codelineno-0-330"></a>        screen1.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-331" name="__codelineno-0-331" href="#__codelineno-0-331"></a>        screen1.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-332" name="__codelineno-0-332" href="#__codelineno-0-332"></a>
+<a id="__codelineno-0-333" name="__codelineno-0-333" href="#__codelineno-0-333"></a>        screen1.figure_wgt.register_cursor()
+<a id="__codelineno-0-334" name="__codelineno-0-334" href="#__codelineno-0-334"></a>
+<a id="__codelineno-0-335" name="__codelineno-0-335" href="#__codelineno-0-335"></a>        add_hover(screen1.figure_wgt,mode=&#39;desktop&#39;,hover_widget=PlotlyHover2())
+<a id="__codelineno-0-336" name="__codelineno-0-336" href="#__codelineno-0-336"></a>
+<a id="__codelineno-0-337" name="__codelineno-0-337" href="#__codelineno-0-337"></a># =============================================================================
+<a id="__codelineno-0-338" name="__codelineno-0-338" href="#__codelineno-0-338"></a>#         figure 2 - screen2
+<a id="__codelineno-0-339" name="__codelineno-0-339" href="#__codelineno-0-339"></a># =============================================================================
+<a id="__codelineno-0-340" name="__codelineno-0-340" href="#__codelineno-0-340"></a>        x = np.linspace(0, 2 * np.pi, 400)
+<a id="__codelineno-0-341" name="__codelineno-0-341" href="#__codelineno-0-341"></a>        y = np.sin(x ** 2)
+<a id="__codelineno-0-342" name="__codelineno-0-342" href="#__codelineno-0-342"></a>
+<a id="__codelineno-0-343" name="__codelineno-0-343" href="#__codelineno-0-343"></a>        fig2 = plt.figure()
+<a id="__codelineno-0-344" name="__codelineno-0-344" href="#__codelineno-0-344"></a>        # set height ratios for subplots
+<a id="__codelineno-0-345" name="__codelineno-0-345" href="#__codelineno-0-345"></a>        gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1]) 
+<a id="__codelineno-0-346" name="__codelineno-0-346" href="#__codelineno-0-346"></a>
+<a id="__codelineno-0-347" name="__codelineno-0-347" href="#__codelineno-0-347"></a>        # the first subplot
+<a id="__codelineno-0-348" name="__codelineno-0-348" href="#__codelineno-0-348"></a>        ax0 = plt.subplot(gs[0])
+<a id="__codelineno-0-349" name="__codelineno-0-349" href="#__codelineno-0-349"></a>        # log scale for axis Y of the first subplot
+<a id="__codelineno-0-350" name="__codelineno-0-350" href="#__codelineno-0-350"></a>        ax0.set_yscale(&quot;log&quot;)
+<a id="__codelineno-0-351" name="__codelineno-0-351" href="#__codelineno-0-351"></a>        line0, = ax0.plot(x, y, color=&#39;r&#39;,label=&#39;red line&#39;)
+<a id="__codelineno-0-352" name="__codelineno-0-352" href="#__codelineno-0-352"></a>
+<a id="__codelineno-0-353" name="__codelineno-0-353" href="#__codelineno-0-353"></a>        # the second subplot
+<a id="__codelineno-0-354" name="__codelineno-0-354" href="#__codelineno-0-354"></a>        # shared axis X
+<a id="__codelineno-0-355" name="__codelineno-0-355" href="#__codelineno-0-355"></a>        ax1 = plt.subplot(gs[1], sharex = ax0)
+<a id="__codelineno-0-356" name="__codelineno-0-356" href="#__codelineno-0-356"></a>        line1, = ax1.plot(x, y, color=&#39;b&#39;, linestyle=&#39;--&#39;,label=&#39;red line&#39;)
+<a id="__codelineno-0-357" name="__codelineno-0-357" href="#__codelineno-0-357"></a>        plt.setp(ax0.get_xticklabels(), visible=False)
+<a id="__codelineno-0-358" name="__codelineno-0-358" href="#__codelineno-0-358"></a>        # remove last tick label for the second subplot
+<a id="__codelineno-0-359" name="__codelineno-0-359" href="#__codelineno-0-359"></a>        yticks = ax1.yaxis.get_major_ticks()
+<a id="__codelineno-0-360" name="__codelineno-0-360" href="#__codelineno-0-360"></a>        yticks[-1].label1.set_visible(False)
+<a id="__codelineno-0-361" name="__codelineno-0-361" href="#__codelineno-0-361"></a>
+<a id="__codelineno-0-362" name="__codelineno-0-362" href="#__codelineno-0-362"></a>        # put legend on first subplot
+<a id="__codelineno-0-363" name="__codelineno-0-363" href="#__codelineno-0-363"></a>        ax0.legend((line0, line1), (&#39;red line&#39;, &#39;blue line&#39;), loc=&#39;lower left&#39;)
+<a id="__codelineno-0-364" name="__codelineno-0-364" href="#__codelineno-0-364"></a>
+<a id="__codelineno-0-365" name="__codelineno-0-365" href="#__codelineno-0-365"></a>        # remove vertical gap between subplots
+<a id="__codelineno-0-366" name="__codelineno-0-366" href="#__codelineno-0-366"></a>        plt.subplots_adjust(hspace=.0)
+<a id="__codelineno-0-367" name="__codelineno-0-367" href="#__codelineno-0-367"></a>
+<a id="__codelineno-0-368" name="__codelineno-0-368" href="#__codelineno-0-368"></a>        screen2=self.graph_app.ids.sm.get_screen(&#39;screen2&#39;)
+<a id="__codelineno-0-369" name="__codelineno-0-369" href="#__codelineno-0-369"></a>        screen2.figure_wgt.figure = fig2
+<a id="__codelineno-0-370" name="__codelineno-0-370" href="#__codelineno-0-370"></a>        screen2.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-371" name="__codelineno-0-371" href="#__codelineno-0-371"></a>        screen2.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-372" name="__codelineno-0-372" href="#__codelineno-0-372"></a>
+<a id="__codelineno-0-373" name="__codelineno-0-373" href="#__codelineno-0-373"></a>        screen2.figure_wgt.register_cursor()
+<a id="__codelineno-0-374" name="__codelineno-0-374" href="#__codelineno-0-374"></a>
+<a id="__codelineno-0-375" name="__codelineno-0-375" href="#__codelineno-0-375"></a>        add_hover(screen2.figure_wgt,mode=&#39;desktop&#39;,hover_widget=PlotlyHover2())
+<a id="__codelineno-0-376" name="__codelineno-0-376" href="#__codelineno-0-376"></a>
+<a id="__codelineno-0-377" name="__codelineno-0-377" href="#__codelineno-0-377"></a># =============================================================================
+<a id="__codelineno-0-378" name="__codelineno-0-378" href="#__codelineno-0-378"></a>#         figure 3 - screen3
+<a id="__codelineno-0-379" name="__codelineno-0-379" href="#__codelineno-0-379"></a># =============================================================================
+<a id="__codelineno-0-380" name="__codelineno-0-380" href="#__codelineno-0-380"></a>
+<a id="__codelineno-0-381" name="__codelineno-0-381" href="#__codelineno-0-381"></a>        # create all axes we need
+<a id="__codelineno-0-382" name="__codelineno-0-382" href="#__codelineno-0-382"></a>        ax0 = plt.subplot(211)
+<a id="__codelineno-0-383" name="__codelineno-0-383" href="#__codelineno-0-383"></a>        ax1 = ax0.twinx()
+<a id="__codelineno-0-384" name="__codelineno-0-384" href="#__codelineno-0-384"></a>        ax2 = plt.subplot(212)
+<a id="__codelineno-0-385" name="__codelineno-0-385" href="#__codelineno-0-385"></a>        ax3 = ax2.twinx()
+<a id="__codelineno-0-386" name="__codelineno-0-386" href="#__codelineno-0-386"></a>
+<a id="__codelineno-0-387" name="__codelineno-0-387" href="#__codelineno-0-387"></a>        # share the secondary axes
+<a id="__codelineno-0-388" name="__codelineno-0-388" href="#__codelineno-0-388"></a>        if hasattr(ax1,&#39;sharey&#39;):
+<a id="__codelineno-0-389" name="__codelineno-0-389" href="#__codelineno-0-389"></a>            ax1.sharey(ax3)
+<a id="__codelineno-0-390" name="__codelineno-0-390" href="#__codelineno-0-390"></a>        else:
+<a id="__codelineno-0-391" name="__codelineno-0-391" href="#__codelineno-0-391"></a>            ax1.get_shared_y_axes().join(ax1, ax3)
+<a id="__codelineno-0-392" name="__codelineno-0-392" href="#__codelineno-0-392"></a>
+<a id="__codelineno-0-393" name="__codelineno-0-393" href="#__codelineno-0-393"></a>
+<a id="__codelineno-0-394" name="__codelineno-0-394" href="#__codelineno-0-394"></a>        ax0.plot(rand(1) * rand(10),&#39;r&#39;)
+<a id="__codelineno-0-395" name="__codelineno-0-395" href="#__codelineno-0-395"></a>        ax1.plot(10*rand(1) * rand(10),&#39;b&#39;)
+<a id="__codelineno-0-396" name="__codelineno-0-396" href="#__codelineno-0-396"></a>        ax2.plot(3*rand(1) * rand(10),&#39;g&#39;)
+<a id="__codelineno-0-397" name="__codelineno-0-397" href="#__codelineno-0-397"></a>        ax3.plot(10*rand(1) * rand(10),&#39;y&#39;)
+<a id="__codelineno-0-398" name="__codelineno-0-398" href="#__codelineno-0-398"></a>        fig3=plt.gcf()
+<a id="__codelineno-0-399" name="__codelineno-0-399" href="#__codelineno-0-399"></a>
+<a id="__codelineno-0-400" name="__codelineno-0-400" href="#__codelineno-0-400"></a>        screen3=self.graph_app.ids.sm.get_screen(&#39;screen3&#39;)
+<a id="__codelineno-0-401" name="__codelineno-0-401" href="#__codelineno-0-401"></a>        screen3.figure_wgt.figure = fig3
+<a id="__codelineno-0-402" name="__codelineno-0-402" href="#__codelineno-0-402"></a>        screen3.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-403" name="__codelineno-0-403" href="#__codelineno-0-403"></a>        screen3.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-404" name="__codelineno-0-404" href="#__codelineno-0-404"></a>
+<a id="__codelineno-0-405" name="__codelineno-0-405" href="#__codelineno-0-405"></a>        screen3.figure_wgt.register_cursor()
+<a id="__codelineno-0-406" name="__codelineno-0-406" href="#__codelineno-0-406"></a>
+<a id="__codelineno-0-407" name="__codelineno-0-407" href="#__codelineno-0-407"></a>        add_hover(screen3.figure_wgt,mode=&#39;desktop&#39;,hover_widget=PlotlyHover2())
+<a id="__codelineno-0-408" name="__codelineno-0-408" href="#__codelineno-0-408"></a>
+<a id="__codelineno-0-409" name="__codelineno-0-409" href="#__codelineno-0-409"></a># =============================================================================
+<a id="__codelineno-0-410" name="__codelineno-0-410" href="#__codelineno-0-410"></a>#         figure 4 - screen4
+<a id="__codelineno-0-411" name="__codelineno-0-411" href="#__codelineno-0-411"></a># =============================================================================
+<a id="__codelineno-0-412" name="__codelineno-0-412" href="#__codelineno-0-412"></a>
+<a id="__codelineno-0-413" name="__codelineno-0-413" href="#__codelineno-0-413"></a>        # Define a function to make the ellipses
+<a id="__codelineno-0-414" name="__codelineno-0-414" href="#__codelineno-0-414"></a>        def ellipse(ra,rb,ang,x0,y0,Nb=100):
+<a id="__codelineno-0-415" name="__codelineno-0-415" href="#__codelineno-0-415"></a>            xpos,ypos=x0,y0
+<a id="__codelineno-0-416" name="__codelineno-0-416" href="#__codelineno-0-416"></a>            radm,radn=ra,rb
+<a id="__codelineno-0-417" name="__codelineno-0-417" href="#__codelineno-0-417"></a>            an=ang
+<a id="__codelineno-0-418" name="__codelineno-0-418" href="#__codelineno-0-418"></a>            co,si=np.cos(an),np.sin(an)
+<a id="__codelineno-0-419" name="__codelineno-0-419" href="#__codelineno-0-419"></a>            the=linspace(0,2*np.pi,Nb)
+<a id="__codelineno-0-420" name="__codelineno-0-420" href="#__codelineno-0-420"></a>            X=radm*np.cos(the)*co-si*radn*np.sin(the)+xpos
+<a id="__codelineno-0-421" name="__codelineno-0-421" href="#__codelineno-0-421"></a>            Y=radm*np.cos(the)*si+co*radn*np.sin(the)+ypos
+<a id="__codelineno-0-422" name="__codelineno-0-422" href="#__codelineno-0-422"></a>            return X,Y
+<a id="__codelineno-0-423" name="__codelineno-0-423" href="#__codelineno-0-423"></a>
+<a id="__codelineno-0-424" name="__codelineno-0-424" href="#__codelineno-0-424"></a>        # Define the x and y data 
+<a id="__codelineno-0-425" name="__codelineno-0-425" href="#__codelineno-0-425"></a>        # For example just using random numbers
+<a id="__codelineno-0-426" name="__codelineno-0-426" href="#__codelineno-0-426"></a>        x = np.random.randn(10000)
+<a id="__codelineno-0-427" name="__codelineno-0-427" href="#__codelineno-0-427"></a>        y = np.random.randn(10000)
+<a id="__codelineno-0-428" name="__codelineno-0-428" href="#__codelineno-0-428"></a>
+<a id="__codelineno-0-429" name="__codelineno-0-429" href="#__codelineno-0-429"></a>        # Set up default x and y limits
+<a id="__codelineno-0-430" name="__codelineno-0-430" href="#__codelineno-0-430"></a>        xlims = [min(x),max(x)]
+<a id="__codelineno-0-431" name="__codelineno-0-431" href="#__codelineno-0-431"></a>        ylims = [min(y),max(y)]
+<a id="__codelineno-0-432" name="__codelineno-0-432" href="#__codelineno-0-432"></a>
+<a id="__codelineno-0-433" name="__codelineno-0-433" href="#__codelineno-0-433"></a>        # Set up your x and y labels
+<a id="__codelineno-0-434" name="__codelineno-0-434" href="#__codelineno-0-434"></a>        xlabel = &#39;$\mathrm{Your\\ X\\ Label}$&#39;
+<a id="__codelineno-0-435" name="__codelineno-0-435" href="#__codelineno-0-435"></a>        ylabel = &#39;$\mathrm{Your\\ Y\\ Label}$&#39;
+<a id="__codelineno-0-436" name="__codelineno-0-436" href="#__codelineno-0-436"></a>
+<a id="__codelineno-0-437" name="__codelineno-0-437" href="#__codelineno-0-437"></a>        # Define the locations for the axes
+<a id="__codelineno-0-438" name="__codelineno-0-438" href="#__codelineno-0-438"></a>        left, width = 0.12, 0.55
+<a id="__codelineno-0-439" name="__codelineno-0-439" href="#__codelineno-0-439"></a>        bottom, height = 0.12, 0.55
+<a id="__codelineno-0-440" name="__codelineno-0-440" href="#__codelineno-0-440"></a>        bottom_h = left_h = left+width+0.02
+<a id="__codelineno-0-441" name="__codelineno-0-441" href="#__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442" href="#__codelineno-0-442"></a>        # Set up the geometry of the three plots
+<a id="__codelineno-0-443" name="__codelineno-0-443" href="#__codelineno-0-443"></a>        rect_temperature = [left, bottom, width, height] # dimensions of temp plot
+<a id="__codelineno-0-444" name="__codelineno-0-444" href="#__codelineno-0-444"></a>        rect_histx = [left, bottom_h, width, 0.25] # dimensions of x-histogram
+<a id="__codelineno-0-445" name="__codelineno-0-445" href="#__codelineno-0-445"></a>        rect_histy = [left_h, bottom, 0.25, height] # dimensions of y-histogram
+<a id="__codelineno-0-446" name="__codelineno-0-446" href="#__codelineno-0-446"></a>
+<a id="__codelineno-0-447" name="__codelineno-0-447" href="#__codelineno-0-447"></a>        # Set up the size of the figure
+<a id="__codelineno-0-448" name="__codelineno-0-448" href="#__codelineno-0-448"></a>        fig4 = plt.figure(1, figsize=(9.5,9))
+<a id="__codelineno-0-449" name="__codelineno-0-449" href="#__codelineno-0-449"></a>
+<a id="__codelineno-0-450" name="__codelineno-0-450" href="#__codelineno-0-450"></a>        # Make the three plots
+<a id="__codelineno-0-451" name="__codelineno-0-451" href="#__codelineno-0-451"></a>        axTemperature = plt.axes(rect_temperature) # temperature plot
+<a id="__codelineno-0-452" name="__codelineno-0-452" href="#__codelineno-0-452"></a>        axHistx = plt.axes(rect_histx, sharex = axTemperature) # x histogram
+<a id="__codelineno-0-453" name="__codelineno-0-453" href="#__codelineno-0-453"></a>        axHisty = plt.axes(rect_histy, sharey = axTemperature) # y histogram
+<a id="__codelineno-0-454" name="__codelineno-0-454" href="#__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455" href="#__codelineno-0-455"></a>
+<a id="__codelineno-0-456" name="__codelineno-0-456" href="#__codelineno-0-456"></a>        # Remove the inner axes numbers of the histograms
+<a id="__codelineno-0-457" name="__codelineno-0-457" href="#__codelineno-0-457"></a>        nullfmt = NullFormatter()
+<a id="__codelineno-0-458" name="__codelineno-0-458" href="#__codelineno-0-458"></a>        axHistx.xaxis.set_major_formatter(nullfmt)
+<a id="__codelineno-0-459" name="__codelineno-0-459" href="#__codelineno-0-459"></a>        axHisty.yaxis.set_major_formatter(nullfmt)
+<a id="__codelineno-0-460" name="__codelineno-0-460" href="#__codelineno-0-460"></a>
+<a id="__codelineno-0-461" name="__codelineno-0-461" href="#__codelineno-0-461"></a>        # Find the min/max of the data
+<a id="__codelineno-0-462" name="__codelineno-0-462" href="#__codelineno-0-462"></a>        xmin = min(xlims)
+<a id="__codelineno-0-463" name="__codelineno-0-463" href="#__codelineno-0-463"></a>        xmax = max(xlims)
+<a id="__codelineno-0-464" name="__codelineno-0-464" href="#__codelineno-0-464"></a>        ymin = min(ylims)
+<a id="__codelineno-0-465" name="__codelineno-0-465" href="#__codelineno-0-465"></a>        ymax = max(y)
+<a id="__codelineno-0-466" name="__codelineno-0-466" href="#__codelineno-0-466"></a>
+<a id="__codelineno-0-467" name="__codelineno-0-467" href="#__codelineno-0-467"></a>        # Make the &#39;main&#39; temperature plot
+<a id="__codelineno-0-468" name="__codelineno-0-468" href="#__codelineno-0-468"></a>        # Define the number of bins
+<a id="__codelineno-0-469" name="__codelineno-0-469" href="#__codelineno-0-469"></a>        nxbins = 50
+<a id="__codelineno-0-470" name="__codelineno-0-470" href="#__codelineno-0-470"></a>        nybins = 50
+<a id="__codelineno-0-471" name="__codelineno-0-471" href="#__codelineno-0-471"></a>        nbins = 100
+<a id="__codelineno-0-472" name="__codelineno-0-472" href="#__codelineno-0-472"></a>
+<a id="__codelineno-0-473" name="__codelineno-0-473" href="#__codelineno-0-473"></a>        xbins = linspace(start = xmin, stop = xmax, num = nxbins)
+<a id="__codelineno-0-474" name="__codelineno-0-474" href="#__codelineno-0-474"></a>        ybins = linspace(start = ymin, stop = ymax, num = nybins)
+<a id="__codelineno-0-475" name="__codelineno-0-475" href="#__codelineno-0-475"></a>        xcenter = (xbins[0:-1]+xbins[1:])/2.0
+<a id="__codelineno-0-476" name="__codelineno-0-476" href="#__codelineno-0-476"></a>        ycenter = (ybins[0:-1]+ybins[1:])/2.0
+<a id="__codelineno-0-477" name="__codelineno-0-477" href="#__codelineno-0-477"></a>
+<a id="__codelineno-0-478" name="__codelineno-0-478" href="#__codelineno-0-478"></a>        H, xedges,yedges = np.histogram2d(y,x,bins=(ybins,xbins))
+<a id="__codelineno-0-479" name="__codelineno-0-479" href="#__codelineno-0-479"></a>        X = xcenter
+<a id="__codelineno-0-480" name="__codelineno-0-480" href="#__codelineno-0-480"></a>        Y = ycenter
+<a id="__codelineno-0-481" name="__codelineno-0-481" href="#__codelineno-0-481"></a>        Z = H
+<a id="__codelineno-0-482" name="__codelineno-0-482" href="#__codelineno-0-482"></a>
+<a id="__codelineno-0-483" name="__codelineno-0-483" href="#__codelineno-0-483"></a>        # Plot the temperature data
+<a id="__codelineno-0-484" name="__codelineno-0-484" href="#__codelineno-0-484"></a>        cax = (axTemperature.imshow(H, extent=[xmin,xmax,ymin,ymax],
+<a id="__codelineno-0-485" name="__codelineno-0-485" href="#__codelineno-0-485"></a>               interpolation=&#39;nearest&#39;, origin=&#39;lower&#39;,aspect=&#39;auto&#39;))
+<a id="__codelineno-0-486" name="__codelineno-0-486" href="#__codelineno-0-486"></a>
+<a id="__codelineno-0-487" name="__codelineno-0-487" href="#__codelineno-0-487"></a>        # Plot the temperature plot contours
+<a id="__codelineno-0-488" name="__codelineno-0-488" href="#__codelineno-0-488"></a>        contourcolor = &#39;w&#39;
+<a id="__codelineno-0-489" name="__codelineno-0-489" href="#__codelineno-0-489"></a>        xcenter = np.mean(x)
+<a id="__codelineno-0-490" name="__codelineno-0-490" href="#__codelineno-0-490"></a>        ycenter = np.mean(y)
+<a id="__codelineno-0-491" name="__codelineno-0-491" href="#__codelineno-0-491"></a>        ra = np.std(x)
+<a id="__codelineno-0-492" name="__codelineno-0-492" href="#__codelineno-0-492"></a>        rb = np.std(y)
+<a id="__codelineno-0-493" name="__codelineno-0-493" href="#__codelineno-0-493"></a>        ang = 0
+<a id="__codelineno-0-494" name="__codelineno-0-494" href="#__codelineno-0-494"></a>
+<a id="__codelineno-0-495" name="__codelineno-0-495" href="#__codelineno-0-495"></a>        X,Y=ellipse(ra,rb,ang,xcenter,ycenter)
+<a id="__codelineno-0-496" name="__codelineno-0-496" href="#__codelineno-0-496"></a>        axTemperature.plot(X,Y,&quot;:&quot;,color = contourcolor,ms=1,linewidth=2.0)
+<a id="__codelineno-0-497" name="__codelineno-0-497" href="#__codelineno-0-497"></a>        axTemperature.annotate(&#39;$1\\sigma$&#39;, xy=(X[15], Y[15]), xycoords=&#39;data&#39;,xytext=(10, 10),
+<a id="__codelineno-0-498" name="__codelineno-0-498" href="#__codelineno-0-498"></a>                               textcoords=&#39;offset points&#39;, horizontalalignment=&#39;right&#39;,
+<a id="__codelineno-0-499" name="__codelineno-0-499" href="#__codelineno-0-499"></a>                               verticalalignment=&#39;bottom&#39;,fontsize=25)
+<a id="__codelineno-0-500" name="__codelineno-0-500" href="#__codelineno-0-500"></a>
+<a id="__codelineno-0-501" name="__codelineno-0-501" href="#__codelineno-0-501"></a>        X,Y=ellipse(2*ra,2*rb,ang,xcenter,ycenter)
+<a id="__codelineno-0-502" name="__codelineno-0-502" href="#__codelineno-0-502"></a>        axTemperature.plot(X,Y,&quot;:&quot;,color = contourcolor,ms=1,linewidth=2.0)
+<a id="__codelineno-0-503" name="__codelineno-0-503" href="#__codelineno-0-503"></a>        axTemperature.annotate(&#39;$2\\sigma$&#39;, xy=(X[15], Y[15]), xycoords=&#39;data&#39;,xytext=(10, 10),
+<a id="__codelineno-0-504" name="__codelineno-0-504" href="#__codelineno-0-504"></a>                               textcoords=&#39;offset points&#39;,horizontalalignment=&#39;right&#39;,
+<a id="__codelineno-0-505" name="__codelineno-0-505" href="#__codelineno-0-505"></a>                               verticalalignment=&#39;bottom&#39;,fontsize=25, color = contourcolor)
+<a id="__codelineno-0-506" name="__codelineno-0-506" href="#__codelineno-0-506"></a>
+<a id="__codelineno-0-507" name="__codelineno-0-507" href="#__codelineno-0-507"></a>        X,Y=ellipse(3*ra,3*rb,ang,xcenter,ycenter)
+<a id="__codelineno-0-508" name="__codelineno-0-508" href="#__codelineno-0-508"></a>        axTemperature.plot(X,Y,&quot;:&quot;,color = contourcolor, ms=1,linewidth=2.0)
+<a id="__codelineno-0-509" name="__codelineno-0-509" href="#__codelineno-0-509"></a>        axTemperature.annotate(&#39;$3\\sigma$&#39;, xy=(X[15], Y[15]), xycoords=&#39;data&#39;,xytext=(10, 10),
+<a id="__codelineno-0-510" name="__codelineno-0-510" href="#__codelineno-0-510"></a>                               textcoords=&#39;offset points&#39;,horizontalalignment=&#39;right&#39;,
+<a id="__codelineno-0-511" name="__codelineno-0-511" href="#__codelineno-0-511"></a>                               verticalalignment=&#39;bottom&#39;,fontsize=25, color = contourcolor)
+<a id="__codelineno-0-512" name="__codelineno-0-512" href="#__codelineno-0-512"></a>
+<a id="__codelineno-0-513" name="__codelineno-0-513" href="#__codelineno-0-513"></a>        #Plot the axes labels
+<a id="__codelineno-0-514" name="__codelineno-0-514" href="#__codelineno-0-514"></a>        axTemperature.set_xlabel(xlabel,fontsize=25)
+<a id="__codelineno-0-515" name="__codelineno-0-515" href="#__codelineno-0-515"></a>        axTemperature.set_ylabel(ylabel,fontsize=25)      
+<a id="__codelineno-0-516" name="__codelineno-0-516" href="#__codelineno-0-516"></a>
+<a id="__codelineno-0-517" name="__codelineno-0-517" href="#__codelineno-0-517"></a>        #Make the tickmarks pretty
+<a id="__codelineno-0-518" name="__codelineno-0-518" href="#__codelineno-0-518"></a>        ticklabels = axTemperature.get_xticklabels()
+<a id="__codelineno-0-519" name="__codelineno-0-519" href="#__codelineno-0-519"></a>        for label in ticklabels:
+<a id="__codelineno-0-520" name="__codelineno-0-520" href="#__codelineno-0-520"></a>            label.set_fontsize(18)
+<a id="__codelineno-0-521" name="__codelineno-0-521" href="#__codelineno-0-521"></a>            label.set_family(&#39;serif&#39;)
+<a id="__codelineno-0-522" name="__codelineno-0-522" href="#__codelineno-0-522"></a>
+<a id="__codelineno-0-523" name="__codelineno-0-523" href="#__codelineno-0-523"></a>        ticklabels = axTemperature.get_yticklabels()
+<a id="__codelineno-0-524" name="__codelineno-0-524" href="#__codelineno-0-524"></a>        for label in ticklabels:
+<a id="__codelineno-0-525" name="__codelineno-0-525" href="#__codelineno-0-525"></a>            label.set_fontsize(18)
+<a id="__codelineno-0-526" name="__codelineno-0-526" href="#__codelineno-0-526"></a>            label.set_family(&#39;serif&#39;)
+<a id="__codelineno-0-527" name="__codelineno-0-527" href="#__codelineno-0-527"></a>
+<a id="__codelineno-0-528" name="__codelineno-0-528" href="#__codelineno-0-528"></a>        #Set up the plot limits
+<a id="__codelineno-0-529" name="__codelineno-0-529" href="#__codelineno-0-529"></a>        axTemperature.set_xlim(xlims)
+<a id="__codelineno-0-530" name="__codelineno-0-530" href="#__codelineno-0-530"></a>        axTemperature.set_ylim(ylims)
+<a id="__codelineno-0-531" name="__codelineno-0-531" href="#__codelineno-0-531"></a>
+<a id="__codelineno-0-532" name="__codelineno-0-532" href="#__codelineno-0-532"></a>        #Set up the histogram bins
+<a id="__codelineno-0-533" name="__codelineno-0-533" href="#__codelineno-0-533"></a>        xbins = np.arange(xmin, xmax, (xmax-xmin)/nbins)
+<a id="__codelineno-0-534" name="__codelineno-0-534" href="#__codelineno-0-534"></a>        ybins = np.arange(ymin, ymax, (ymax-ymin)/nbins)
+<a id="__codelineno-0-535" name="__codelineno-0-535" href="#__codelineno-0-535"></a>
+<a id="__codelineno-0-536" name="__codelineno-0-536" href="#__codelineno-0-536"></a>        #Plot the histograms
+<a id="__codelineno-0-537" name="__codelineno-0-537" href="#__codelineno-0-537"></a>        axHistx.hist(x, bins=xbins, color = &#39;blue&#39;)
+<a id="__codelineno-0-538" name="__codelineno-0-538" href="#__codelineno-0-538"></a>        axHisty.hist(y, bins=ybins, orientation=&#39;horizontal&#39;, color = &#39;red&#39;)
+<a id="__codelineno-0-539" name="__codelineno-0-539" href="#__codelineno-0-539"></a>
+<a id="__codelineno-0-540" name="__codelineno-0-540" href="#__codelineno-0-540"></a>        #Set up the histogram limits
+<a id="__codelineno-0-541" name="__codelineno-0-541" href="#__codelineno-0-541"></a>        axHistx.set_xlim( min(x), max(x) )
+<a id="__codelineno-0-542" name="__codelineno-0-542" href="#__codelineno-0-542"></a>        axHisty.set_ylim( min(y), max(y) )
+<a id="__codelineno-0-543" name="__codelineno-0-543" href="#__codelineno-0-543"></a>
+<a id="__codelineno-0-544" name="__codelineno-0-544" href="#__codelineno-0-544"></a>        #Make the tickmarks pretty
+<a id="__codelineno-0-545" name="__codelineno-0-545" href="#__codelineno-0-545"></a>        ticklabels = axHistx.get_yticklabels()
+<a id="__codelineno-0-546" name="__codelineno-0-546" href="#__codelineno-0-546"></a>        for label in ticklabels:
+<a id="__codelineno-0-547" name="__codelineno-0-547" href="#__codelineno-0-547"></a>            label.set_fontsize(12)
+<a id="__codelineno-0-548" name="__codelineno-0-548" href="#__codelineno-0-548"></a>            label.set_family(&#39;serif&#39;)
+<a id="__codelineno-0-549" name="__codelineno-0-549" href="#__codelineno-0-549"></a>
+<a id="__codelineno-0-550" name="__codelineno-0-550" href="#__codelineno-0-550"></a>        #Make the tickmarks pretty
+<a id="__codelineno-0-551" name="__codelineno-0-551" href="#__codelineno-0-551"></a>        ticklabels = axHisty.get_xticklabels()
+<a id="__codelineno-0-552" name="__codelineno-0-552" href="#__codelineno-0-552"></a>        for label in ticklabels:
+<a id="__codelineno-0-553" name="__codelineno-0-553" href="#__codelineno-0-553"></a>            label.set_fontsize(12)
+<a id="__codelineno-0-554" name="__codelineno-0-554" href="#__codelineno-0-554"></a>            label.set_family(&#39;serif&#39;)
+<a id="__codelineno-0-555" name="__codelineno-0-555" href="#__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556" href="#__codelineno-0-556"></a>        #Cool trick that changes the number of tickmarks for the histogram axes
+<a id="__codelineno-0-557" name="__codelineno-0-557" href="#__codelineno-0-557"></a>        axHisty.xaxis.set_major_locator(MaxNLocator(4))
+<a id="__codelineno-0-558" name="__codelineno-0-558" href="#__codelineno-0-558"></a>        axHistx.yaxis.set_major_locator(MaxNLocator(4))
+<a id="__codelineno-0-559" name="__codelineno-0-559" href="#__codelineno-0-559"></a>        fig4=plt.gcf()
+<a id="__codelineno-0-560" name="__codelineno-0-560" href="#__codelineno-0-560"></a>
+<a id="__codelineno-0-561" name="__codelineno-0-561" href="#__codelineno-0-561"></a>        screen4=self.graph_app.ids.sm.get_screen(&#39;screen4&#39;)
+<a id="__codelineno-0-562" name="__codelineno-0-562" href="#__codelineno-0-562"></a>        screen4.figure_wgt.figure = fig4
+<a id="__codelineno-0-563" name="__codelineno-0-563" href="#__codelineno-0-563"></a>        screen4.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-564" name="__codelineno-0-564" href="#__codelineno-0-564"></a>        screen4.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter(&#39;%.1f&#39;) 
+<a id="__codelineno-0-565" name="__codelineno-0-565" href="#__codelineno-0-565"></a>
+<a id="__codelineno-0-566" name="__codelineno-0-566" href="#__codelineno-0-566"></a>        screen4.figure_wgt.register_cursor()
+<a id="__codelineno-0-567" name="__codelineno-0-567" href="#__codelineno-0-567"></a>
+<a id="__codelineno-0-568" name="__codelineno-0-568" href="#__codelineno-0-568"></a>        add_hover(screen4.figure_wgt,mode=&#39;desktop&#39;,hover_widget=InfoHover2())
+<a id="__codelineno-0-569" name="__codelineno-0-569" href="#__codelineno-0-569"></a>
+<a id="__codelineno-0-570" name="__codelineno-0-570" href="#__codelineno-0-570"></a>
+<a id="__codelineno-0-571" name="__codelineno-0-571" href="#__codelineno-0-571"></a>    def set_touch_mode(self,mode):
+<a id="__codelineno-0-572" name="__codelineno-0-572" href="#__codelineno-0-572"></a>        for screen in self.graph_app.ids.sm.screens:
+<a id="__codelineno-0-573" name="__codelineno-0-573" href="#__codelineno-0-573"></a>            if hasattr(screen,&#39;figure_wgt&#39;):
+<a id="__codelineno-0-574" name="__codelineno-0-574" href="#__codelineno-0-574"></a>                screen.figure_wgt.touch_mode=mode
+<a id="__codelineno-0-575" name="__codelineno-0-575" href="#__codelineno-0-575"></a>
+<a id="__codelineno-0-576" name="__codelineno-0-576" href="#__codelineno-0-576"></a>    def home(self):
+<a id="__codelineno-0-577" name="__codelineno-0-577" href="#__codelineno-0-577"></a>        screen=self.graph_app.ids.sm.current_screen
+<a id="__codelineno-0-578" name="__codelineno-0-578" href="#__codelineno-0-578"></a>        screen.figure_wgt.main_home()
+<a id="__codelineno-0-579" name="__codelineno-0-579" href="#__codelineno-0-579"></a>
+<a id="__codelineno-0-580" name="__codelineno-0-580" href="#__codelineno-0-580"></a>    def previous_screen(self):
+<a id="__codelineno-0-581" name="__codelineno-0-581" href="#__codelineno-0-581"></a>        screen_name=self.graph_app.ids.sm.current
+<a id="__codelineno-0-582" name="__codelineno-0-582" href="#__codelineno-0-582"></a>        screen_number = int(screen_name[-1])
+<a id="__codelineno-0-583" name="__codelineno-0-583" href="#__codelineno-0-583"></a>        if screen_number&lt;=1:
+<a id="__codelineno-0-584" name="__codelineno-0-584" href="#__codelineno-0-584"></a>            screen_number=4
+<a id="__codelineno-0-585" name="__codelineno-0-585" href="#__codelineno-0-585"></a>        else:
+<a id="__codelineno-0-586" name="__codelineno-0-586" href="#__codelineno-0-586"></a>            screen_number-=1
+<a id="__codelineno-0-587" name="__codelineno-0-587" href="#__codelineno-0-587"></a>
+<a id="__codelineno-0-588" name="__codelineno-0-588" href="#__codelineno-0-588"></a>        self.graph_app.ids.sm.current = &#39;screen&#39; + str(screen_number)        
+<a id="__codelineno-0-589" name="__codelineno-0-589" href="#__codelineno-0-589"></a>
+<a id="__codelineno-0-590" name="__codelineno-0-590" href="#__codelineno-0-590"></a>    def next_screen(self):
+<a id="__codelineno-0-591" name="__codelineno-0-591" href="#__codelineno-0-591"></a>        screen_name=self.graph_app.ids.sm.current
+<a id="__codelineno-0-592" name="__codelineno-0-592" href="#__codelineno-0-592"></a>        screen_number = int(screen_name[-1])
+<a id="__codelineno-0-593" name="__codelineno-0-593" href="#__codelineno-0-593"></a>        if screen_number&gt;=4:
+<a id="__codelineno-0-594" name="__codelineno-0-594" href="#__codelineno-0-594"></a>            screen_number=1
+<a id="__codelineno-0-595" name="__codelineno-0-595" href="#__codelineno-0-595"></a>        else:
+<a id="__codelineno-0-596" name="__codelineno-0-596" href="#__codelineno-0-596"></a>            screen_number+=1
+<a id="__codelineno-0-597" name="__codelineno-0-597" href="#__codelineno-0-597"></a>
+<a id="__codelineno-0-598" name="__codelineno-0-598" href="#__codelineno-0-598"></a>        self.graph_app.ids.sm.current = &#39;screen&#39; + str(screen_number)
+<a id="__codelineno-0-599" name="__codelineno-0-599" href="#__codelineno-0-599"></a>
+<a id="__codelineno-0-600" name="__codelineno-0-600" href="#__codelineno-0-600"></a>
+<a id="__codelineno-0-601" name="__codelineno-0-601" href="#__codelineno-0-601"></a>Test().run()
+</code></pre></div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/mp-007"  target="_blank" rel="noopener">MP-007</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/mp-007/kivy_matplotlib_widget" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
