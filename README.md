@@ -1,6 +1,9 @@
 # kivy_matplotlib_widget
 A fast matplotlib rendering for Kivy based on Kivy_matplotlib project (https://github.com/jeysonmc/kivy_matplotlib) and kivy scatter. Hover option is also based on the algorithm from mplcursors project (https://github.com/anntzer/mplcursors). Matplotlib used 'agg' backend
 
+# Documentation (new)
+See documentation at https://mp-007.github.io/kivy_matplotlib_widget/
+  
 # How to use
 install with pip install (just import module in your header to register all the widgets in your kivy Factory: import kivy_matplotlib_widget)
 ```
