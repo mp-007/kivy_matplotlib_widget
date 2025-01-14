@@ -1275,7 +1275,7 @@
   <h1>Matplotlib events</h1>
 
 <h2 id="can-i-used-matplotlib-event">Can I used matplotlib event</h2>
-<p>Yes but matplotlib tools can be difficult to incorporate inside my library because it interfare with kivy touch behavior. In this case, You need to declare and handle 3 matplotlib event (down/move/up) and it can't be very complicated. Most matplotlib event can be easily integrated but my biggest concern was to performance (use blit method) and you need to handle more matplotlib artists. At the end, I think it better to use kivy widgets for this.</p>
+<p>Yes but matplotlib tools can be difficult to incorporate inside my library because it interfare with kivy touch behavior. Sometime, you need to declare and handle 3 matplotlib event (down/move/up) and it can't be very complicated (e.g matplotlib selector tool). Most matplotlib event can be easily integrated (e.g pick_event or on_enter event - <a href="https://github.com/mp-007/kivy_matplotlib_widget/issues/20">example</a>) but if you need to handle more matplotlib artists and use blit method, it can be harder. At the end, I think it better to use kivy widgets for this.</p>
 
 
 
