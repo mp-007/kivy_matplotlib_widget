@@ -28,7 +28,7 @@ from kivy.event import EventDispatcher
 import copy
 
 
-kv = """
+kv = '''
 <ResizeSelect>:     
     canvas.before:
         # TOP LINE
@@ -379,7 +379,7 @@ kv = """
         pos: 0, 0
         opacity:0
 
-"""
+'''
 
 MINIMUM_HEIGHT = 20.0
 MINIMUM_WIDTH = 20.0
