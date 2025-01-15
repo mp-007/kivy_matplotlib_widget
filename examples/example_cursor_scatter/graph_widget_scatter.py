@@ -184,7 +184,11 @@ class MatplotFigureScatter(Widget):
         self.first_touch_pan = None
         
         #manage back and next event
-        self._nav_stack = cbook.Stack()
+        if hasattr(cbook,'_Stack'):
+            #manage matplotlib version with no Stack (replace by _Stack)
+            self._nav_stack = cbook._Stack()
+        else:
+            self._nav_stack = cbook.Stack()  
         self.set_history_buttons()  
         
         #legend management

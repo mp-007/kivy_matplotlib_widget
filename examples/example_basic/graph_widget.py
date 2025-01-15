@@ -177,7 +177,11 @@ class MatplotFigure(Widget):
         self.show_compare_cursor = False
         
         #manage back and next event
-        self._nav_stack = cbook.Stack()
+        if hasattr(cbook,'_Stack'):
+            #manage matplotlib version with no Stack (replace by _Stack)
+            self._nav_stack = cbook._Stack()
+        else:
+            self._nav_stack = cbook.Stack()          
         self.set_history_buttons()       
         
         #legend management
