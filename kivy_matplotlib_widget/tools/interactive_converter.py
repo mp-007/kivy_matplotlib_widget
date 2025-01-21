@@ -133,7 +133,7 @@ class PlotlyHover2(BaseHoverFloatLayout):
         """ init class """
         super().__init__(**kwargs)   
 
-class Test(App):
+class GraphApp(App):
     figure = None
     compare_hover = BooleanProperty(False)
     show_cursor_data = BooleanProperty(True)
@@ -171,7 +171,7 @@ class Test(App):
         self.disable_hover=disable_hover
         
         # print(self.figure.get())
-        super(Test, self).__init__(**kwargs)
+        super(GraphApp, self).__init__(**kwargs)
         
         self.drag_legend=drag_legend
         self.show_cursor_data=show_cursor_data
@@ -232,9 +232,9 @@ class Test(App):
                                                 legend_instance=self.legend_instance,
                                                 custom_handlers=self.custom_handlers)
 
-def main(plot_queue,**kwargs):
+def app_window(plot_queue,**kwargs):
 
-    Test(plot_queue,**kwargs).run()
+    GraphApp(plot_queue,**kwargs).run()
     
 def interactive_graph(fig,**kwargs):
     """ Interactive grpah using multiprocessing method. 
@@ -250,11 +250,11 @@ def interactive_graph(fig,**kwargs):
     plot_queue.put((fig,))
 
     # Create and start the subprocess
-    p = mp.Process(target=main, args=(plot_queue,), kwargs=kwargs)
+    p = mp.Process(target=app_window, args=(plot_queue,), kwargs=kwargs)
     p.start()
     
 def interactive_graph_ipython(fig,**kwargs):
-    main(fig,**kwargs)
+    app_window(fig,**kwargs)
     
 if __name__ == "__main__":
     fig, ax1 = plt.subplots(1, 1)
