@@ -161,6 +161,7 @@ class GraphApp(App):
     max_hover_rate = NumericProperty(5/60,allownone=True) 
     fast_draw = BooleanProperty(False)
     hist_range = BooleanProperty(True)
+    autoscale_tight = BooleanProperty(False)
 
     def __init__(self, 
                  figure,
@@ -178,6 +179,7 @@ class GraphApp(App):
                  disable_hover=False,
                  fast_draw=True,
                  hist_range=True,
+                 autoscale_tight=False,
                  **kwargs):
         """__init__ function class"""
         self.figure=figure
@@ -199,6 +201,7 @@ class GraphApp(App):
         self.max_hover_rate=max_hover_rate
         self.fast_draw=fast_draw
         self.hist_range=hist_range
+        self.autoscale_tight=autoscale_tight
         
     def build(self):
         self.screen=Builder.load_string(KV)
