@@ -46,6 +46,7 @@ Screen
             max_hover_rate:app.max_hover_rate
             legend_do_scroll_x:app.legend_do_scroll_x
             hist_range:app.hist_range
+            autoscale_tight:app.autoscale_tight
             
 <PlotlyHover2>
     custom_color: [0,0,0,1]
