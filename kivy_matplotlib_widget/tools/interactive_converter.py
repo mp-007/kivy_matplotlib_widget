@@ -121,6 +121,25 @@ Screen
             
 '''
 
+KV3D = '''
+Screen
+    figure_wgt:figure_wgt
+    
+    BoxLayout:
+        orientation:'vertical'
+        
+        canvas.before:
+            Color:
+                rgba: (1, 1, 1, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        MatplotFigure3D:
+            id:figure_wgt
+
+'''
+
 class PlotlyHover2(BaseHoverFloatLayout):
     """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
     text_color=ColorProperty([0,0,0,1])
@@ -236,6 +255,38 @@ def app_window(plot_queue,**kwargs):
 
     GraphApp(plot_queue,**kwargs).run()
     
+class GraphApp3D(App):
+    figure = None
+
+    def __init__(self, 
+                 figure,
+                 **kwargs):
+        """__init__ function class"""
+        self.figure=figure
+        
+        # print(self.figure.get())
+        super(GraphApp3D, self).__init__(**kwargs)
+        
+    def build(self):
+        self.screen=Builder.load_string(KV3D)
+        return self.screen
+
+    def on_start(self, *args): 
+        if hasattr(self.figure,'get'):
+            figure = self.figure.get()[0]
+        else:
+            figure= self.figure
+            
+        if isinstance(figure,list):
+            self.screen.figure_wgt.figure = figure[0]
+
+        else:
+            self.screen.figure_wgt.figure = figure
+
+def app_window_3D(plot_queue,**kwargs):
+
+    GraphApp3D(plot_queue,**kwargs).run() 
+    
 def interactive_graph(fig,**kwargs):
     """ Interactive grpah using multiprocessing method. 
     function need to be call in if __name__ == "__main__": method
@@ -256,6 +307,26 @@ def interactive_graph(fig,**kwargs):
 def interactive_graph_ipython(fig,**kwargs):
     app_window(fig,**kwargs)
     
+def interactive_graph3D_ipython(fig,**kwargs):
+    app_window_3D(fig,**kwargs)
+    
+def interactive_graph3D(fig,**kwargs):
+    """ Interactive grpah using multiprocessing method. 
+    function need to be call in if __name__ == "__main__": method
+    """
+    # Create a queue to pass the Matplotlib instance object
+    plot_queue = mp.Queue()
+    
+    #switch to agg backend
+    plt.switch_backend('Agg')
+
+    # Put the Matplotlib instance object into the queue
+    plot_queue.put((fig,))
+
+    # Create and start the subprocess
+    p = mp.Process(target=app_window_3D, args=(plot_queue,), kwargs=kwargs)
+    p.start()
+
 if __name__ == "__main__":
     fig, ax1 = plt.subplots(1, 1)
     
