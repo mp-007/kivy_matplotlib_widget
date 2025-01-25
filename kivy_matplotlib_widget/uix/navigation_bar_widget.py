@@ -185,7 +185,7 @@ class KivyMatplotNavToolbar(RelativeLayout):
         '''Kivy Event to trigger mouse event on motion
            `enter_notify_event`.
         '''
-        if self.figure_wgt._pressed or self.figure_wgt.disabled:  # Do not process this event if there's a touch_move
+        if self.figure_wgt._pressed:  # Do not process this event if there's a touch_move
             return
         pos = args[1]
         newcoord = self.figure_wgt.to_widget(pos[0], pos[1])
