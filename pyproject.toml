@@ -11,7 +11,7 @@ authors = [
   { name="T-Dynamos", email="anshdadwal298@mail.com" },
 ]
 readme = {file = 'README.md', content-type='text/markdown', charset="UTF-8", variant="GFM"}
-requires-python = ">=3.11"
+requires-python = ">=3.7"
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
