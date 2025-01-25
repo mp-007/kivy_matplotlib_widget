@@ -183,6 +183,8 @@ class MatplotFigureSubplot(MatplotFigure):
         self.cursor_cls = cursor(self.figure,pickables=pickables,remove_artists=remove_artists)
 
     def autoscale(self):
+        if self.disabled:
+            return
         axes=self.figure.axes
         for i,ax in enumerate(axes):
             twinx = any(ax.get_shared_x_axes().joined(ax, prev)

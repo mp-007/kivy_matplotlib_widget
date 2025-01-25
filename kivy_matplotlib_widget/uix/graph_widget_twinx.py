@@ -701,6 +701,8 @@ class MatplotFigureTwinx(Widget):
                     self.y_hover_data = None                
 
     def autoscale(self):
+        if self.disabled:
+            return
         ax=self.figure.axes[0]
         ax.relim(visible_only=self.autoscale_visible_only)
         ax.autoscale_view(tight=self.autoscale_tight,

@@ -609,6 +609,8 @@ class MatplotFigureScatter(Widget):
                     self.y_hover_data = None                
 
     def autoscale(self):
+        if self.disabled:
+            return
         ax=self.axes
         no_visible = self.myrelim(ax,visible_only=self.autoscale_visible_only)
         ax.autoscale_view(tight=self.autoscale_tight,
