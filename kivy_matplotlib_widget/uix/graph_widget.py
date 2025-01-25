@@ -100,8 +100,14 @@ class MatplotFigure(Widget):
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            for pos in ['right', 'top', 'bottom', 'left']:
-                ax.spines[pos].set_zorder(10)
+            
+            if hasattr(ax,'PolarTransform'):
+                for pos in list(ax.spines._dict.keys()):
+                    ax.spines[pos].set_zorder(10)
+                self.disabled = True #polar graph do not handle pan/zoom
+            else:
+                for pos in ['right', 'top', 'bottom', 'left']:
+                    ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy= ax.add_patch(patch_cpy)
             
