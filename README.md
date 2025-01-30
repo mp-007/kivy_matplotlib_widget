@@ -14,7 +14,7 @@ You can also copy the needed widget in project
 See examples for more informations
 
 # Available tool
-convert any matplotlib figure into kivy interactive graph with only 2 lines in your ipython console
+convert any matplotlib 2D figure into kivy interactive graph with only 2 lines in your ipython console
 ```
 from kivy_matplotlib_widget.tools.interactive_converter import interactive_graph_ipython
 
