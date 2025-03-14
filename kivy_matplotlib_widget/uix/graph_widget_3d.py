@@ -8,28 +8,25 @@ matplotlib.use('Agg')
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
-from kivy.properties import AliasProperty,ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
+from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
     NumericProperty,StringProperty,ColorProperty
-from kivy.uix.widget import Widget
+from kivy.uix.boxlayout import BoxLayout
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.transforms import Bbox
 from matplotlib.backend_bases import ResizeEvent
 from matplotlib.backend_bases import MouseEvent
+from matplotlib.colors import to_hex
 from kivy.metrics import dp
 from kivy_matplotlib_widget.tools.cursors import cursor
 
 import numpy as np
-import matplotlib.transforms as mtransforms
 from mpl_toolkits import mplot3d
 from weakref import WeakKeyDictionary
 from matplotlib import cbook
 
 from kivy.uix.scatter import Scatter
-from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.screenmanager import ScreenManager
 import time
 
 def line2d_seg_dist(p1, p2, p0):
@@ -135,6 +132,7 @@ class MatplotFigure3D(ScatterLayout):
     crop_factor = NumericProperty(1.0)     
     cursor_size=NumericProperty("10dp")
     matplot_figure_layout = ObjectProperty(None) 
+    disable_double_tap = BooleanProperty(False) 
 
     def on_figure(self, obj, value):
         if self.default_dpi is None:
@@ -160,7 +158,7 @@ class MatplotFigure3D(ScatterLayout):
             self.cursor_label.figure=self.figure
             self.cursor_label.xmin_line = self.x + dp(20)
             self.cursor_label.ymax_line = self.y +  h - dp(48)
-            self.matplot_figure_layout.parent.add_widget(self.cursor_label)
+            self.matplot_figure_layout.add_widget(self.cursor_label)
           
 
     def __init__(self, **kwargs):
@@ -529,6 +527,11 @@ class MatplotFigure3D(ScatterLayout):
                     self.figcanvas.draw()
                     if self.cursor_alpha == 1.0:
                         self.recalcul_cursor()
+
+            elif touch.is_double_tap:
+                if not self.disable_double_tap:
+                    self.home()
+                return True
             
             elif self.touch_mode == 'pan':
                 ax=self.figure.axes[0]
@@ -602,6 +605,11 @@ class MatplotFigure3D(ScatterLayout):
             # self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
             if event.is_mouse_scrolling:
                 pass
+
+            elif event.is_double_tap:
+                if not self.disable_double_tap:
+                    self.home()
+                return True
                 
             elif self.touch_mode == 'figure_zoom_pan':
                 
@@ -805,9 +813,9 @@ class _FigureCanvas(FigureCanvasAgg):
         self.widget.bt_h = h
         self.widget._draw_bitmap()
         
-class MatplotFigure3DLayout(ScreenManager):
+class MatplotFigure3DLayout(BoxLayout):
     """This handle figure zoom and pan inside the widget. 
-    Cursor is also not rescale when zooming
+    Cursor label is also not rescale when zooming
     """
 
     pickradius = NumericProperty(dp(50))
@@ -816,11 +824,29 @@ class MatplotFigure3DLayout(ScreenManager):
     max_hover_rate =  NumericProperty(None,allownone=True) 
     crop_factor = NumericProperty(1.0)     
     cursor_size=NumericProperty("10dp") 
+    figure_background = ColorProperty([1,0,1,1])
 
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs) 
         
+    def set_figure_background(self,color):
+        """
+
+        Parameters
+        ----------
+        color : rgba color
+
+        Returns
+        -------
+        None.
+
+        """
+        self.figure_background=color
+        self.figure_wgt.figure.axes[0].set_facecolor(to_hex(color))
+        self.figure_wgt.figure.set_facecolor(to_hex(color))
+        self.figure_wgt.figcanvas.draw()
+ 
 class CursorInfo(FloatLayout):
     figure_wgt = ObjectProperty(None)
     xmin_line = NumericProperty(1)
@@ -848,19 +874,26 @@ Factory.register('MatplotFigure3D', MatplotFigure3D)
 Builder.load_string('''                            
 <MatplotFigure3DLayout>
     figure_wgt : figure_wgt.__self__
-    
-    Screen:
-        size: root.size
-        pos: root.pos 
-        BoxLayout:
-            MatplotFigure3D:
-                id:figure_wgt
-                pickradius : root.pickradius
-                projection : root.projection
-                max_hover_rate : root.max_hover_rate 
-                crop_factor : root.crop_factor
-                cursor_size : root.cursor_size   
-                matplot_figure_layout:root
+    canvas.before:
+        Color:
+            rgba: root.figure_background
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
+    ScreenManager:
+        Screen:
+            size: self.manager.size
+            pos: self.manager.pos 
+            BoxLayout:
+                MatplotFigure3D:
+                    id:figure_wgt
+                    pickradius : root.pickradius
+                    projection : root.projection
+                    max_hover_rate : root.max_hover_rate 
+                    crop_factor : root.crop_factor
+                    cursor_size : root.cursor_size   
+                    matplot_figure_layout:root
                     
 <MatplotFigure3D>
     canvas.before:
