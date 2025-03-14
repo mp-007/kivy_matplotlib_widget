@@ -824,7 +824,7 @@ class MatplotFigure3DLayout(BoxLayout):
     max_hover_rate =  NumericProperty(None,allownone=True) 
     crop_factor = NumericProperty(1.0)     
     cursor_size=NumericProperty("10dp") 
-    figure_background = ColorProperty([1,0,1,1])
+    figure_background = ColorProperty([1,1,1,1])
 
     def __init__(self, **kwargs):
         """ init class """
