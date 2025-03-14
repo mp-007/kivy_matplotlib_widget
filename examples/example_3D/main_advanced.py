@@ -57,12 +57,7 @@ Screen
    
         
         BoxLayout:
-            canvas.before:
-                Color:
-                    rgba: (1, 1, 1, 1)
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+
             MatplotFigure3DLayout:
                 id:figure_wgt_layout
                 
