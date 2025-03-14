@@ -124,7 +124,7 @@ Screen
 
 KV3D = '''
 Screen
-    figure_wgt:figure_wgt
+    figure_wgt_layout:figure_wgt_layout
     
     BoxLayout:
         orientation:'vertical'
@@ -135,9 +135,12 @@ Screen
             Rectangle:
                 pos: self.pos
                 size: self.size
-
-        MatplotFigure3D:
-            id:figure_wgt
+        KivyMatplotNavToolbar:
+            id:nav_bar
+            nav_icon:'3D'
+            figure_wgt_layout:figure_wgt_layout
+        MatplotFigure3DLayout:
+            id:figure_wgt_layout
 
 '''
 
@@ -282,10 +285,10 @@ class GraphApp3D(App):
             figure= self.figure
             
         if isinstance(figure,list):
-            self.screen.figure_wgt.figure = figure[0]
+            self.screen.figure_wgt_layout.figure_wgt.figure = figure[0]
 
         else:
-            self.screen.figure_wgt.figure = figure
+            self.screen.figure_wgt_layout.figure_wgt.figure = figure
 
 def app_window_3D(plot_queue,**kwargs):
 
