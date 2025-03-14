@@ -468,6 +468,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#3d-graph-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D graph usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples-using-this-widget" class="md-nav__link">
     <span class="md-ellipsis">
       Examples using this widget
@@ -1264,6 +1273,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#3d-graph-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D graph usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples-using-this-widget" class="md-nav__link">
     <span class="md-ellipsis">
       Examples using this widget
@@ -1295,12 +1313,12 @@
 <p>KivyMatplotNavToolbar is a kivy navigation bar. All the option avalaible used the icons on NavigationIcons.ttf font.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This widget a figure object to be functional. figure_wgt property need a matplotlib figure object.</p>
+<p>This widget need a figure object to be functional. figure_wgt property need a matplotlib figure object.</p>
 </div>
 <p><img alt="intro" src="../../assets/intro.PNG" /></p>
 <h2 id="some-useful-kivy-properties">Some useful kivy properties</h2>
 <ul>
-<li>nav_icon (str) : navigation icon used (option: 'normal','minimal','all', 'custom'. Default: 'normal')</li>
+<li>nav_icon (str) : navigation icon used (option: 'normal','minimal','all', '3D', 'custom'. Default: 'normal')</li>
 <li>hover_mode (str) : type of hover mode (option: 'desktop','touch'. Default: 'touch')</li>
 <li>show_cursor_data (bool) : show cursor coordinate (default False). Useful when 'desktop mode' is set.</li>
 <li>orientation_type (str) : navigation bar orientation (option: 'actionbar','rail'. Default: 'actionbar')</li>
@@ -1314,6 +1332,20 @@
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>MatplotFigureSubplot:
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    id:figure_wgt
+</code></pre></div></p>
+<h2 id="3d-graph-usage">3D graph usage</h2>
+<p>For 3D graph use nav_icon = '3D' properties.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For 3D graph, you need to set figure_wgt_layout property to be functional. hover_mode and show_cursor_data doesn't work for 3D graph</p>
+</div>
+<p>How to use in Kv language :
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>KivyMatplotNavToolbar:
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    nav_icon:&#39;3D&#39;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    figure_wgt_layout:figure_wgt_layout
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>MatplotFigure3DLayout:
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    id:figure_wgt_layout
 </code></pre></div></p>
 <h2 id="examples-using-this-widget">Examples using this widget</h2>
 <ul>
