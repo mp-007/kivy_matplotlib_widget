@@ -1,7 +1,7 @@
 # kivy_matplotlib_widget
 A fast matplotlib rendering for Kivy based on Kivy_matplotlib project (https://github.com/jeysonmc/kivy_matplotlib) and kivy scatter. Hover option is also based on the algorithm from mplcursors project (https://github.com/anntzer/mplcursors). Matplotlib used 'agg' backend
 
-# Documentation (new)
+# Documentation
 See documentation at https://mp-007.github.io/kivy_matplotlib_widget/
   
 # How to use
@@ -35,5 +35,6 @@ See interactive_converter folder in the examples for more details.
  - min/max touch option to easily change axis limit
  - autoscale option
  - several selectors widget (rectangle, lasso, ellipse and span)
+ - 3D graph with cursor, figure pan and figure zoom
 
 ![image](https://github.com/mp-007/kivy_matplotlib_widget/assets/19823482/7709886e-0891-4fb7-a95d-eee790a6c57c)
