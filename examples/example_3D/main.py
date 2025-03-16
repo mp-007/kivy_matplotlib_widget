@@ -29,9 +29,9 @@ Screen
             ToggleButton:
                 group:'touch_mode'
                 state:'down'
-                text:"pan and zoom" 
+                text:"rotate" 
                 on_release:
-                    app.set_touch_mode('pan')
+                    app.set_touch_mode('rotate')
                     self.state='down'
             ToggleButton:
                 group:'touch_mode'

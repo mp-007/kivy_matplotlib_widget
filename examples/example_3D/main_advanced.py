@@ -36,13 +36,13 @@ Screen
                     self.state='down'                
             ToggleButton:
                 group:'touch_mode'
-                text:"pan axis" 
+                text:"pan and zoom data" 
                 on_release:
                     app.set_touch_mode('pan')
                     self.state='down' 
             ToggleButton:
                 group:'touch_mode'
-                text:"pan figure" 
+                text:"pan and zoom figure" 
                 on_release:
                     app.set_touch_mode('figure_zoom_pan')
                     self.state='down'
