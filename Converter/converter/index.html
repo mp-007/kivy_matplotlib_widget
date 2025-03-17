@@ -97,6 +97,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#3d-figure-converter" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -968,6 +973,17 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Convert any matplotlib figure with 1 function
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -977,6 +993,50 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#3d-figure-converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D figure converter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-blocking-method-multiprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Not blocking method (multiprocessing)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-converter-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other converter functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1197,6 +1257,41 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#3d-figure-converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D figure converter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not-blocking-method-multiprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Not blocking method (multiprocessing)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-converter-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other converter functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1215,12 +1310,279 @@
 
   <h1>Convert any matplotlib figure with 1 function</h1>
 
-<p>Convert any matplotlib figure into kivy interactive graph with only 2 lines in your ipython console
+<p>Convert any matplotlib 2D figure into kivy interactive graph with only 2 lines in your ipython console
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>from kivy_matplotlib_widget.tools.interactive_converter import interactive_graph_ipython
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>interactive_graph_ipython(fig) #fig is your matplotlib figure instance
 </code></pre></div>
-See interactive_converter folder in the examples for more details.</p>
+Interactive_graph_ipython is used to generate kivy interactive graph directly in python interactive console (ipython) or directly in the code if you have only 1 figure. You can generate only 1 figure at a time with this function. </p>
+<p>You can close your kivy graph (or ctrl+c) if you want to resume your code and then you can call interactive_graph_ipython again.</p>
+<p>See interactive_converter folder in the examples for more details.</p>
+<h2 id="3d-figure-converter">3D figure converter</h2>
+<p>For 3D figure, use this function</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>interactive_graph3D_ipython(fig) #fig is your matplotlib figure instance
+</code></pre></div>
+<h2 id="not-blocking-method-multiprocessing">Not blocking method (multiprocessing)</h2>
+<p>If you need to generate multiple figure with a no blocking method, please see interactive_graph and interactive_graph3D functions.</p>
+<p>These functions use python multiprocessing method, so it's a not blocking method and several figure can be generated. Becauce it use mutiprocessing method, it need to be call with <code>if __name__ == "__main__":</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>if __name__ == &quot;__main__&quot;: 
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    interactive_graph(fig) #2D figure
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    interactive_graph3D(fig) #3D figure
+</code></pre></div>
+<h2 id="other-converter-functions">Other converter functions</h2>
+<p>For more control, you can use app_window and app_window3D directly. These function are used inside interactive_graph and interactive_graph3D functions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>from kivy_matplotlib_widget.tools.interactive_converter import app_window,app_window_3D
+</code></pre></div>
+<p>This code test differents kind of figure using these functions. <strong>To make this code work, create a .py file and run this code</strong>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>import multiprocessing
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>import matplotlib.pyplot as plt
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>from kivy_matplotlib_widget.tools.interactive_converter import app_window,app_window_3D
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>import numpy as np
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>def generate_plot(kwargs):
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    &quot;&quot;&quot;Function to generate and display the plot.&quot;&quot;&quot;
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    num = kwargs[&#39;num&#39;]
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    if num == 1:
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        # 1. Line Plot (1D)
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        x = np.linspace(0, 10, 100)
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        y = np.sin(x)
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        plt.figure()
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        plt.plot(x, y)
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        plt.title(&quot;Line Plot&quot;)
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    elif num == 2:
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        # 2. Scatter Plot (2D)
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        plt.figure()
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>        plt.scatter(x, y)
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>        plt.title(&quot;Scatter Plot&quot;)
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    elif num == 3:
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        # 3. 3D Scatter Plot (3D using color for 3rd dimension)
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>        z = np.random.rand(100)
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>        plt.figure()
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>        plt.scatter(x, y, c=z, cmap=&#39;viridis&#39;)
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>        plt.colorbar(label=&quot;Z-axis (color)&quot;)
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>        plt.title(&quot;3D Scatter in 2D&quot;)
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>        app_window(plt.gcf(),autoscale_tight=True)
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>    elif num == 4:
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>        # 4. 4D Scatter Plot (4D with size and color for extra dimensions)
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>        z = np.random.rand(100)
+<a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>        sizes = 100 * np.random.rand(100)
+<a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>        plt.figure()
+<a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>        plt.scatter(x, y, c=z, s=sizes, cmap=&#39;plasma&#39;, alpha=0.7)
+<a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>        plt.colorbar(label=&quot;Color dimension&quot;)
+<a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>        plt.title(&quot;4D Scatter in 2D&quot;)
+<a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>    elif num == 5:
+<a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>        # 5. Bar Plot
+<a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>        categories = [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;]
+<a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>        values = [5, 7, 3, 8]
+<a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>        plt.figure()
+<a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a>        plt.bar(categories, values)
+<a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a>        plt.title(&quot;Bar Plot&quot;)
+<a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a>    elif num == 6:
+<a id="__codelineno-4-55" name="__codelineno-4-55" href="#__codelineno-4-55"></a>        # 6. Histogram
+<a id="__codelineno-4-56" name="__codelineno-4-56" href="#__codelineno-4-56"></a>        values = np.random.randn(1000)
+<a id="__codelineno-4-57" name="__codelineno-4-57" href="#__codelineno-4-57"></a>        plt.figure()
+<a id="__codelineno-4-58" name="__codelineno-4-58" href="#__codelineno-4-58"></a>        plt.hist(values, bins=20)
+<a id="__codelineno-4-59" name="__codelineno-4-59" href="#__codelineno-4-59"></a>        plt.title(&quot;Histogram&quot;)
+<a id="__codelineno-4-60" name="__codelineno-4-60" href="#__codelineno-4-60"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-61" name="__codelineno-4-61" href="#__codelineno-4-61"></a>    elif num == 7:
+<a id="__codelineno-4-62" name="__codelineno-4-62" href="#__codelineno-4-62"></a>        # 7. Pie Chart
+<a id="__codelineno-4-63" name="__codelineno-4-63" href="#__codelineno-4-63"></a>        sizes = [15, 30, 45, 10]
+<a id="__codelineno-4-64" name="__codelineno-4-64" href="#__codelineno-4-64"></a>        labels = [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;]
+<a id="__codelineno-4-65" name="__codelineno-4-65" href="#__codelineno-4-65"></a>        plt.figure()
+<a id="__codelineno-4-66" name="__codelineno-4-66" href="#__codelineno-4-66"></a>        plt.pie(sizes, labels=labels, autopct=&#39;%1.1f%%&#39;)
+<a id="__codelineno-4-67" name="__codelineno-4-67" href="#__codelineno-4-67"></a>        plt.title(&quot;Pie Chart&quot;)
+<a id="__codelineno-4-68" name="__codelineno-4-68" href="#__codelineno-4-68"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-69" name="__codelineno-4-69" href="#__codelineno-4-69"></a>    elif num == 8:
+<a id="__codelineno-4-70" name="__codelineno-4-70" href="#__codelineno-4-70"></a>        # 8. Heatmap (2D data)
+<a id="__codelineno-4-71" name="__codelineno-4-71" href="#__codelineno-4-71"></a>        data = np.random.rand(10, 10)
+<a id="__codelineno-4-72" name="__codelineno-4-72" href="#__codelineno-4-72"></a>        plt.figure()
+<a id="__codelineno-4-73" name="__codelineno-4-73" href="#__codelineno-4-73"></a>        plt.imshow(data, cmap=&#39;hot&#39;, interpolation=&#39;nearest&#39;)
+<a id="__codelineno-4-74" name="__codelineno-4-74" href="#__codelineno-4-74"></a>        plt.colorbar()
+<a id="__codelineno-4-75" name="__codelineno-4-75" href="#__codelineno-4-75"></a>        plt.title(&quot;Heatmap&quot;)
+<a id="__codelineno-4-76" name="__codelineno-4-76" href="#__codelineno-4-76"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-77" name="__codelineno-4-77" href="#__codelineno-4-77"></a>    elif num == 9:
+<a id="__codelineno-4-78" name="__codelineno-4-78" href="#__codelineno-4-78"></a>        # 9. Contour Plot
+<a id="__codelineno-4-79" name="__codelineno-4-79" href="#__codelineno-4-79"></a>        x = np.linspace(-5, 5, 100)
+<a id="__codelineno-4-80" name="__codelineno-4-80" href="#__codelineno-4-80"></a>        y = np.linspace(-5, 5, 100)
+<a id="__codelineno-4-81" name="__codelineno-4-81" href="#__codelineno-4-81"></a>        x, y = np.meshgrid(x, y)
+<a id="__codelineno-4-82" name="__codelineno-4-82" href="#__codelineno-4-82"></a>        z = np.sin(np.sqrt(x ** 2 + y ** 2))
+<a id="__codelineno-4-83" name="__codelineno-4-83" href="#__codelineno-4-83"></a>        plt.figure()
+<a id="__codelineno-4-84" name="__codelineno-4-84" href="#__codelineno-4-84"></a>        plt.contour(x, y, z, cmap=&#39;viridis&#39;)
+<a id="__codelineno-4-85" name="__codelineno-4-85" href="#__codelineno-4-85"></a>        plt.title(&quot;Contour Plot&quot;)
+<a id="__codelineno-4-86" name="__codelineno-4-86" href="#__codelineno-4-86"></a>        app_window(plt.gcf(),autoscale_tight=True)
+<a id="__codelineno-4-87" name="__codelineno-4-87" href="#__codelineno-4-87"></a>    elif num == 10:
+<a id="__codelineno-4-88" name="__codelineno-4-88" href="#__codelineno-4-88"></a>        # 10. Box Plot
+<a id="__codelineno-4-89" name="__codelineno-4-89" href="#__codelineno-4-89"></a>        data = [np.random.rand(50), np.random.rand(50), np.random.rand(50)]
+<a id="__codelineno-4-90" name="__codelineno-4-90" href="#__codelineno-4-90"></a>        plt.figure()
+<a id="__codelineno-4-91" name="__codelineno-4-91" href="#__codelineno-4-91"></a>        plt.boxplot(data)
+<a id="__codelineno-4-92" name="__codelineno-4-92" href="#__codelineno-4-92"></a>        plt.title(&quot;Box Plot&quot;)
+<a id="__codelineno-4-93" name="__codelineno-4-93" href="#__codelineno-4-93"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-94" name="__codelineno-4-94" href="#__codelineno-4-94"></a>    elif num == 11:
+<a id="__codelineno-4-95" name="__codelineno-4-95" href="#__codelineno-4-95"></a>        # 11. Violin Plot
+<a id="__codelineno-4-96" name="__codelineno-4-96" href="#__codelineno-4-96"></a>        data = [np.random.rand(50), np.random.rand(50), np.random.rand(50)]
+<a id="__codelineno-4-97" name="__codelineno-4-97" href="#__codelineno-4-97"></a>        plt.figure()
+<a id="__codelineno-4-98" name="__codelineno-4-98" href="#__codelineno-4-98"></a>        plt.violinplot(data)
+<a id="__codelineno-4-99" name="__codelineno-4-99" href="#__codelineno-4-99"></a>        plt.title(&quot;Violin Plot&quot;)
+<a id="__codelineno-4-100" name="__codelineno-4-100" href="#__codelineno-4-100"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-101" name="__codelineno-4-101" href="#__codelineno-4-101"></a>    elif num == 12:
+<a id="__codelineno-4-102" name="__codelineno-4-102" href="#__codelineno-4-102"></a>        # 12. Step Plot
+<a id="__codelineno-4-103" name="__codelineno-4-103" href="#__codelineno-4-103"></a>        x = np.arange(0, 10, 0.1)
+<a id="__codelineno-4-104" name="__codelineno-4-104" href="#__codelineno-4-104"></a>        y = np.sin(x)
+<a id="__codelineno-4-105" name="__codelineno-4-105" href="#__codelineno-4-105"></a>        plt.figure()
+<a id="__codelineno-4-106" name="__codelineno-4-106" href="#__codelineno-4-106"></a>        plt.step(x, y)
+<a id="__codelineno-4-107" name="__codelineno-4-107" href="#__codelineno-4-107"></a>        plt.title(&quot;Step Plot&quot;)
+<a id="__codelineno-4-108" name="__codelineno-4-108" href="#__codelineno-4-108"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-109" name="__codelineno-4-109" href="#__codelineno-4-109"></a>    elif num == 13:
+<a id="__codelineno-4-110" name="__codelineno-4-110" href="#__codelineno-4-110"></a>        # 13. Error Bar Plot
+<a id="__codelineno-4-111" name="__codelineno-4-111" href="#__codelineno-4-111"></a>        x = np.linspace(0, 10, 10)
+<a id="__codelineno-4-112" name="__codelineno-4-112" href="#__codelineno-4-112"></a>        y = np.sin(x)
+<a id="__codelineno-4-113" name="__codelineno-4-113" href="#__codelineno-4-113"></a>        errors = 0.1 + 0.2 * np.sqrt(x)
+<a id="__codelineno-4-114" name="__codelineno-4-114" href="#__codelineno-4-114"></a>        plt.figure()
+<a id="__codelineno-4-115" name="__codelineno-4-115" href="#__codelineno-4-115"></a>        plt.errorbar(x, y, yerr=errors, fmt=&#39;-o&#39;)
+<a id="__codelineno-4-116" name="__codelineno-4-116" href="#__codelineno-4-116"></a>        plt.title(&quot;Error Bar Plot&quot;)
+<a id="__codelineno-4-117" name="__codelineno-4-117" href="#__codelineno-4-117"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-118" name="__codelineno-4-118" href="#__codelineno-4-118"></a>    elif num == 14:
+<a id="__codelineno-4-119" name="__codelineno-4-119" href="#__codelineno-4-119"></a>        # 14. Polar Plot
+<a id="__codelineno-4-120" name="__codelineno-4-120" href="#__codelineno-4-120"></a>        theta = np.linspace(0, 2 * np.pi, 100)
+<a id="__codelineno-4-121" name="__codelineno-4-121" href="#__codelineno-4-121"></a>        r = 1 + np.sin(3 * theta)
+<a id="__codelineno-4-122" name="__codelineno-4-122" href="#__codelineno-4-122"></a>        plt.figure()
+<a id="__codelineno-4-123" name="__codelineno-4-123" href="#__codelineno-4-123"></a>        ax = plt.subplot(111, polar=True)
+<a id="__codelineno-4-124" name="__codelineno-4-124" href="#__codelineno-4-124"></a>        ax.plot(theta, r)
+<a id="__codelineno-4-125" name="__codelineno-4-125" href="#__codelineno-4-125"></a>        plt.title(&quot;Polar Plot&quot;)
+<a id="__codelineno-4-126" name="__codelineno-4-126" href="#__codelineno-4-126"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-127" name="__codelineno-4-127" href="#__codelineno-4-127"></a>    elif num == 15:
+<a id="__codelineno-4-128" name="__codelineno-4-128" href="#__codelineno-4-128"></a>        # 15. Quiver Plot
+<a id="__codelineno-4-129" name="__codelineno-4-129" href="#__codelineno-4-129"></a>        x, y = np.meshgrid(np.arange(-2, 2, 0.5), np.arange(-2, 2, 0.5))
+<a id="__codelineno-4-130" name="__codelineno-4-130" href="#__codelineno-4-130"></a>        u = -y
+<a id="__codelineno-4-131" name="__codelineno-4-131" href="#__codelineno-4-131"></a>        v = x
+<a id="__codelineno-4-132" name="__codelineno-4-132" href="#__codelineno-4-132"></a>        plt.figure()
+<a id="__codelineno-4-133" name="__codelineno-4-133" href="#__codelineno-4-133"></a>        plt.quiver(x, y, u, v)
+<a id="__codelineno-4-134" name="__codelineno-4-134" href="#__codelineno-4-134"></a>        plt.title(&quot;Quiver Plot&quot;)
+<a id="__codelineno-4-135" name="__codelineno-4-135" href="#__codelineno-4-135"></a>        app_window(plt.gcf())
+<a id="__codelineno-4-136" name="__codelineno-4-136" href="#__codelineno-4-136"></a>    elif num == 16:
+<a id="__codelineno-4-137" name="__codelineno-4-137" href="#__codelineno-4-137"></a>        # 16. 3D Scatter Plot (3D in 3D)
+<a id="__codelineno-4-138" name="__codelineno-4-138" href="#__codelineno-4-138"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-139" name="__codelineno-4-139" href="#__codelineno-4-139"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-140" name="__codelineno-4-140" href="#__codelineno-4-140"></a>        z = np.random.rand(100)
+<a id="__codelineno-4-141" name="__codelineno-4-141" href="#__codelineno-4-141"></a>        fig = plt.figure()
+<a id="__codelineno-4-142" name="__codelineno-4-142" href="#__codelineno-4-142"></a>        ax = fig.add_subplot(111, projection=&#39;3d&#39;)
+<a id="__codelineno-4-143" name="__codelineno-4-143" href="#__codelineno-4-143"></a>        ax.scatter(x, y, z, c=&#39;blue&#39;)
+<a id="__codelineno-4-144" name="__codelineno-4-144" href="#__codelineno-4-144"></a>        ax.set_title(&quot;3D Scatter in 3D&quot;)
+<a id="__codelineno-4-145" name="__codelineno-4-145" href="#__codelineno-4-145"></a>        app_window_3D(plt.gcf())
+<a id="__codelineno-4-146" name="__codelineno-4-146" href="#__codelineno-4-146"></a>    elif num == 17:
+<a id="__codelineno-4-147" name="__codelineno-4-147" href="#__codelineno-4-147"></a>        # 17. 4D Scatter Plot (4D in 3D with color for 4th dimension)
+<a id="__codelineno-4-148" name="__codelineno-4-148" href="#__codelineno-4-148"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-149" name="__codelineno-4-149" href="#__codelineno-4-149"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-150" name="__codelineno-4-150" href="#__codelineno-4-150"></a>        z = np.random.rand(100)
+<a id="__codelineno-4-151" name="__codelineno-4-151" href="#__codelineno-4-151"></a>        c = np.random.rand(100)
+<a id="__codelineno-4-152" name="__codelineno-4-152" href="#__codelineno-4-152"></a>        fig = plt.figure()
+<a id="__codelineno-4-153" name="__codelineno-4-153" href="#__codelineno-4-153"></a>        ax = fig.add_subplot(111, projection=&#39;3d&#39;)
+<a id="__codelineno-4-154" name="__codelineno-4-154" href="#__codelineno-4-154"></a>        p = ax.scatter(x, y, z, c=c, cmap=&#39;viridis&#39;)
+<a id="__codelineno-4-155" name="__codelineno-4-155" href="#__codelineno-4-155"></a>        fig.colorbar(p, label=&quot;4th Dimension (color)&quot;)
+<a id="__codelineno-4-156" name="__codelineno-4-156" href="#__codelineno-4-156"></a>        ax.set_title(&quot;4D Scatter in 3D&quot;)
+<a id="__codelineno-4-157" name="__codelineno-4-157" href="#__codelineno-4-157"></a>        app_window_3D(plt.gcf())
+<a id="__codelineno-4-158" name="__codelineno-4-158" href="#__codelineno-4-158"></a>    elif num == 18:
+<a id="__codelineno-4-159" name="__codelineno-4-159" href="#__codelineno-4-159"></a>        # 18. 5D Scatter Plot (5D in 3D with color and size for extra dimensions)
+<a id="__codelineno-4-160" name="__codelineno-4-160" href="#__codelineno-4-160"></a>        x = np.random.rand(100)
+<a id="__codelineno-4-161" name="__codelineno-4-161" href="#__codelineno-4-161"></a>        y = np.random.rand(100)
+<a id="__codelineno-4-162" name="__codelineno-4-162" href="#__codelineno-4-162"></a>        z = np.random.rand(100)
+<a id="__codelineno-4-163" name="__codelineno-4-163" href="#__codelineno-4-163"></a>        c = np.random.rand(100)
+<a id="__codelineno-4-164" name="__codelineno-4-164" href="#__codelineno-4-164"></a>        sizes = 100 * np.random.rand(100)
+<a id="__codelineno-4-165" name="__codelineno-4-165" href="#__codelineno-4-165"></a>        fig = plt.figure()
+<a id="__codelineno-4-166" name="__codelineno-4-166" href="#__codelineno-4-166"></a>        ax = fig.add_subplot(111, projection=&#39;3d&#39;)
+<a id="__codelineno-4-167" name="__codelineno-4-167" href="#__codelineno-4-167"></a>        p = ax.scatter(x, y, z, c=c, s=sizes, cmap=&#39;plasma&#39;, alpha=0.7)
+<a id="__codelineno-4-168" name="__codelineno-4-168" href="#__codelineno-4-168"></a>        fig.colorbar(p, label=&quot;4th Dimension (color)&quot;)
+<a id="__codelineno-4-169" name="__codelineno-4-169" href="#__codelineno-4-169"></a>        ax.set_title(&quot;5D Scatter in 3D&quot;)
+<a id="__codelineno-4-170" name="__codelineno-4-170" href="#__codelineno-4-170"></a>        app_window_3D(plt.gcf())
+<a id="__codelineno-4-171" name="__codelineno-4-171" href="#__codelineno-4-171"></a>
+<a id="__codelineno-4-172" name="__codelineno-4-172" href="#__codelineno-4-172"></a>
+<a id="__codelineno-4-173" name="__codelineno-4-173" href="#__codelineno-4-173"></a>if __name__ == &quot;__main__&quot;:
+<a id="__codelineno-4-174" name="__codelineno-4-174" href="#__codelineno-4-174"></a>    # Set the multiprocessing start method
+<a id="__codelineno-4-175" name="__codelineno-4-175" href="#__codelineno-4-175"></a>    multiprocessing.set_start_method(&quot;spawn&quot;)
+<a id="__codelineno-4-176" name="__codelineno-4-176" href="#__codelineno-4-176"></a>
+<a id="__codelineno-4-177" name="__codelineno-4-177" href="#__codelineno-4-177"></a>    # Place Kivy imports here to ensure they&#39;re only in the main process
+<a id="__codelineno-4-178" name="__codelineno-4-178" href="#__codelineno-4-178"></a>    from kivy.app import App
+<a id="__codelineno-4-179" name="__codelineno-4-179" href="#__codelineno-4-179"></a>    from kivy.uix.button import Button
+<a id="__codelineno-4-180" name="__codelineno-4-180" href="#__codelineno-4-180"></a>    from kivy.uix.boxlayout import BoxLayout
+<a id="__codelineno-4-181" name="__codelineno-4-181" href="#__codelineno-4-181"></a>
+<a id="__codelineno-4-182" name="__codelineno-4-182" href="#__codelineno-4-182"></a>
+<a id="__codelineno-4-183" name="__codelineno-4-183" href="#__codelineno-4-183"></a>    class PlottingApp(App):
+<a id="__codelineno-4-184" name="__codelineno-4-184" href="#__codelineno-4-184"></a>        def build(self):
+<a id="__codelineno-4-185" name="__codelineno-4-185" href="#__codelineno-4-185"></a>            layout = BoxLayout(orientation=&quot;vertical&quot;)
+<a id="__codelineno-4-186" name="__codelineno-4-186" href="#__codelineno-4-186"></a>
+<a id="__codelineno-4-187" name="__codelineno-4-187" href="#__codelineno-4-187"></a>            b1 = Button(text=&quot;1 &#39;Line Plot&#39;&quot;)
+<a id="__codelineno-4-188" name="__codelineno-4-188" href="#__codelineno-4-188"></a>            b1.bind(on_press=lambda x: self.generate_plot(1))
+<a id="__codelineno-4-189" name="__codelineno-4-189" href="#__codelineno-4-189"></a>            b2 = Button(text=&quot;2 &#39;Scatter Plot&#39;&quot;)
+<a id="__codelineno-4-190" name="__codelineno-4-190" href="#__codelineno-4-190"></a>            b2.bind(on_press=lambda x: self.generate_plot(2))
+<a id="__codelineno-4-191" name="__codelineno-4-191" href="#__codelineno-4-191"></a>            b3 = Button(text=&quot;3 &#39;3D Scatter in 2D&#39;&quot;)
+<a id="__codelineno-4-192" name="__codelineno-4-192" href="#__codelineno-4-192"></a>            b3.bind(on_press=lambda x: self.generate_plot(3))
+<a id="__codelineno-4-193" name="__codelineno-4-193" href="#__codelineno-4-193"></a>            b4 = Button(text=&quot;4 &#39;4D Scatter in 2D&#39;&quot;)
+<a id="__codelineno-4-194" name="__codelineno-4-194" href="#__codelineno-4-194"></a>            b4.bind(on_press=lambda x: self.generate_plot(4))
+<a id="__codelineno-4-195" name="__codelineno-4-195" href="#__codelineno-4-195"></a>            b5 = Button(text=&quot;5 &#39;Bar Plot&#39;&quot;)
+<a id="__codelineno-4-196" name="__codelineno-4-196" href="#__codelineno-4-196"></a>            b5.bind(on_press=lambda x: self.generate_plot(5))
+<a id="__codelineno-4-197" name="__codelineno-4-197" href="#__codelineno-4-197"></a>            b6 = Button(text=&quot;6 &#39;Histogram&#39;&quot;)
+<a id="__codelineno-4-198" name="__codelineno-4-198" href="#__codelineno-4-198"></a>            b6.bind(on_press=lambda x: self.generate_plot(6))
+<a id="__codelineno-4-199" name="__codelineno-4-199" href="#__codelineno-4-199"></a>            b7 = Button(text=&quot;7 &#39;Pie Chart&#39;&quot;)
+<a id="__codelineno-4-200" name="__codelineno-4-200" href="#__codelineno-4-200"></a>            b7.bind(on_press=lambda x: self.generate_plot(7))
+<a id="__codelineno-4-201" name="__codelineno-4-201" href="#__codelineno-4-201"></a>            b8 = Button(text=&quot;8 &#39;Heatmap&#39;&quot;)
+<a id="__codelineno-4-202" name="__codelineno-4-202" href="#__codelineno-4-202"></a>            b8.bind(on_press=lambda x: self.generate_plot(8))
+<a id="__codelineno-4-203" name="__codelineno-4-203" href="#__codelineno-4-203"></a>            b9 = Button(text=&quot;9 &#39;Contour Plot&#39;&quot;)
+<a id="__codelineno-4-204" name="__codelineno-4-204" href="#__codelineno-4-204"></a>            b9.bind(on_press=lambda x: self.generate_plot(9))
+<a id="__codelineno-4-205" name="__codelineno-4-205" href="#__codelineno-4-205"></a>            b10 = Button(text=&quot;10 &#39;Box Plot&#39;&quot;)
+<a id="__codelineno-4-206" name="__codelineno-4-206" href="#__codelineno-4-206"></a>            b10.bind(on_press=lambda x: self.generate_plot(10))
+<a id="__codelineno-4-207" name="__codelineno-4-207" href="#__codelineno-4-207"></a>            b11 = Button(text=&quot;11 &#39;Violin Plot&#39;&quot;)
+<a id="__codelineno-4-208" name="__codelineno-4-208" href="#__codelineno-4-208"></a>            b11.bind(on_press=lambda x: self.generate_plot(11))
+<a id="__codelineno-4-209" name="__codelineno-4-209" href="#__codelineno-4-209"></a>            b12 = Button(text=&quot;12 &#39;Step Plot&#39;&quot;)
+<a id="__codelineno-4-210" name="__codelineno-4-210" href="#__codelineno-4-210"></a>            b12.bind(on_press=lambda x: self.generate_plot(12))
+<a id="__codelineno-4-211" name="__codelineno-4-211" href="#__codelineno-4-211"></a>            b13 = Button(text=&quot;13 &#39;Error Bar Plot&#39;&quot;)
+<a id="__codelineno-4-212" name="__codelineno-4-212" href="#__codelineno-4-212"></a>            b13.bind(on_press=lambda x: self.generate_plot(13))
+<a id="__codelineno-4-213" name="__codelineno-4-213" href="#__codelineno-4-213"></a>            b14 = Button(text=&quot;14 &#39;Polar Plot&#39;&quot;)
+<a id="__codelineno-4-214" name="__codelineno-4-214" href="#__codelineno-4-214"></a>            b14.bind(on_press=lambda x: self.generate_plot(14))
+<a id="__codelineno-4-215" name="__codelineno-4-215" href="#__codelineno-4-215"></a>            b15 = Button(text=&quot;15 &#39;Quiver Plot&#39;&quot;)
+<a id="__codelineno-4-216" name="__codelineno-4-216" href="#__codelineno-4-216"></a>            b15.bind(on_press=lambda x: self.generate_plot(15))
+<a id="__codelineno-4-217" name="__codelineno-4-217" href="#__codelineno-4-217"></a>            b16 = Button(text=&quot;16 &#39;3D Scatter in 3D&#39;&quot;)
+<a id="__codelineno-4-218" name="__codelineno-4-218" href="#__codelineno-4-218"></a>            b16.bind(on_press=lambda x: self.generate_plot(16))
+<a id="__codelineno-4-219" name="__codelineno-4-219" href="#__codelineno-4-219"></a>            b17 = Button(text=&quot;17 &#39;4D Scatter in 3D&#39;&quot;)
+<a id="__codelineno-4-220" name="__codelineno-4-220" href="#__codelineno-4-220"></a>            b17.bind(on_press=lambda x: self.generate_plot(17))
+<a id="__codelineno-4-221" name="__codelineno-4-221" href="#__codelineno-4-221"></a>            b18 = Button(text=&quot;18 &#39;5D Scatter in 3D&#39;&quot;)
+<a id="__codelineno-4-222" name="__codelineno-4-222" href="#__codelineno-4-222"></a>            b18.bind(on_press=lambda x: self.generate_plot(18))
+<a id="__codelineno-4-223" name="__codelineno-4-223" href="#__codelineno-4-223"></a>
+<a id="__codelineno-4-224" name="__codelineno-4-224" href="#__codelineno-4-224"></a>            for b in (b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18):
+<a id="__codelineno-4-225" name="__codelineno-4-225" href="#__codelineno-4-225"></a>                layout.add_widget(b)
+<a id="__codelineno-4-226" name="__codelineno-4-226" href="#__codelineno-4-226"></a>
+<a id="__codelineno-4-227" name="__codelineno-4-227" href="#__codelineno-4-227"></a>            return layout
+<a id="__codelineno-4-228" name="__codelineno-4-228" href="#__codelineno-4-228"></a>
+<a id="__codelineno-4-229" name="__codelineno-4-229" href="#__codelineno-4-229"></a>        def generate_plot(self, num):
+<a id="__codelineno-4-230" name="__codelineno-4-230" href="#__codelineno-4-230"></a>            x = [1, 2, 3, 4, 5]
+<a id="__codelineno-4-231" name="__codelineno-4-231" href="#__codelineno-4-231"></a>            y = [i ** 2 for i in x]
+<a id="__codelineno-4-232" name="__codelineno-4-232" href="#__codelineno-4-232"></a>            kwargs = {&#39;data&#39;: (x, y), &#39;num&#39;: num}
+<a id="__codelineno-4-233" name="__codelineno-4-233" href="#__codelineno-4-233"></a>            plot_process = multiprocessing.Process(target=generate_plot, args=(kwargs,))
+<a id="__codelineno-4-234" name="__codelineno-4-234" href="#__codelineno-4-234"></a>            plot_process.start()
+<a id="__codelineno-4-235" name="__codelineno-4-235" href="#__codelineno-4-235"></a>            self.plot_processes.append(plot_process)
+<a id="__codelineno-4-236" name="__codelineno-4-236" href="#__codelineno-4-236"></a>
+<a id="__codelineno-4-237" name="__codelineno-4-237" href="#__codelineno-4-237"></a>        def on_stop(self):
+<a id="__codelineno-4-238" name="__codelineno-4-238" href="#__codelineno-4-238"></a>            for process in self.plot_processes:
+<a id="__codelineno-4-239" name="__codelineno-4-239" href="#__codelineno-4-239"></a>                if process.is_alive():
+<a id="__codelineno-4-240" name="__codelineno-4-240" href="#__codelineno-4-240"></a>                    process.terminate()
+<a id="__codelineno-4-241" name="__codelineno-4-241" href="#__codelineno-4-241"></a>            super().on_stop()
+<a id="__codelineno-4-242" name="__codelineno-4-242" href="#__codelineno-4-242"></a>
+<a id="__codelineno-4-243" name="__codelineno-4-243" href="#__codelineno-4-243"></a>        def __init__(self, **kwargs):
+<a id="__codelineno-4-244" name="__codelineno-4-244" href="#__codelineno-4-244"></a>            super().__init__(**kwargs)
+<a id="__codelineno-4-245" name="__codelineno-4-245" href="#__codelineno-4-245"></a>            self.plot_processes = []
+<a id="__codelineno-4-246" name="__codelineno-4-246" href="#__codelineno-4-246"></a>
+<a id="__codelineno-4-247" name="__codelineno-4-247" href="#__codelineno-4-247"></a>    PlottingApp().run()
+</code></pre></div>
 
 
 
