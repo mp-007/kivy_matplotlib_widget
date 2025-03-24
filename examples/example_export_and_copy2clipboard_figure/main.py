@@ -8,7 +8,7 @@ from plyer import filechooser #using plyer filechooser to be cross platform
 from kivy_matplotlib_widget.tools.clipboard_tool import image2clipboard
 
 """
-note: image2clipboard do not work on ndroid
+note: image2clipboard do not work on android
 """
 
 class SaveFig(Button):
