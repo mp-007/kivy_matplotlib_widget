@@ -1,13 +1,9 @@
-"""Basic example for kivy_matplotlib_widget
+"""Velocity pan example for kivy_matplotlib_widget
 
-    This example don't use kivy_matplotlib_widget module in case you want to
-    incorporate some widgets in your project and you want to customized stuffs.
-    If you don't need custom used, please install the module with:
-        
-        pip install kivy-matplotlib-widget
     
 Note:
     MatplotFigure is used when you have only 1 axis with lines only.
+    Velocity pan is managed for xaxis only
     
 """
 
@@ -96,10 +92,7 @@ class Test(App):
         ax1.set_ylim(min(s)-0.05,max(s)+0.05)
 
         self.screen.figure_wgt.figure = fig
-        
-        #set pan only in x
-        # self.set_touch_mode('pan_x')
-        
+
         #set x lim (can pan or zoom over these values)
         self.screen.figure_wgt.stop_xlimits = [min(t),max(t)]
 
