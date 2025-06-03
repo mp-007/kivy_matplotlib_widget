@@ -1694,11 +1694,6 @@ class MatplotFigure(Widget):
         newcoord = self.to_widget(event.x, event.y, relative=True)
         x = newcoord[0]
         y = newcoord[1]
-        
-        if self.velocity_panx:
-            ax=self.axes
-            x = (ax.bbox.bounds[2] - ax.bbox.bounds[0])/2
-            y = (ax.bbox.bounds[3] - ax.bbox.bounds[1])/2
 
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point((x, y))   
