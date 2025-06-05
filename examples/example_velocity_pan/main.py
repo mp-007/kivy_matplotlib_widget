@@ -4,6 +4,7 @@
 Note:
     MatplotFigure is used when you have only 1 axis with lines only.
     Velocity pan is managed for xaxis only
+    Velocity pan may not work on inverted axis
     
 """
 

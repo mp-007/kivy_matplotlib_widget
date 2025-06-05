@@ -1078,6 +1078,7 @@ class MatplotFigure(Widget):
         cur_ylim = ax.get_ylim() 
         
         if self.velocity_panx:
+            #zoom in the middle because pan is only in x axis
             xdata = (cur_xlim[1] - cur_xlim[0])*.5 + cur_xlim[0]
             ydata = (cur_ylim[1] - cur_ylim[0])*.5 + cur_ylim[0]
 
@@ -1156,7 +1157,7 @@ class MatplotFigure(Widget):
                 else:    
                     ax.set_xlim([new_min, new_max])
     
-        if self.do_zoom_y or not self.velocity_panx:
+        if self.do_zoom_y:
             if yscale == 'linear':
                 ax.set_ylim([ydata - new_height * (1 - rely), ydata + new_height * (rely)])
             else:
@@ -1702,6 +1703,7 @@ class MatplotFigure(Widget):
         cur_ylim = ax.get_ylim()
         
         if self.velocity_panx:
+            #zoom in the middle because pan is only in x axis
             xdata = (cur_xlim[1] - cur_xlim[0])*.5 + cur_xlim[0]
             ydata = (cur_ylim[1] - cur_ylim[0])*.5 + cur_ylim[0]
 
