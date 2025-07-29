@@ -87,6 +87,8 @@ class Test(App):
         return self.screen
 
     def on_start(self, *args):
+        
+        #generate the plot
         fig, ax1 = plt.subplots(1, 1)
         ax1.plot(t,s)
         ax1.set_xlim(t[0],t[50])

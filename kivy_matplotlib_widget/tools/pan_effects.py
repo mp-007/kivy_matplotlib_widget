@@ -68,11 +68,9 @@ class PanEffect(KineticEffect):
 
     def update(self, val, t=None):
         self.displacement += abs(val - self.history[-1][1])
-        # print('allo')
         return super(PanEffect, self).update(val, t)
 
     def stop(self, val, t=None):
-        # print('allo')
         self.is_manual = False
         self.displacement += abs(val - self.history[-1][1])
         if self.displacement <= self.drag_threshold:
