@@ -3,6 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from kivy.properties import (
     ObjectProperty,
+    OptionProperty,
     NumericProperty,
     StringProperty,
     BooleanProperty,
@@ -297,6 +298,32 @@ class MatplotlibStyleHover(BaseHoverFloatLayout):
         """ init class """
         super().__init__(**kwargs)              
 
+class HightChartHover(BaseHoverFloatLayout):
+    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    hover_height = NumericProperty(dp(24))
+    label_format = StringProperty("")
+    # position = OptionProperty('top',
+    #     options=('top', 'bottom', 'left', 'right'))
+
+    position = OptionProperty('top',
+        options=('top', 'bottom', 'left', 'right',
+                 'top_start','top_end','bottom_start','bottom_end',
+                 'left_start','left_end','right_start','right_end'))
+    
+    
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs)  
+
+class RichTooltip(BoxLayout):
+    position = OptionProperty('top',
+        options=('top', 'bottom', 'left', 'right',
+                 'top_start','top_end','bottom_start','bottom_end',
+                 'left_start','left_end','right_start','right_end'))
+    
 Builder.load_string('''
 
 <BaseHoverFloatLayout>
@@ -783,5 +810,134 @@ Builder.load_string('''
                 font_size:root.text_size
                 font_name : root.text_font
                 color: root.text_color
-              
+
+<HightChartHover>
+    #:import get_hex_from_color kivy.utils.get_hex_from_color
+    custom_color: [0,0,0,1]
+    extra_text:root.custom_label if root.custom_label and not '_child' in root.custom_label else ''
+    label_format:'[size={}]'.format(int(root.text_size + dp(6))) + '[color={}]'.format(get_hex_from_color(root.custom_color)) + \
+                 '[font=NavigationIcons]' + u"{}".format("\U00000EB1") + \
+                 '[/font][/color][/size]' +  root.extra_text + "\\n" + 'x:' + \
+                 root.label_x_value  +"\\n"+ "y:" + root.label_y_value
+
+    canvas.before:               
+        Color:
+            rgb: root.custom_color if root.custom_color else [0,0,0,1]
+            a:0.5
+        Ellipse:
+            size: (dp(12),dp(12))
+            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))  
+            
+    use_position: 
+        'left_' + root.position.split('_')[1]  if ('right_' in root.position and root.x_hover_pos + main_box.width + dp(14) > root.figwidth + root.figx) else \
+        'left' if ('right'==root.position and root.x_hover_pos + main_box.width + dp(14) > root.figwidth + root.figx) else \
+        'right' if ('left'==root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else \
+        'right_' + root.position.split('_')[1]  if ('left_' in root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else root.position 
+         
+    #use_position:root.position
+    RichTooltip:
+        id:main_box
+        x:
+            root.x_hover_pos - self.width/2 - main_box.offset1 if ('top' in root.position or 'bottom' in root.position) else \
+            root.x_hover_pos - self.width - dp(14) if 'left' in root.use_position else \
+            root.x_hover_pos + dp(14)
+        y:
+            root.y_hover_pos + dp(14) if 'top' in root.position else \
+            root.y_hover_pos - self.height - dp(14) if 'bottom' in root.position else \
+            root.y_hover_pos - self.height/2 - main_box.offset2
+                
+        size_hint: None, None
+        height: label.texture_size[1]+ dp(16)
+        width: 
+            label.texture_size[0] + dp(32) if root.show_cursor \
+            else dp(0.0001)            
+        orientation:'vertical'
+        padding: 0,-dp(1),0,0
+        position:root.use_position
+    
+        Label:
+            id:label
+            text: root.label_format
+            font_size:root.text_size
+            color:[0,0,0,1]
+            font_name : root.text_font
+            markup:True
+
+<RichTooltip>:
+    id:mainbox
+    size_hint: None,None
+    width:dp(200)
+    height:dp(60)
+    offset1: 
+        0 if not '_' in root.position else -mainbox.width//2 + dp(20) \
+        if 'start' in root.position else mainbox.width//2 - dp(20)
+    offset2: 
+        0 if not '_' in root.position else mainbox.height//2 - dp(20) \
+        if 'start' in root.position else - mainbox.height//2 + dp(20)
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, .65
+        BoxShadow:
+            pos: self.pos
+            size: self.size                
+            offset: 0, -2
+            spread_radius: -4, -4
+            border_radius: 4, 4, 4, 4
+            blur_radius: 14 
+        Color:
+            rgba: 1, 1, 1, 1
+        SmoothRoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [7,]              
+                
+    FloatLayout:
+        size_hint: None,None
+        size:dp(0.01),dp(0.01)
+        BoxLayout:
+            x:
+                mainbox.x+mainbox.width//2 - self.width//2 + root.offset1 \
+                if ('top' in root.position or 'bottom' in root.position) \
+                else mainbox.x +mainbox.width - self.width//2 - dp(1) \
+                if 'left' in root.position else mainbox.x - self.width//2 + dp(1) 
+            y:
+                mainbox.y - self.height//2 +dp(1) if 'top' in root.position \
+                else mainbox.y +  mainbox.height - self.height//2 - dp(1) \
+                if 'bottom' in root.position else mainbox.y + mainbox.height//2 - self.height//2 + root.offset2 
+            size_hint: None,None
+            width:dp(12)
+            height:dp(12)    
+            canvas.before:
+                StencilPush
+                Rectangle:
+                    pos:
+                        (self.pos[0]-self.width//2,self.pos[1] - self.height//2-dp(5)) \
+                        if 'top' in root.position  else (self.pos[0]-self.width//2,self.pos[1] + self.height//2 ) \
+                        if 'bottom' in root.position else (self.pos[0]+self.width//2,self.pos[1] - dp(20)) \
+                        if 'left' in root.position  else (self.pos[0]-self.width//2 -dp(5),self.pos[1] - dp(20))
+                    size:
+                        (self.size[0]+self.width,self.size[1]+dp(5)) \
+                        if ('top' in root.position  or 'bottom' in root.position ) \
+                        else (self.size[0]+dp(5) ,self.size[1] + dp(40))
+                StencilUse                    
+                Color:
+                    rgba: 0, 0, 0, .65
+                PushMatrix
+                Rotate:
+                    angle: 45
+                    origin: self.center
+                BoxShadow:
+                    pos: self.pos
+                    size: self.size
+                    offset: 0, -2
+                    spread_radius: -4, -4
+                    blur_radius: 12
+                StencilUse
+                Color:
+                    rgba: 1, 1, 1, 1
+                SmoothRectangle:
+                    pos: self.pos
+                    size: self.size  
+                PopMatrix  
+                StencilPop                    
         ''')
