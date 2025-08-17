@@ -304,8 +304,7 @@ class HightChartHover(BaseHoverFloatLayout):
     text_size = NumericProperty(dp(14))
     hover_height = NumericProperty(dp(24))
     label_format = StringProperty("")
-    # position = OptionProperty('top',
-    #     options=('top', 'bottom', 'left', 'right'))
+    label_padding = NumericProperty(dp(16))
 
     position = OptionProperty('top',
         options=('top', 'bottom', 'left', 'right',
@@ -848,7 +847,7 @@ Builder.load_string('''
         size_hint: None, None
         height: label.texture_size[1]+ dp(16)
         width: 
-            label.texture_size[0] + dp(32) if root.show_cursor \
+            label.texture_size[0] + root.label_padding*2 if root.show_cursor \
             else dp(0.0001)            
         orientation:'vertical'
         padding: 0,-dp(1),0,0
