@@ -14,6 +14,10 @@ from kivy.lang import Builder
 from kivy.core.window import Window 
 from kivy.metrics import dp
 import numpy as np
+
+from kivy_matplotlib_widget import fonts_path
+from kivy.core.text import LabelBase
+LabelBase.register(name="NavigationIcons",fn_regular= fonts_path + "NavigationIcons.ttf")
         
         
 def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,hover_type='nearest'):
