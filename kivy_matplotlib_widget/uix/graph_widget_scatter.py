@@ -1886,6 +1886,9 @@ class MatplotFigureScatter(Widget):
                 current_legend.update_size()      
         if self.hover_instance:
             self.hover_instance.figwidth = self.width
+            self.hover_instance.figheight = self.height
+            self.hover_instance.figx = self.x
+            self.hover_instance.figy = self.y            
         if self.selector and self.selector.resize_wgt.verts:
             #update selector next frame to have correct position
             Clock.schedule_once(self.update_selector)             

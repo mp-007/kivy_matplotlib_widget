@@ -106,6 +106,9 @@ class BaseHoverFloatLayout(FloatLayout):
     custom_label = StringProperty('',allownone=True) #futur used for dynamic label
     custom_color=ColorProperty([0,0,0,1],allownone=True) #futur used for dynamic color
     figwidth = NumericProperty(2) 
+    figheight = NumericProperty(2) 
+    figx = NumericProperty(0)
+    figy = NumericProperty(0)
     
     def __init__(self, **kwargs):
         """ init class """
