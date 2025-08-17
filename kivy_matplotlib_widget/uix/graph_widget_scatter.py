@@ -1493,7 +1493,7 @@ class MatplotFigureScatter(Widget):
         """ update hover on fast draw (if exist)"""
         if self.hover_instance:
             #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+            if self.hover_instance.show_cursor and self.x_hover_data is not None and self.y_hover_data is not None:        
                 xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
@@ -1886,6 +1886,9 @@ class MatplotFigureScatter(Widget):
                 current_legend.update_size()      
         if self.hover_instance:
             self.hover_instance.figwidth = self.width
+            self.hover_instance.figheight = self.height
+            self.hover_instance.figx = self.x
+            self.hover_instance.figy = self.y            
         if self.selector and self.selector.resize_wgt.verts:
             #update selector next frame to have correct position
             Clock.schedule_once(self.update_selector)             
