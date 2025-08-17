@@ -9,11 +9,6 @@ from kivy_matplotlib_widget.uix.hover_widget import add_hover
 from kivy.core.window import Window
 from kivy.metrics import dp 
 
-from kivy_matplotlib_widget import fonts_path
-from kivy.core.text import LabelBase
-LabelBase.register(name="NavigationIcons",fn_regular= fonts_path + "NavigationIcons.ttf")
-
-
 class MatplotNavToolbar(BoxLayout):
 
     """Figure Toolbar"""
