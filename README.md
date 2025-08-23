@@ -5,7 +5,7 @@ A fast matplotlib rendering for Kivy based on [Kivy_matplotlib project](https://
 See documentation [here](https://mp-007.github.io/kivy_matplotlib_widget/)
 
 # How to use
-install with pip install (just import module in your header to register all the widgets in your kivy Factory: import kivy_matplotlib_widget)
+install with `pip install` (just import module in your header to register all the widgets in your kivy Factory: `import kivy_matplotlib_widget`)
 ```
 pip install kivy-matplotlib-widget
 ```
