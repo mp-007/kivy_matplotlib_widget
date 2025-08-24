@@ -84,7 +84,9 @@ class MatplotFigure(Widget):
     autoscale_tight = BooleanProperty(False)
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
-                                     options = ["None",'rectangle','lasso','ellipse','span','custom'])    
+                                     options = ["None",'rectangle','lasso','ellipse','span','custom']) 
+    pick_minimum_radius=NumericProperty(dp(50))
+    pick_radius_axis = OptionProperty("both", options=["both", "x", "y"])
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -391,8 +393,12 @@ class MatplotFigure(Widget):
                                 dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
                                 
                                 #store distance
-                                distance.append((dx2 + dy2)**0.5)
-                        
+                                if self.pick_radius_axis == 'both':
+                                    distance.append((dx2 + dy2)**0.5)
+                                if self.pick_radius_axis == 'x':
+                                    distance.append(abs(dx2))
+                                if self.pick_radius_axis == 'y':
+                                    distance.append(abs(dy2))                                   
                         #store all best lines and index
                         good_line.append(line)
                         good_index.append(index)
@@ -403,7 +409,7 @@ class MatplotFigure(Widget):
 
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
-            if np.nanmin(distance)<dp(50):
+            if np.nanmin(distance)<self.pick_minimum_radius:
                 #index of minimum distance
                 if self.compare_xdata:
                     if not self.hover_instance or not hasattr(self.hover_instance,'children_list'):
