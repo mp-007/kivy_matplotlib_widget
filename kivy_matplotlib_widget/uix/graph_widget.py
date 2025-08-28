@@ -96,6 +96,7 @@ class MatplotFigure(Widget):
     highlight_hover = BooleanProperty(True)
     highlight_prop = DictProperty({})
     highlight_alpha =  NumericProperty(0.2)
+    myevent = MatplotlibEvent()
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
