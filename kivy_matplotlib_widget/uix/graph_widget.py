@@ -566,6 +566,11 @@ class MatplotFigure(Widget):
                             if not axes:                            
                                 
                                 if self.last_line:
+                                    if self.last_line_prop:
+                                        for key in self.last_line_prop:
+                                            set_line_attr = getattr(self.last_line,'set_' + key)
+                                            set_line_attr(self.last_line_prop[key])                                    
+                                        self.last_line_prop={}                                       
                                     self.last_line=None
                                     self.axes.figure.canvas.restore_region(self.background)
                                     #draw (blit method)
@@ -676,6 +681,11 @@ class MatplotFigure(Widget):
                         if not axes:                            
                             
                             if self.last_line:
+                                if self.last_line_prop:
+                                    for key in self.last_line_prop:
+                                        set_line_attr = getattr(self.last_line,'set_' + key)
+                                        set_line_attr(self.last_line_prop[key])                                    
+                                    self.last_line_prop={}                                  
                                 self.last_line=None
                                 self.axes.figure.canvas.restore_region(self.background)
                                 #draw (blit method)
