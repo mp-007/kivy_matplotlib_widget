@@ -93,7 +93,7 @@ class MatplotFigure(Widget):
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
                                      options = ["None",'rectangle','lasso','ellipse','span','custom'])    
-    highlight_hover = BooleanProperty(True)
+    highlight_hover = BooleanProperty(False)
     highlight_prop = DictProperty({})
     highlight_alpha =  NumericProperty(0.2)
     myevent = MatplotlibEvent()
@@ -498,7 +498,62 @@ class MatplotFigure(Widget):
                             self.hover_instance.hover_outside_bound=True                            
                         else:
                             self.hover_instance.hover_outside_bound=False 
+                        
+                        return
+               
+                else:
+                    idx_best=np.nanargmin(distance)
+                    
+                    #get datas from closest line
+                    line=good_line[idx_best]
+                    self.x_cursor, self.y_cursor = line.get_data()
+                    x = self.x_cursor[good_index[idx_best]]
+                    y = self.y_cursor[good_index[idx_best]]  
+                    
+                    if not self.hover_instance:
+                        self.set_cross_hair_visible(True)
+                    
+                    # update the cursor x,y data               
+                    ax=line.axes
+                    self.horizontal_line.set_ydata([y,])
+                    self.vertical_line.set_xdata([x,])
+    
+                    #x y label
+                    if self.hover_instance:                     
+                        xy_pos = ax.transData.transform([(x,y)]) 
+                        self.x_hover_data = x
+                        self.y_hover_data = y
+                        self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
+                        self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
+                        self.hover_instance.show_cursor=True
+                            
+                        if self.cursor_xaxis_formatter:
+                            x = self.cursor_xaxis_formatter.format_data(x)
+                        else:
+                            x = ax.xaxis.get_major_formatter().format_data_short(x)
+                        if self.cursor_yaxis_formatter:
+                            y = self.cursor_yaxis_formatter.format_data(y) 
+                        else:
+                            y = ax.yaxis.get_major_formatter().format_data_short(y)
+                        self.hover_instance.label_x_value=f"{x}"
+                        self.hover_instance.label_y_value=f"{y}"
 
+                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
+                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                  
+                        self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
+                        self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
+                        
+                        self.hover_instance.custom_label = line.get_label()
+                        self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
+                        
+                        if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
+                            self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
+                            self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
+                            self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
+                            self.hover_instance.hover_outside_bound=True
+                        else:
+                            self.hover_instance.hover_outside_bound=False 
+ 
                         if self.highlight_hover:
                             self.myevent.x=event.x - self.pos[0]
                             self.myevent.y=event.y - self.pos[1]
@@ -562,63 +617,7 @@ class MatplotFigure(Widget):
             
                             #draw (blit method)
                             self.axes.figure.canvas.blit(self.axes.bbox)                 
-                            self.axes.figure.canvas.flush_events() 
-                        
-                        return
-               
-                else:
-                    idx_best=np.nanargmin(distance)
-                    
-                    #get datas from closest line
-                    line=good_line[idx_best]
-                    self.x_cursor, self.y_cursor = line.get_data()
-                    x = self.x_cursor[good_index[idx_best]]
-                    y = self.y_cursor[good_index[idx_best]]  
-                    
-                    if not self.hover_instance:
-                        self.set_cross_hair_visible(True)
-                    
-                    # update the cursor x,y data               
-                    ax=line.axes
-                    self.horizontal_line.set_ydata([y,])
-                    self.vertical_line.set_xdata([x,])
-    
-                    #x y label
-                    if self.hover_instance:                     
-                        xy_pos = ax.transData.transform([(x,y)]) 
-                        self.x_hover_data = x
-                        self.y_hover_data = y
-                        self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
-                        self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
-                        self.hover_instance.show_cursor=True
-                            
-                        if self.cursor_xaxis_formatter:
-                            x = self.cursor_xaxis_formatter.format_data(x)
-                        else:
-                            x = ax.xaxis.get_major_formatter().format_data_short(x)
-                        if self.cursor_yaxis_formatter:
-                            y = self.cursor_yaxis_formatter.format_data(y) 
-                        else:
-                            y = ax.yaxis.get_major_formatter().format_data_short(y)
-                        self.hover_instance.label_x_value=f"{x}"
-                        self.hover_instance.label_y_value=f"{y}"
-
-                        self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) + self.x
-                        self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x                  
-                        self.hover_instance.ymin_line = float(ax.bbox.bounds[1])  + self.y
-                        self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])  + self.y
-                        
-                        self.hover_instance.custom_label = line.get_label()
-                        self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
-                        
-                        if self.hover_instance.x_hover_pos>self.x+self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
-                            self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0] or \
-                            self.hover_instance.y_hover_pos>self.y+self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
-                            self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]:               
-                            self.hover_instance.hover_outside_bound=True
-                        else:
-                            self.hover_instance.hover_outside_bound=False                      
-                        
+                            self.axes.figure.canvas.flush_events()                         
                         return
                     else:
                         if self.cursor_xaxis_formatter:
