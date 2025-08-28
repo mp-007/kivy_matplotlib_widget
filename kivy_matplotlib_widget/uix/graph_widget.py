@@ -31,6 +31,14 @@ from kivy.utils import get_color_from_hex
 from kivy.core.window import Window
 from kivy.clock import Clock
 
+class MatplotlibEvent:
+    x:None
+    y:None
+    pickradius:None
+    inaxes:None
+    projection:False
+    compare_xdata:False
+    
 class MatplotFigure(Widget):
     """Widget to show a matplotlib figure in kivy.
     The figure is rendered internally in an AGG backend then
