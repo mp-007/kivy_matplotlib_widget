@@ -3,7 +3,7 @@ import os
 import kivy
 
 
-kivy.require("2.0.0")
+kivy.require("2.3.0")
 
 path = os.path.dirname(__file__)
 """Path to kivy_matplotlib_widget package directory."""

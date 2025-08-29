@@ -22,6 +22,8 @@ from matplotlib.colors import to_hex
 import matplotlib as mpl
 from math import ceil
 import numpy as np
+import copy
+import re
 
 
 class LegendGestures(Widget):
@@ -176,6 +178,7 @@ class LegendRv(BoxLayout):
     text_font_size=NumericProperty(dp(18.5))
     background_color=ColorProperty([1,1,1,1])
     box_height = NumericProperty(dp(48))
+    autoscale=BooleanProperty(False)
 
     def __init__(self, **kwargs):
         """init class
@@ -271,14 +274,20 @@ class LegendRv(BoxLayout):
             #show line
             self.data[row_index]["selected"] = False
             self.data[row_index]["matplotlib_line"].set_visible(True)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()             
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                self.figure_wgt.autoscale()
+            else:            
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()             
         else:
             #hide line
             self.data[row_index]["selected"] = True
             self.data[row_index]["matplotlib_line"].set_visible(False)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()            
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                self.figure_wgt.autoscale()
+            else:
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()            
         self.ids.view.refresh_from_layout()
            
     def doubletap(self,row_index) -> None:  
@@ -323,8 +332,11 @@ class LegendRv(BoxLayout):
                 self.data[idx]["selected"] = False                     
                
         self.ids.view.refresh_from_layout()
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()
+        if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+            self.figure_wgt.autoscale()  
+        else:
+            self.figure_wgt.figure.canvas.draw_idle()
+            self.figure_wgt.figure.canvas.flush_events()
         
 class LegendRvHorizontal(BoxLayout):
     """Legend Horizontal class
@@ -337,6 +349,7 @@ class LegendRvHorizontal(BoxLayout):
     text_font_size = NumericProperty(dp(18.5))
     background_color = ColorProperty([1,1,1,1])
     box_height = NumericProperty(dp(48))
+    autoscale=BooleanProperty(False)
     
     def __init__(self, **kwargs):
         """init class
@@ -432,14 +445,20 @@ class LegendRvHorizontal(BoxLayout):
             #show line
             self.data[row_index]["selected"] = False
             self.data[row_index]["matplotlib_line"].set_visible(True)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()             
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                self.figure_wgt.autoscale()
+            else:
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()             
         else:
             #hide line
             self.data[row_index]["selected"] = True
             self.data[row_index]["matplotlib_line"].set_visible(False)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()            
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                self.figure_wgt.autoscale()
+            else:
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()            
         self.ids.view.refresh_from_layout()
            
     def doubletap(self,row_index) -> None:  
@@ -484,8 +503,11 @@ class LegendRvHorizontal(BoxLayout):
                 self.data[idx]["selected"] = False                     
                
         self.ids.view.refresh_from_layout()
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()
+        if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+            self.figure_wgt.autoscale() 
+        else:
+            self.figure_wgt.figure.canvas.draw_idle()
+            self.figure_wgt.figure.canvas.flush_events()
 
 class CellLegendMatplotlib(LegendGestures, BoxLayout):
     """ Touch legend kivy class"""  
@@ -565,7 +587,11 @@ def MatplotlibInteractiveLegend(figure_wgt,
                                 delay=None,
                                 legend_instance=None,
                                 custom_handlers=None,
-                                multi_legend=False):
+                                multi_legend=False,
+                                prop=None,
+                                current_handles_text=None,
+                                scatter=None,
+                                autoscale=False):
     """ transform matplotlib legend to interactive legend
     
     Args:
@@ -615,6 +641,10 @@ def MatplotlibInteractiveLegend(figure_wgt,
                             legend_instance,
                             custom_handlers,
                             multi_legend,
+                            prop,
+                            current_handles_text,
+                            scatter,
+                            autoscale,
                             0)
     else:
         #get legend bbox position atfer delay (sometime needed if 'best position' was used)
@@ -623,7 +653,11 @@ def MatplotlibInteractiveLegend(figure_wgt,
                                     legend_handles,
                                     legend_instance,
                                     custom_handlers,
-                                    multi_legend),
+                                    multi_legend,
+                                    prop,
+                                    current_handles_text,
+                                    scatter,
+                                    autoscale),
                             delay)
     
 
@@ -633,6 +667,10 @@ def create_touch_legend(figure_wgt,
                         legend_instance,
                         custom_handlers,
                         multi_legend,
+                        prop,
+                        current_handles_text,
+                        scatter,
+                        autoscale,
                         _):    
     """ create touch legend """
     
@@ -694,6 +732,16 @@ def create_touch_legend(figure_wgt,
         figure_wgt_as_legend=True
     else:
         matplotlib_legend_box = MatplotlibLegendGrid()
+        
+    matplotlib_legend_box.prop=prop
+    matplotlib_legend_box.autoscale=autoscale
+    
+    if prop:
+        matplotlib_legend_box.facecolor = scatter.get_facecolor()
+        matplotlib_legend_box.mysize=float(scatter.get_sizes()[0])
+        matplotlib_legend_box.scatter = scatter
+        matplotlib_legend_box.current_handles_text=current_handles_text
+        matplotlib_legend_box.original_size=scatter.get_sizes()
 
     if ncol:
         #reorder legend handles to fit with grid layout orientation
@@ -821,11 +869,20 @@ class MatplotlibLegendGrid(FloatLayout):
     legend_width = NumericProperty(1) 
     title_padding = NumericProperty(0)  
     legend_instance = ObjectProperty(None,allow_none=True)
-    
+    prop = StringProperty(None,allow_none=True)
+    autoscale=BooleanProperty(False)
+
     instance_dict=dict()
     
     def __init__(self, **kwargs):
         """ init class """
+        self.facecolor=[]
+        self.mysize=None
+        self.scatter=None
+        self.mysize_list=[]
+        self.original_size=None
+        self.current_handles_text=None
+        
         super().__init__(**kwargs) 
 
     def update_size(self):
@@ -900,9 +957,15 @@ class MatplotlibLegendGrid(FloatLayout):
             
             hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
             for current_hist in hist:
-                self.set_visible(current_hist,True)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()             
+                self.set_visible(current_hist,True,row_index)
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                if self.prop:
+                    self.prop_autoscale()
+                else:
+                    self.figure_wgt.autoscale()
+            else:
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()             
         else:
             #hide line
             self.box.children[::-1][row_index].selected = True
@@ -911,9 +974,15 @@ class MatplotlibLegendGrid(FloatLayout):
             
             hist = self.instance_dict[self.box.children[::-1][row_index].matplotlib_line]
             for current_hist in hist:
-                self.set_visible(current_hist,False)
-            self.figure_wgt.figure.canvas.draw_idle()
-            self.figure_wgt.figure.canvas.flush_events()
+                self.set_visible(current_hist,False,row_index)
+            if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+                if self.prop:
+                    self.prop_autoscale()
+                else:
+                    self.figure_wgt.autoscale() 
+            else:
+                self.figure_wgt.figure.canvas.draw_idle()
+                self.figure_wgt.figure.canvas.flush_events()
            
     def doubletap(self,row_index) -> None:  
         """ double tap behavior is based on plotly behavior """
@@ -921,50 +990,187 @@ class MatplotlibLegendGrid(FloatLayout):
             hist = self.instance_dict
             current_line = hist[self.box.children[::-1][row_index].matplotlib_line][0]
             hist_keys= list(self.instance_dict.keys())           
-            
-            if self.get_visible(current_line):
-                #check if we isolate line or show all lines
-                need_isolate = False
-                for line in hist_keys:
-                    if hist[line][0] != current_line and self.get_visible(hist[line][0]):
+   
+            #check if we isolate line or show all lines
+            need_isolate = False
+            # for line in hist_keys:
+            for idx,line in enumerate(hist_keys):
+                if hist[line][0] != current_line:
+                    if not self.box.children[::-1][idx].selected:
                         need_isolate=True
                         break            
-            
-                if need_isolate:
-                   #isolate line'
-                   for idx,line in enumerate(hist_keys):
-                       if hist[line][0] != current_line:
-                           for current_hist in hist[line]:
-                               self.set_visible(current_hist,False)                          
-                           self.box.children[::-1][idx].selected = True
-                           self.box.children[::-1][idx].matplotlib_line.set_alpha(0.5)
-                           self.box.children[::-1][idx].matplotlib_text.set_alpha(0.5)
-                       else:
-                           self.box.children[::-1][idx].selected = False
-                           self.box.children[::-1][idx].matplotlib_line.set_alpha(1)
-                           self.box.children[::-1][idx].matplotlib_text.set_alpha(1)
-                else:
-                    #show all lines'
-                    for idx,line in enumerate(hist_keys):                     
+        
+            if need_isolate:
+                #isolate line'
+                for idx,line in enumerate(hist_keys):
+                    if hist[line][0] != current_line:
                         for current_hist in hist[line]:
-                            self.set_visible(current_hist,True)
-                        self.box.children[::-1][idx].selected = False  
-                        self.box.children[::-1][idx].matplotlib_line.set_alpha(1)  
-                        self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                                   
+                            self.set_visible(current_hist,False,idx)                          
+                        self.box.children[::-1][idx].selected = True
+                        self.box.children[::-1][idx].matplotlib_line.set_alpha(0.5)
+                        self.box.children[::-1][idx].matplotlib_text.set_alpha(0.5)
+                    else:
+                        self.box.children[::-1][idx].selected = False
+                        self.box.children[::-1][idx].matplotlib_line.set_alpha(1)
+                        self.box.children[::-1][idx].matplotlib_text.set_alpha(1)
+            else:
+                #show all lines'
+                for idx,line in enumerate(hist_keys):                     
+                    for current_hist in hist[line]:
+                        self.set_visible(current_hist,True,idx)
+                    self.box.children[::-1][idx].selected = False  
+                    self.box.children[::-1][idx].matplotlib_line.set_alpha(1)  
+                    self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                                   
         else:
             hist = self.instance_dict
             #show all lines
             for idx,line in enumerate(hist): 
                 for current_hist in hist[line]:
-                    self.set_visible(current_hist,True)                   
+                    self.set_visible(current_hist,True,idx)                   
                 self.box.children[::-1][idx].selected = False 
                 self.box.children[::-1][idx].matplotlib_line.set_alpha(1) 
                 self.box.children[::-1][idx].matplotlib_text.set_alpha(1)                   
-               
-        self.figure_wgt.figure.canvas.draw_idle()
-        self.figure_wgt.figure.canvas.flush_events()  
 
-    def set_visible(self,instance,value) -> None:
+        if self.autoscale and hasattr(self.figure_wgt,'autoscale_axis'):
+            if self.prop:
+                self.prop_autoscale()
+                self.figure_wgt.autoscale() 
+            else:            
+                self.figure_wgt.autoscale()  
+        else:              
+            self.figure_wgt.figure.canvas.draw_idle()
+            self.figure_wgt.figure.canvas.flush_events()  
+
+    def prop_autoscale(self) -> None:
+        """set autoscale hen use prop
+        
+        Args:
+            None
+            
+        Returns:
+            None
+        """ 
+        ax=self.scatter.axes
+        if self.prop=='colors':
+            if not self.facecolor.any():
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()
+                return 
+        
+        if isinstance(self.mysize_list,list):
+            mysize_list = self.mysize_list
+        else:
+            mysize_list = self.mysize_list.tolist()
+
+        if mysize_list and not all(x == 0.0 for x in mysize_list):
+
+           
+            x,y = self.scatter.get_offsets().T
+            indices_nozero = [i for i, v in enumerate(mysize_list) if v != 0.0]
+            if len(indices_nozero)==0:
+                ax.set_autoscale_on(False)
+                    
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()
+                return
+            else:                
+                xmin = np.min(x[indices_nozero])
+                xmax = np.max(x[indices_nozero])
+                ymin = np.min(y[indices_nozero])
+                ymax = np.max(y[indices_nozero])
+                
+            autoscale_axis = self.figure_wgt.autoscale_axis
+
+            no_visible = self.figure_wgt.myrelim(ax,visible_only=self.figure_wgt.autoscale_visible_only)
+            ax.autoscale_view(tight=self.figure_wgt.autoscale_tight,
+                              scalex=True if autoscale_axis!="y" else False, 
+                              scaley=True if autoscale_axis!="x" else False)
+            ax.autoscale(axis=autoscale_axis,tight=self.figure_wgt.autoscale_tight)              
+            
+            current_xlim = ax.get_xlim()
+            current_ylim = ax.get_ylim()                 
+
+            invert_xaxis = False
+            invert_yaxis = False
+            if ax.xaxis_inverted():
+                invert_xaxis=True
+                xleft = xmax
+                xright = xmin
+            else:
+                xleft = xmin
+                xright = xmax
+                
+            if ax.yaxis_inverted():
+                invert_yaxis=True  
+                ybottom = ymax
+                ytop = ymin
+            else:
+                ybottom = ymin
+                ytop = ymax                                              
+
+            lim_collection = [xleft,ybottom,xright,ytop]
+
+            if lim_collection:
+                xchanged=False
+                if self.figure_wgt.autoscale_tight:
+                    current_margins = (0,0)
+                else:
+                    current_margins = ax.margins()
+                
+                if self.figure_wgt.autoscale_axis!="y":
+                    if invert_xaxis:
+                        if lim_collection[0]>current_xlim[0] or no_visible:
+                            ax.set_xlim(left=lim_collection[0])
+                            xchanged=True
+                        if lim_collection[2]<current_xlim[1] or no_visible:
+                            ax.set_xlim(right=lim_collection[2])
+                            xchanged=True                
+                    else:
+                        if lim_collection[0]<current_xlim[0] or no_visible:
+                            ax.set_xlim(left=lim_collection[0])
+                            xchanged=True
+                        if lim_collection[2]>current_xlim[1] or no_visible:
+                            ax.set_xlim(right=lim_collection[2])
+                            xchanged=True
+                    
+                #recalculed margin
+                if xchanged:
+                    xlim =  ax.get_xlim()
+                    ax.set_xlim(left=xlim[0] - current_margins[0]*(xlim[1]-xlim[0]))
+                    ax.set_xlim(right=xlim[1] + current_margins[0]*(xlim[1]-xlim[0]))
+                    
+                ychanged=False 
+                
+                if self.figure_wgt.autoscale_axis!="x":
+                    if invert_yaxis:
+                        if lim_collection[1]>current_ylim[0] or no_visible:
+                            ax.set_ylim(bottom=lim_collection[1])
+                            ychanged=True
+                        if lim_collection[3]<current_ylim[1] or no_visible:
+                            ax.set_ylim(top=lim_collection[3]) 
+                            ychanged=True
+                    else:
+                        if lim_collection[1]<current_ylim[0] or no_visible:
+                            ax.set_ylim(bottom=lim_collection[1])
+                            ychanged=True
+                        if lim_collection[3]>current_ylim[1] or no_visible:
+                            ax.set_ylim(top=lim_collection[3]) 
+                            ychanged=True
+                    
+                if ychanged:
+                    ylim =  ax.get_ylim()
+                    ax.set_ylim(bottom=ylim[0] - current_margins[1]*(ylim[1]-ylim[0]))
+                    ax.set_ylim(top=ylim[1] + current_margins[1]*(ylim[1]-ylim[0]))   
+    
+            index = self.figure_wgt.figure.axes.index(ax)
+            self.figure_wgt.xmin[index],self.figure_wgt.xmax[index] = ax.get_xlim()
+            self.figure_wgt.ymin[index],self.figure_wgt.ymax[index] = ax.get_ylim()
+            ax.set_autoscale_on(False)
+            
+        ax.figure.canvas.draw_idle()
+        ax.figure.canvas.flush_events()
+        
+    def set_visible(self,instance,value,row_index=None) -> None:
         """set visible method
         
         Args:
@@ -974,12 +1180,74 @@ class MatplotlibLegendGrid(FloatLayout):
         Returns:
             None
         """   
-        if hasattr(instance,'set_visible'):
-            instance.set_visible(value)
-        elif hasattr(instance,'get_children'):
-            all_child = instance.get_children()
-            for child in all_child:
-                child.set_visible(value)
+        if self.prop:
+            if self.prop=='colors':
+                if self.facecolor.any():
+                    unique_color = np.unique(self.facecolor,axis=0)
+                    ncol = np.shape(unique_color)[0]
+                    
+                    if not self.mysize_list:
+                        
+                        self.mysize_list =[self.mysize] * np.shape(self.facecolor)[0]
+                    for i in range(np.shape(self.facecolor)[0]):
+                        if (self.facecolor[i,:] == unique_color[row_index,:]).all():
+                            if value:
+                                self.mysize_list[i] = self.mysize
+                            else:
+                                self.mysize_list[i] = 0.0  
+                        # else:
+                        #     if value:
+                        #         mysize_list.append(0.0)
+                        #     else:
+                        #         mysize_list.append(self.mysize)
+    
+                    # self.figure_wgt.figure.axes[0].get_children()[0].set_facecolor(newfacecolor)
+                    self.scatter.set_sizes(self.mysize_list)
+            if self.prop=='sizes':
+                if self.mysize:
+                    legend_size = len(self.current_handles_text)
+                    legend_value = self.current_handles_text[row_index]
+                    
+                    float_legend_value_before=None
+                    if row_index!=0:
+                        legend_value_before = self.current_handles_text[row_index-1]
+                        match_legend_value_before = re.search(r"\{(.+?)\}", legend_value_before)
+                        if match_legend_value_before: 
+                            float_legend_value_before = float(match_legend_value_before.group(1))
+                        else:
+                            return                        
+                    
+                    match_legend_value = re.search(r"\{(.+?)\}", legend_value)
+                    if match_legend_value: 
+                        float_legend_value = float(match_legend_value.group(1))
+                    else:
+                        return
+                    
+                    if isinstance(self.mysize_list,list) and len(self.mysize_list)==0:
+                        
+                        self.mysize_list = copy.copy(self.original_size)
+                    
+                    if row_index==0:
+                        index_match=np.where(float_legend_value>=self.original_size)[0]
+                    elif row_index==legend_size-1:
+                        index_match=np.where(float_legend_value_before<=self.original_size)[0]
+                    else:
+                        index_match=np.where((float_legend_value>=self.original_size) &  
+                                             (float_legend_value_before<=self.original_size))[0]
+                    if value:
+                        self.mysize_list[index_match] = self.original_size[index_match]
+                    else:
+                        self.mysize_list[index_match] = 0.0  
+
+                    self.scatter.set_sizes(self.mysize_list)
+                    
+        else:
+            if hasattr(instance,'set_visible'):
+                instance.set_visible(value)
+            elif hasattr(instance,'get_children'):
+                all_child = instance.get_children()
+                for child in all_child:
+                    child.set_visible(value)
 
     def get_visible(self,instance) -> bool:
         """get visible method
@@ -1060,8 +1328,8 @@ Builder.load_string('''
     size_hint: None,None
     width: dp(0.01) 
     height: dp(0.01) 
-  
-    GridLayout:        
+   
+    GridLayout:          
         id:box         
         x:root.x_pos
         y:root.y_pos
