@@ -483,14 +483,17 @@ class Test(App):
             formatter = FuncFormatter(minute_axis)
             screen4.figure_wgt.figure.axes[0].xaxis.set_major_formatter(formatter)
             screen4.figure_wgt.text_instance.invert_xaxis_formatter = minute2second
+            screen4.figure_wgt.cursor_xaxis_formatter = None #use axis major formatter
         elif unit == 'hour':
             formatter = FuncFormatter(hour_axis)
             screen4.figure_wgt.figure.axes[0].xaxis.set_major_formatter(formatter)
             screen4.figure_wgt.text_instance.invert_xaxis_formatter = hour2second
+            screen4.figure_wgt.cursor_xaxis_formatter = None #use axis major formatter
         else:
             formatter = ScalarFormatter() #default matplotlib formatter
             screen4.figure_wgt.figure.axes[0].xaxis.set_major_formatter(formatter)
             screen4.figure_wgt.text_instance.invert_xaxis_formatter = None  
+            screen4.figure_wgt.cursor_xaxis_formatter = FormatStrFormatter('%.1f') #use custom formatter
             
         screen4.figure_wgt.figure.canvas.draw_idle()
         screen4.figure_wgt.figure.canvas.flush_events()       
