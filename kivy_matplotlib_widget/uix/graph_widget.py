@@ -593,10 +593,11 @@ class MatplotFigure(Widget):
                                 
                                 if self.last_line:
                                     self.clear_line_prop() 
-                                    self.axes.figure.canvas.restore_region(self.background)
-                                    #draw (blit method)
-                                    self.axes.figure.canvas.blit(self.axes.bbox)                 
-                                    self.axes.figure.canvas.flush_events()   
+                                    if self.background:
+                                        self.axes.figure.canvas.restore_region(self.background)
+                                        #draw (blit method)
+                                        self.axes.figure.canvas.blit(self.axes.bbox)                 
+                                        self.axes.figure.canvas.flush_events()   
                                 return
 
                             #blit method (always use because same visual effect as draw)                  
@@ -698,10 +699,11 @@ class MatplotFigure(Widget):
                             
                             if self.last_line:
                                 self.clear_line_prop() 
-                                self.axes.figure.canvas.restore_region(self.background)
-                                #draw (blit method)
-                                self.axes.figure.canvas.blit(self.axes.bbox)                 
-                                self.axes.figure.canvas.flush_events()   
+                                if self.background:
+                                    self.axes.figure.canvas.restore_region(self.background)
+                                    #draw (blit method)
+                                    self.axes.figure.canvas.blit(self.axes.bbox)                 
+                                    self.axes.figure.canvas.flush_events()   
                             return
     def autoscale(self):
         if self.disabled:
@@ -751,7 +753,10 @@ class MatplotFigure(Widget):
                 ax.set_ylim(top=self.ymin,bottom=self.ymax)
             else:
                 ax.set_ylim(bottom=self.ymin,top=self.ymax)                              
-    
+
+            if self.last_line is not None:
+                self.clear_line_prop()  
+                
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
 
@@ -1148,8 +1153,9 @@ class MatplotFigure(Widget):
             ax=self.axes
             self.background=None
             self.show_compare_cursor=True
-            ax.figure.canvas.draw_idle()
-            ax.figure.canvas.flush_events()                           
+            if self.last_line is None or self.touch_mode!='cursor':
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                           
             
             return True
 
@@ -1228,7 +1234,7 @@ class MatplotFigure(Widget):
 
         if self.fast_draw:   
             #use blit method            
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
@@ -1417,7 +1423,7 @@ class MatplotFigure(Widget):
 
         if self.fast_draw: 
             #use blit method               
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
@@ -1817,6 +1823,9 @@ class MatplotFigure(Widget):
                         new_ymin, new_ymax = ymin_, ymax_ 
                 ax.set_ylim([new_ymin, new_ymax]) 
 
+        if self.last_line is not None:
+            self.clear_line_prop()  
+                    
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    
 
