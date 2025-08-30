@@ -32,12 +32,13 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 
 class MatplotlibEvent:
-    x:None
-    y:None
-    pickradius:None
-    inaxes:None
-    projection:False
-    compare_xdata:False
+    x=None
+    y=None
+    pickradius=None
+    inaxes=None
+    projection=False
+    compare_xdata=False
+    pick_radius_axis='both'
     
 class MatplotFigure(Widget):
     """Widget to show a matplotlib figure in kivy.

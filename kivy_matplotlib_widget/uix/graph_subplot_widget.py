@@ -579,6 +579,7 @@ class MatplotFigureSubplot(MatplotFigure):
             self.myevent.pickradius=self.pickradius
             self.myevent.projection=self.projection
             self.myevent.compare_xdata=self.compare_xdata
+            self.myevent.pick_radius_axis = self.pick_radius_axis
             #find closest artist from kivy event
             sel = self.cursor_cls.xy_event(self.myevent) 
             
