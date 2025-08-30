@@ -815,7 +815,7 @@ class ResizeSelect(FloatLayout):
             self.fc[self.ind, -1] = 1
             self.collection.set_facecolors(self.fc)
         if self.line:
-            xdata,ydata = self.line.get_xydata()
+            xdata,ydata = self.line.get_xydata().T
             self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
 
         self.figure_wgt.figure.canvas.draw_idle()
@@ -3456,7 +3456,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 self.fc[self.ind, -1] = 1
                 self.collection.set_facecolors(self.fc)
             if self.line:
-                xdata,ydata = self.line.get_xydata()
+                xdata,ydata = self.line.get_xydata().T
                 self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
     
             self.figure_wgt.figure.canvas.draw_idle()
@@ -3980,7 +3980,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 self.fc[self.ind, -1] = 1
                 self.collection.set_facecolors(self.fc)
             if self.line:
-                xdata,ydata = self.line.get_xydata()
+                xdata,ydata = self.line.get_xydata().T
                 self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
     
             self.figure_wgt.figure.canvas.draw_idle()
@@ -4381,7 +4381,7 @@ class SpanSelect(FloatLayout):
             self.fc[self.ind, -1] = 1
             self.collection.set_facecolors(self.fc)
         if self.line:
-            xdata,ydata = self.line.get_xydata()
+            xdata,ydata = self.line.get_xydata().T
             
             #matplotlib method if data is sorted
             # indmin, indmax = np.searchsorted(x, (xmin, xmax))

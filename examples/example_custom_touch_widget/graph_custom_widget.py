@@ -38,7 +38,7 @@ class MatplotFigureCustom(MatplotFigure):
         good_line=[]
         distance =[]
         for line in self.axes.lines:
-            x, y = line.get_xydata()
+            x, y = line.get_xydata().T
             
             if line.get_visible():
                 if len(x)!=0:
