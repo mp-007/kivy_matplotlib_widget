@@ -25,12 +25,13 @@ def _iter_axes_subartists(ax):
     return ax.collections + ax.images + ax.lines + ax.texts + ax.patches
 
 class MatplotlibEvent:
-    x:None
-    y:None
-    pickradius:None
-    inaxes:None
-    projection:False
-    compare_xdata:False
+    x=None
+    y=None
+    pickradius=None
+    inaxes=None
+    projection=False
+    compare_xdata=False
+    pick_radius_axis='both'
 
 class MatplotFigureSubplot(MatplotFigure):
     """Custom MatplotFigure
@@ -585,6 +586,7 @@ class MatplotFigureSubplot(MatplotFigure):
             self.myevent.pickradius=self.pickradius
             self.myevent.projection=self.projection
             self.myevent.compare_xdata=self.compare_xdata
+            self.myevent.pick_radius_axis = self.pick_radius_axis
             #find closest artist from kivy event
             sel = self.cursor_cls.xy_event(self.myevent) 
             
