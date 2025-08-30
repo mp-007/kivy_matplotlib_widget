@@ -339,6 +339,23 @@ class MatplotFigure(Widget):
         self.vertical_line.set_visible(visible)
         self.text.set_visible(visible)
 
+    def clear_line_prop(self) -> None:
+        """ clear attribute line_prop method
+        
+        Args:
+            None
+            
+        Return:
+            None
+        
+        """       
+        if self.last_line_prop:
+            for key in self.last_line_prop:
+                set_line_attr = getattr(self.last_line,'set_' + key)
+                set_line_attr(self.last_line_prop[key])                                    
+            self.last_line_prop={}                                       
+        self.last_line=None
+
     def hover(self, event) -> None:
         """ hover cursor method (cursor to nearest value)
         
@@ -575,12 +592,7 @@ class MatplotFigure(Widget):
                             if not axes:                            
                                 
                                 if self.last_line:
-                                    if self.last_line_prop:
-                                        for key in self.last_line_prop:
-                                            set_line_attr = getattr(self.last_line,'set_' + key)
-                                            set_line_attr(self.last_line_prop[key])                                    
-                                        self.last_line_prop={}                                       
-                                    self.last_line=None
+                                    self.clear_line_prop() 
                                     self.axes.figure.canvas.restore_region(self.background)
                                     #draw (blit method)
                                     self.axes.figure.canvas.blit(self.axes.bbox)                 
@@ -652,12 +664,7 @@ class MatplotFigure(Widget):
                         self.background = self.axes.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
                         self.set_cross_hair_visible(True) 
                         if self.last_line is not None:
-                            if self.last_line_prop:
-                                for key in self.last_line_prop:
-                                    set_line_attr = getattr(self.last_line,'set_' + key)
-                                    set_line_attr(self.last_line_prop[key])                                    
-                                self.last_line_prop={}                    
-                            self.last_line=None 
+                            self.clear_line_prop() 
     
                     self.axes.figure.canvas.restore_region(self.background)
                     self.axes.draw_artist(self.text)
@@ -690,12 +697,7 @@ class MatplotFigure(Widget):
                         if not axes:                            
                             
                             if self.last_line:
-                                if self.last_line_prop:
-                                    for key in self.last_line_prop:
-                                        set_line_attr = getattr(self.last_line,'set_' + key)
-                                        set_line_attr(self.last_line_prop[key])                                    
-                                    self.last_line_prop={}                                  
-                                self.last_line=None
+                                self.clear_line_prop() 
                                 self.axes.figure.canvas.restore_region(self.background)
                                 #draw (blit method)
                                 self.axes.figure.canvas.blit(self.axes.bbox)                 
@@ -1120,12 +1122,7 @@ class MatplotFigure(Widget):
                     self.first_touch_pan=None
                     
                 if self.last_line is not None:
-                    if self.last_line_prop:
-                        for key in self.last_line_prop:
-                            set_line_attr = getattr(self.last_line,'set_' + key)
-                            set_line_attr(self.last_line_prop[key])                                    
-                        self.last_line_prop={}                    
-                    self.last_line=None
+                    self.clear_line_prop()
                     
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -1238,12 +1235,7 @@ class MatplotFigure(Widget):
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 self.background_patch_copy.set_visible(False)  
                 if self.last_line is not None:
-                    if self.last_line_prop:
-                        for key in self.last_line_prop:
-                            set_line_attr = getattr(self.last_line,'set_' + key)
-                            set_line_attr(self.last_line_prop[key])                                    
-                        self.last_line_prop={}                    
-                    self.last_line=None                
+                    self.clear_line_prop()               
             ax.figure.canvas.restore_region(self.background)
            
             for line in ax.lines:
@@ -1432,12 +1424,7 @@ class MatplotFigure(Widget):
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 self.background_patch_copy.set_visible(False) 
                 if self.last_line is not None:
-                    if self.last_line_prop:
-                        for key in self.last_line_prop:
-                            set_line_attr = getattr(self.last_line,'set_' + key)
-                            set_line_attr(self.last_line_prop[key])                                    
-                        self.last_line_prop={}                    
-                    self.last_line=None                 
+                    self.clear_line_prop()                 
             ax.figure.canvas.restore_region(self.background)                
            
             for line in ax.lines:
@@ -1737,12 +1724,7 @@ class MatplotFigure(Widget):
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 legend.set_visible(True)
                 if self.last_line is not None:
-                    if self.last_line_prop:
-                        for key in self.last_line_prop:
-                            set_line_attr = getattr(self.last_line,'set_' + key)
-                            set_line_attr(self.last_line_prop[key])                                    
-                        self.last_line_prop={}                    
-                    self.last_line=None                 
+                    self.clear_line_prop()                
             ax.figure.canvas.restore_region(self.background)   
     
             ax.draw_artist(legend)
