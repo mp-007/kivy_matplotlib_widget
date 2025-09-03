@@ -22,10 +22,17 @@ font_size_axis_title = dp(16)
 font_size_axis_tick = dp(12)
 linewidth = 2
 
-from kivy_matplotlib_widget.uix.hover_widget import add_hover,HoverVerticalText,InfoHover,BaseHoverFloatLayout
+from kivy_matplotlib_widget.uix.hover_widget import (add_hover,
+                                                     HoverVerticalText,
+                                                     InfoHover,
+                                                     BaseHoverFloatLayout,
+                                                     PlotlyHover)
 from matplotlib.ticker import FormatStrFormatter
 from kivy.properties import ColorProperty,NumericProperty,StringProperty
 
+#remove font_manager "debug" from matplotib
+import logging
+logging.getLogger('matplotlib.font_manager').disabled = True
 
 KV = '''
 #:import MatplotFigureCustom graph_custom_widget
@@ -73,94 +80,9 @@ Screen
 
             MatplotFigureCustom:
                 id:figure_wgt4   
-                fast_draw:False
-
-<PlotlyHover>
-    custom_color: [0,0,0,1]
-    BoxLayout:
-        id:main_box
-        x:
-            root.x_hover_pos + dp(4)
-        y:
-            root.y_hover_pos - root.hover_height/2
-        size_hint: None, None
-        height: label.texture_size[1]+ dp(4)
-        width: 
-            self.minimum_width + dp(12) if root.show_cursor \
-            else dp(0.0001)            
-        orientation:'vertical'
-        padding: 0,-dp(1),0,0
-        
-        canvas:            
-            Color:
-                rgba: root.custom_color if root.custom_color else [0,0,0,1]
-            Rectangle:
-                pos: self.pos
-                size: self.size
-            Triangle:
-                points:
-                    [ \
-                    root.x_hover_pos, root.y_hover_pos, \
-                    main_box.x, root.y_hover_pos+ dp(4), \
-                    main_box.x, root.y_hover_pos- dp(4)  \
-                    ]
-            SmoothLine:
-                width:dp(1)
-                points:
-                    [ \
-                    root.x_hover_pos, root.y_hover_pos, \
-                    main_box.x, root.y_hover_pos \
-                    ]                           
-             
-        BoxLayout:
-            size_hint_x:None
-            width:label.texture_size[0]
-            padding: dp(12),0,0,0
-            Label:
-                id:label
-                text: 
-                    '(' + root.label_x_value  +','+ root.label_y_value +')'
-                font_size:root.text_size
-                color:
-                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
-                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186/255 \
-                    else [1,1,1,1]
-                font_name : root.text_font
-
-                font_name : root.text_font
-                
-        FloatLayout:
-            size_hint: None,None
-            width: dp(0.01) 
-            height: dp(0.01) 
-            BoxLayout:
-                size_hint:None,None
-                x:main_box.x + main_box.width + dp(4)
-                y:main_box.y + main_box.height/2 - label3.texture_size[1]/2
-                width:label3.texture_size[0]
-                height:label3.texture_size[1]
-                Label:
-                    id:label3
-                    text: 
-                        root.custom_label if root.custom_label else ''  
-                    font_size:root.text_size
-                    color: root.text_color
-                    font_name : root.text_font      
+                fast_draw:False 
 
 '''
-
-class PlotlyHover(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
-    text_color=ColorProperty([0,0,0,1])
-    text_font=StringProperty("Roboto")
-    text_size = NumericProperty(dp(14))
-    hover_height = NumericProperty(dp(24))
-
-    
-    def __init__(self, **kwargs):
-        """ init class """
-        super().__init__(**kwargs)  
- 
 
 class Test(App):
     lines = []
@@ -175,11 +97,11 @@ class Test(App):
         mygraph = GraphGenerator()
         self.screen.figure_wgt.axes= mygraph.ax1
 
-        self.screen.figure_wgt.register_lines(self.screen.figure_wgt.axes.lines)
         self.screen.figure_wgt.figure = mygraph.fig
         self.screen.figure_wgt.cursor_xaxis_formatter = mdates.DateFormatter('%m-%d')
         self.screen.figure_wgt.cursor_yaxis_formatter = FormatStrFormatter('%.1f') 
         
+        self.screen.figure_wgt.register_lines(self.screen.figure_wgt.axes.lines)
         self.screen.figure_wgt.register_cursor()
         
         add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=PlotlyHover())
@@ -199,8 +121,9 @@ class Test(App):
         self.screen.figure_wgt2.cursor_yaxis_formatter = FormatStrFormatter('%.1f')  
 
         self.screen.figure_wgt2.axes= ax
-        self.screen.figure_wgt2.register_lines([])
+        
         self.screen.figure_wgt2.figure = fig
+        self.screen.figure_wgt2.register_lines([])
         self.screen.figure_wgt2.register_cursor()
         
         add_hover(self.screen.figure_wgt2,mode='desktop',hover_widget=InfoHover())
@@ -220,8 +143,9 @@ class Test(App):
         self.screen.figure_wgt3.cursor_yaxis_formatter = FormatStrFormatter('%.1f') 
         
         self.screen.figure_wgt3.axes= ax3
-        self.screen.figure_wgt3.register_lines([])
+        
         self.screen.figure_wgt3.figure = fig3
+        self.screen.figure_wgt3.register_lines([])
         self.screen.figure_wgt3.register_cursor() 
         
         add_hover(self.screen.figure_wgt3,mode='desktop',hover_widget=InfoHover())
@@ -253,8 +177,9 @@ class Test(App):
         self.screen.figure_wgt4.cursor_yaxis_formatter = FormatStrFormatter('%.1f') 
         
         self.screen.figure_wgt4.axes= ax4
-        self.screen.figure_wgt4.register_lines([])
+        
         self.screen.figure_wgt4.figure = fig4
+        self.screen.figure_wgt4.register_lines([])
         self.screen.figure_wgt4.register_cursor() 
 
         add_hover(self.screen.figure_wgt4,mode='desktop',hover_widget=InfoHover())        

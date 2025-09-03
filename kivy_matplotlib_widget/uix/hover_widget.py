@@ -143,7 +143,7 @@ class HoverVerticalText(BaseHoverFloatLayout):
     
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)  
+        super().__init__(**kwargs)
 
 class GeneralCompareHover(BaseHoverFloatLayout):
     """ GeneralCompareHover""" 
@@ -322,7 +322,21 @@ class RichTooltip(BoxLayout):
         options=('top', 'bottom', 'left', 'right',
                  'top_start','top_end','bottom_start','bottom_end',
                  'left_start','left_end','right_start','right_end'))
+
+class PlotlyHover(BaseHoverFloatLayout):
+    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    hover_height = NumericProperty(dp(24))
+    use_position = StringProperty('right')
+    position = OptionProperty('right',
+        options=('right', 'left'))
     
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs)
+
 Builder.load_string('''
 
 <BaseHoverFloatLayout>
@@ -833,7 +847,6 @@ Builder.load_string('''
         'right' if ('left'==root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else \
         'right_' + root.position.split('_')[1]  if ('left_' in root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else root.position 
          
-    #use_position:root.position
     RichTooltip:
         id:main_box
         x:
@@ -938,5 +951,97 @@ Builder.load_string('''
                     pos: self.pos
                     size: self.size  
                 PopMatrix  
-                StencilPop                    
+                StencilPop   
+
+<PlotlyHover>
+    custom_color: [0,0,0,1]
+    
+    use_position: 
+        'left' if ('right'==root.position and root.x_hover_pos + main_box.width + label3.texture_size[0] + dp(6)  > root.figwidth + root.figx) else \
+        'right' if ('left'==root.position and root.x_hover_pos - main_box.width - label3.texture_size[0] - dp(6) < root.figx) else \
+        root.position
+        
+    BoxLayout:
+        id:main_box
+        x:
+            root.x_hover_pos + dp(4) if 'right' in root.use_position else \
+            root.x_hover_pos - self.width - dp(4) 
+        y:
+            root.y_hover_pos - root.hover_height/2
+  
+        size_hint: None, None
+        height: label.texture_size[1]+ dp(4)
+        width: 
+            self.minimum_width + dp(12) if root.show_cursor \
+            else dp(0.0001)            
+        orientation:'vertical'
+        padding: 0,-dp(1),0,0
+        
+        canvas:            
+            Color:
+                rgba: root.custom_color if root.custom_color else [0,0,0,1]
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Triangle:
+                points:
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x, root.y_hover_pos+ dp(4), \
+                    main_box.x, root.y_hover_pos- dp(4)  \
+                    ] if 'right' in root.use_position else \
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x + main_box.width, root.y_hover_pos+ dp(4), \
+                    main_box.x + main_box.width, root.y_hover_pos- dp(4)  \
+                    ]                        
+            SmoothLine:
+                width:dp(1)
+                points:
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x, root.y_hover_pos \
+                    ]  if 'right' in root.use_position else \
+                    [ \
+                    root.x_hover_pos, root.y_hover_pos, \
+                    main_box.x + main_box.width, root.y_hover_pos \
+                    ]
+                                             
+             
+        BoxLayout:
+            size_hint_x:None
+            width:label.texture_size[0]
+            padding: dp(12),0,0,0
+            Label:
+                id:label
+                text: 
+                    '(' + root.label_x_value  +','+ root.label_y_value +')'
+                font_size:root.text_size
+                color:
+                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
+                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186/255 \
+                    else [1,1,1,1]
+                font_name : root.text_font
+
+                font_name : root.text_font
+                
+        FloatLayout:
+            size_hint: None,None
+            width: dp(0.01) 
+            height: dp(0.01) 
+            BoxLayout:
+                size_hint:None,None
+                x:
+                    main_box.x + main_box.width + dp(4) if 'right' in root.use_position else \
+                    main_box.x - label3.texture_size[0] - dp(4)
+                y:main_box.y + main_box.height/2 - label3.texture_size[1]/2
+                width:label3.texture_size[0]
+                height:label3.texture_size[1]
+                Label:
+                    id:label3
+                    text: 
+                        root.custom_label if root.custom_label and not '_child' in root.custom_label else ''  
+                    font_size:root.text_size
+                    color: root.text_color
+                    font_name : root.text_font                       
         ''')

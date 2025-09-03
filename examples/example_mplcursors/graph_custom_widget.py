@@ -15,12 +15,13 @@ from matplotlib.container import BarContainer
 
 
 class MatplotlibEvent:
-    x:None
-    y:None
-    pickradius:None
-    inaxes:None
-    projection:False
-    compare_xdata:False
+    x=None
+    y=None
+    pickradius=None
+    inaxes=None
+    projection=False
+    compare_xdata=False
+    pick_radius_axis='both'
 
 class MatplotFigureCustom(MatplotFigure):
     """Custom MatplotFigure
