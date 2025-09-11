@@ -401,7 +401,7 @@ class MatplotFigureTwinx(Widget):
                 #get only visible lines
                 if line.get_visible():  
                     #get line x,y datas
-                    self.x_cursor, self.y_cursor = line.get_xydata()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     
                     #check if line is not empty
                     if len(self.x_cursor)!=0:                        
@@ -492,7 +492,7 @@ class MatplotFigureTwinx(Widget):
                     idx_best_list = np.flatnonzero(np.array(distance) == np.nanmin(distance))
                     #get datas from closest line
                     line=good_line[idx_best_list[0]]
-                    self.x_cursor, self.y_cursor = line.get_xydata()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     x = self.x_cursor[good_index[idx_best_list[0]]]
                     y = self.y_cursor[good_index[idx_best_list[0]]] 
 
@@ -585,7 +585,7 @@ class MatplotFigureTwinx(Widget):
                     
                     #get datas from closest line
                     line=good_line[idx_best]
-                    self.x_cursor, self.y_cursor = line.get_xydata()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     x = self.x_cursor[good_index[idx_best]]
                     y = self.y_cursor[good_index[idx_best]] 
                     
