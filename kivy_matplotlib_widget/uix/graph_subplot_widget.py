@@ -7,7 +7,7 @@ import time
 
 import matplotlib
 matplotlib.use('Agg')
-from kivy_matplotlib_widget.uix.graph_widget import _FigureCanvas ,MatplotFigure
+from kivy_matplotlib_widget.uix.graph_widget import _FigureCanvas ,MatplotFigure,MatplotlibEvent
 from kivy.utils import get_color_from_hex
 from matplotlib.colors import to_hex
 from kivy.metrics import dp
@@ -23,15 +23,6 @@ from matplotlib.container import BarContainer
 def _iter_axes_subartists(ax):
     r"""Yield all child `Artist`\s (*not* `Container`\s) of *ax*."""
     return ax.collections + ax.images + ax.lines + ax.texts + ax.patches
-
-class MatplotlibEvent:
-    x=None
-    y=None
-    pickradius=None
-    inaxes=None
-    projection=False
-    compare_xdata=False
-    pick_radius_axis='both'
 
 class MatplotFigureSubplot(MatplotFigure):
     """Custom MatplotFigure
@@ -452,7 +443,10 @@ class MatplotFigureSubplot(MatplotFigure):
                     ax.set_ylim(top=ymin,bottom=ymax)
                 else:
                     ax.set_ylim(bottom=ymin,top=ymax)                              
-    
+
+            if self.last_line is not None:
+                self.clear_line_prop() 
+                
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events() 
 
@@ -580,7 +574,6 @@ class MatplotFigureSubplot(MatplotFigure):
             #mimic matplotlib mouse event with kivy touch evant
             self.myevent.x=event.x - self.pos[0]
             self.myevent.y=event.y - self.pos[1]
-            # self.myevent.inaxes=self.figure.axes[0]
             self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
                                                            event.y - self.pos[1]))
             self.myevent.pickradius=self.pickradius
@@ -600,6 +593,21 @@ class MatplotFigureSubplot(MatplotFigure):
                     self.hover_instance.show_cursor=False
                     self.x_hover_data = None
                     self.y_hover_data = None
+                    if self.highlight_hover:
+                        axes = [a for a in self.figure.canvas.figure.get_axes()
+                                if a.in_axes(self.myevent)]   
+        
+                        if not axes:                            
+                            
+                            if self.last_line:
+                                self.clear_line_prop() 
+                                ax=self.axes
+                                if self.background:
+                                    ax.figure.canvas.restore_region(self.background)
+                                    #draw (blit method)
+                                    ax.figure.canvas.blit(ax.bbox)                 
+                                    ax.figure.canvas.flush_events()
+                                    self.background = None
                 return
 
             if self.compare_xdata:
@@ -796,6 +804,69 @@ class MatplotFigureSubplot(MatplotFigure):
                         self.hover_instance.hover_outside_bound=True
                     else:
                         self.hover_instance.hover_outside_bound=False                      
+
+                    if self.highlight_hover:
+                        axes = [a for a in self.figure.canvas.figure.get_axes()
+                                if a.in_axes(self.myevent)]   
+        
+                        if not axes or not isinstance(line, mlines.Line2D):                           
+                            
+                            if self.last_line:
+                                self.clear_line_prop() 
+                                if self.background:
+                                    ax.figure.canvas.restore_region(self.background)
+                                    #draw (blit method)
+                                    ax.figure.canvas.blit(ax.bbox)                 
+                                    ax.figure.canvas.flush_events() 
+                                    self.background = None
+                                
+                            return
+
+                        #blit method (always use because same visual effect as draw)                  
+                        if self.background is None:                 
+                            self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                        if self.last_line is None:
+                            default_alpha=[]
+                            lines_list=ax.lines
+                            for current_line in lines_list:
+                                default_alpha.append(current_line.get_alpha())
+                                current_line.set_alpha(self.highlight_alpha)
+                                
+                            ax.figure.canvas.draw_idle()
+                            ax.figure.canvas.flush_events()                                      
+                            self.background_highlight=ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                            self.last_line=line
+                            for i,current_line in enumerate(lines_list):
+                                current_line.set_alpha(default_alpha[i])
+                                default_alpha[i]
+                            
+                            if self.highlight_prop:
+                                self.last_line_prop={}
+                                for key in self.highlight_prop:
+                                    # if hasattr(line,key):
+                                    line_attr = getattr(line,'get_' + key)
+                                    self.last_line_prop.update({key:line_attr()})
+                                    set_line_attr = getattr(line,'set_' + key)
+                                    set_line_attr(self.highlight_prop[key])
+                        elif self.last_line_prop:
+                            for key in self.last_line_prop:
+                                set_line_attr = getattr(self.last_line,'set_' + key)
+                                set_line_attr(self.last_line_prop[key]) 
+                            self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
+                            self.last_line_prop={}
+                            for key in self.highlight_prop:
+                                line_attr = getattr(line,'get_' + key)
+                                self.last_line_prop.update({key:line_attr()})
+                                set_line_attr = getattr(line,'set_' + key)
+                                set_line_attr(self.highlight_prop[key])                                
+                            self.last_line=line
+
+                        ax.figure.canvas.restore_region(self.background_highlight)
+                        ax.draw_artist(line)
+        
+                        #draw (blit method)
+                        ax.figure.canvas.blit(self.axes.bbox)                 
+                        ax.figure.canvas.flush_events()  
                     
                     return
                 else:
@@ -815,7 +886,9 @@ class MatplotFigureSubplot(MatplotFigure):
                     self.figcanvas.draw_idle()
                     self.figcanvas.flush_events()                   
                     self.background = self.figcanvas.copy_from_bbox(ax.figure.bbox)
-                    self.set_cross_hair_visible(True)  
+                    self.set_cross_hair_visible(True) 
+                    if self.last_line is not None:
+                        self.clear_line_prop()
     
                 self.figcanvas.restore_region(self.background)
                 ax.draw_artist(self.text)
@@ -1037,7 +1110,7 @@ class MatplotFigureSubplot(MatplotFigure):
         
         if self.fast_draw: 
             #use blit method               
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 if self.draw_all_axes:
                     for myax in self.figure.canvas.figure.get_axes():
                         index = self.figure.axes.index(myax)  
@@ -1053,7 +1126,9 @@ class MatplotFigureSubplot(MatplotFigure):
                         index = self.figure.axes.index(myax)  
                         self.background_patch_copy[index].set_visible(False)                   
                 else:                   
-                    self.background_patch_copy[index].set_visible(False)  
+                    self.background_patch_copy[index].set_visible(False) 
+                if self.last_line is not None:
+                    self.clear_line_prop()                      
             self.figcanvas.restore_region(self.background)                
            
 
@@ -1353,7 +1428,7 @@ class MatplotFigureSubplot(MatplotFigure):
         
         if self.fast_draw: 
             #use blit method               
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 if self.draw_all_axes:
                     for myax in self.figure.canvas.figure.get_axes():
                         index = self.figure.axes.index(myax)  
@@ -1369,7 +1444,9 @@ class MatplotFigureSubplot(MatplotFigure):
                         index = self.figure.axes.index(myax)  
                         self.background_patch_copy[index].set_visible(False)                   
                 else:                   
-                    self.background_patch_copy[index].set_visible(False)  
+                    self.background_patch_copy[index].set_visible(False)
+                if self.last_line is not None:
+                    self.clear_line_prop()                      
             self.figcanvas.restore_region(self.background)                
            
 
@@ -1576,7 +1653,10 @@ class MatplotFigureSubplot(MatplotFigure):
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                         self.touch_mode='pan'
                     self.first_touch_pan=None
-
+                    
+                if self.last_line is not None:
+                    self.clear_line_prop()
+                      
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
             self.reset_box()  
@@ -1601,8 +1681,9 @@ class MatplotFigureSubplot(MatplotFigure):
             ax=self.axes
             self.background=None
             self.show_compare_cursor=True
-            ax.figure.canvas.draw_idle()
-            ax.figure.canvas.flush_events()                           
+            if self.last_line is None or self.touch_mode!='cursor':
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                           
             
             return True
 

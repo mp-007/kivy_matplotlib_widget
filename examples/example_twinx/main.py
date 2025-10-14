@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 from kivy.metrics import dp
+from kivy_matplotlib_widget.uix.hover_widget import add_hover,HightChartHover
 
 #optimized draw on Agg backend
 mpl.rcParams['path.simplify'] = True
@@ -103,6 +104,9 @@ Screen
             id:figure_wgt
             fast_draw:False
             interactive_axis:True
+            auto_cursor:True
+            highlight_hover:True
+            highlight_prop:{'linewidth':8}
             
         BoxLayout:
             size_hint_y:0.2
@@ -167,14 +171,15 @@ class Test(App):
             
         self.screen.figure_wgt.figure = fig
         
-        self.lines=fig.axes[0].lines + fig.axes[1].lines
-        self.screen.figure_wgt.register_lines(self.lines)
+        # self.lines=fig.axes[0].lines + fig.axes[1].lines
+        # self.screen.figure_wgt.register_lines(self.lines)
 
         ax=self.screen.figure_wgt.figure.axes[0]
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
         self.screen.figure_wgt.cursor_xaxis_formatter = ax.xaxis.get_major_formatter()
         self.screen.figure_wgt.cursor_yaxis_formatter = FuncFormatter(y_axis_formatter)        
-        self.screen.figure_wgt.cursor_yaxis2_formatter = FormatStrFormatter('%.1f')
+        # self.screen.figure_wgt.cursor_yaxis2_formatter = FormatStrFormatter('%.1f')
+        add_hover(self.screen.figure_wgt,mode='desktop',hover_widget=HightChartHover())
 
     def set_touch_mode(self,mode):
         if mode == 'adjust_y':

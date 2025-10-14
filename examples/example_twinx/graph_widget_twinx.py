@@ -17,12 +17,13 @@ from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty, OptionProperty
+    NumericProperty, OptionProperty, DictProperty
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import to_hex
 from matplotlib import cbook
+import matplotlib.lines as mlines
 from weakref import WeakKeyDictionary
 from matplotlib.backend_bases import ResizeEvent
 from kivy.metrics import dp
@@ -30,6 +31,15 @@ import numpy as np
 from kivy.utils import get_color_from_hex
 from kivy.core.window import Window
 from kivy.clock import Clock
+
+class MatplotlibEvent:
+    x=None
+    y=None
+    pickradius=None
+    inaxes=None
+    projection=False
+    compare_xdata=False
+    pick_radius_axis='both'
 
 class MatplotFigureTwinx(Widget):
     """Widget to show a matplotlib figure in kivy.
@@ -87,6 +97,10 @@ class MatplotFigureTwinx(Widget):
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
                                      options = ["None",'rectangle','lasso','ellipse','span','custom'])     
+    highlight_hover = BooleanProperty(False)
+    highlight_prop = DictProperty({})
+    highlight_alpha =  NumericProperty(0.2)
+    myevent = MatplotlibEvent()    
     pick_minimum_radius=NumericProperty(dp(50))
     pick_radius_axis = OptionProperty("both", options=["both", "x", "y"])
     
@@ -102,6 +116,7 @@ class MatplotFigureTwinx(Widget):
         if len(self.figure.axes) > 0 and self.figure.axes[0]:
             #add copy patch
             ax=self.figure.axes[0]
+            self.axes=ax
             patch_cpy=copy.copy(ax.patch)
             patch_cpy.set_visible(False)
             for pos in ['right', 'top', 'bottom', 'left']:
@@ -225,7 +240,11 @@ class MatplotFigureTwinx(Widget):
         
         #selector management
         self.kv_post_done = False
-        self.selector = None        
+        self.selector = None  
+        
+        #highlight management
+        self.last_line = None
+        self.last_line_prop = {}        
                 
         self.bind(size=self._onSize)
 
@@ -296,13 +315,13 @@ class MatplotFigureTwinx(Widget):
         
     def set_collection(self):          
         self.selector.resize_wgt.ax = self.axes
-        collections = self.axes.collections      
+        collections = self.figure.axes[0].collections      
         
         if collections:
            self.selector.resize_wgt.set_collection(collections[0]) 
            
     def set_line(self,line):
-        self.selector.resize_wgt.ax = self.axes  
+        self.selector.resize_wgt.ax = self.axes 
         self.selector.resize_wgt.set_line(line) 
            
     def set_callback(self,callback):
@@ -372,7 +391,23 @@ class MatplotFigureTwinx(Widget):
                         xy_pos = self.figure.axes[1].transData.transform([(x,new_y)])
                         xdata, ydata = trans.transform_point((xy_pos[0][0], xy_pos[0][1]))
                         self.horizontal_line.set_ydata([ydata,])
-                    
+
+    def clear_line_prop(self) -> None:
+        """ clear attribute line_prop method
+        
+        Args:
+            None
+            
+        Return:
+            None
+        
+        """       
+        if self.last_line_prop:
+            for key in self.last_line_prop:
+                set_line_attr = getattr(self.last_line,'set_' + key)
+                set_line_attr(self.last_line_prop[key])                                    
+            self.last_line_prop={}                                       
+        self.last_line=None                    
 
     def hover(self, event) -> None:
         """ hover cursor method (cursor to nearest value)
@@ -677,7 +712,75 @@ class MatplotFigureTwinx(Widget):
                             self.hover_instance.hover_outside_bound=True
                         else:
                             self.hover_instance.hover_outside_bound=False                      
-                        
+
+                        if self.highlight_hover:
+                            self.myevent.x=event.x - self.pos[0]
+                            self.myevent.y=event.y - self.pos[1]
+                            self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
+                                                                           event.y - self.pos[1])) 
+
+                            axes = [a for a in self.figure.canvas.figure.get_axes()
+                                    if a.in_axes(self.myevent)]   
+
+                            if not axes or not isinstance(line, mlines.Line2D):                           
+    
+                                if self.last_line:
+                                    self.clear_line_prop() 
+                                    if self.background:
+                                        ax.figure.canvas.restore_region(self.background)
+                                        #draw (blit method)
+                                        ax.figure.canvas.blit(ax.bbox)                 
+                                        ax.figure.canvas.flush_events()
+                                        self.background = None
+    
+                                return
+
+                            #blit method (always use because same visual effect as draw)                  
+                            if self.background is None:                 
+                                self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                            if self.last_line is None:
+                                default_alpha=[]
+                                lines_list=self.lines #get all register lines
+                                for current_line in lines_list:
+                                    default_alpha.append(current_line.get_alpha())
+                                    current_line.set_alpha(self.highlight_alpha)
+    
+                                ax.figure.canvas.draw_idle()
+                                ax.figure.canvas.flush_events()                                      
+                                self.background_highlight=ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                                self.last_line=line
+                                for i,current_line in enumerate(lines_list):
+                                    current_line.set_alpha(default_alpha[i])
+                                    default_alpha[i]
+    
+                                if self.highlight_prop:
+                                    self.last_line_prop={}
+                                    for key in self.highlight_prop:
+                                        # if hasattr(line,key):
+                                        line_attr = getattr(line,'get_' + key)
+                                        self.last_line_prop.update({key:line_attr()})
+                                        set_line_attr = getattr(line,'set_' + key)
+                                        set_line_attr(self.highlight_prop[key])
+                            elif self.last_line_prop:
+                                for key in self.last_line_prop:
+                                    set_line_attr = getattr(self.last_line,'set_' + key)
+                                    set_line_attr(self.last_line_prop[key]) 
+                                self.hover_instance.custom_color = get_color_from_hex(to_hex(line.get_color()))
+                                self.last_line_prop={}
+                                for key in self.highlight_prop:
+                                    line_attr = getattr(line,'get_' + key)
+                                    self.last_line_prop.update({key:line_attr()})
+                                    set_line_attr = getattr(line,'set_' + key)
+                                    set_line_attr(self.highlight_prop[key])                                
+                                self.last_line=line
+    
+                            ax.figure.canvas.restore_region(self.background_highlight)
+                            ax.draw_artist(line)
+    
+                            #draw (blit method)
+                            ax.figure.canvas.blit(ax.bbox)                
+                            ax.figure.canvas.flush_events()  
+                            
                         return
                     else:
                         self.text.set_text(f"x={x}, y={y}")                
@@ -688,7 +791,9 @@ class MatplotFigureTwinx(Widget):
                         self.figure.canvas.draw_idle()
                         self.figure.canvas.flush_events()                   
                         self.background = self.figure.canvas.copy_from_bbox(self.figure.bbox)
-                        self.set_cross_hair_visible(True)  
+                        self.set_cross_hair_visible(True)
+                        if self.last_line is not None:
+                            self.clear_line_prop()
     
                     self.figure.canvas.restore_region(self.background)
                     self.figure.axes[0].draw_artist(self.text)
@@ -708,7 +813,28 @@ class MatplotFigureTwinx(Widget):
                     self.hover_instance.y_hover_pos=self.y      
                     self.hover_instance.show_cursor=False
                     self.x_hover_data = None
-                    self.y_hover_data = None                
+                    self.y_hover_data = None 
+
+                    if self.highlight_hover:
+                        self.myevent.x=event.x - self.pos[0]
+                        self.myevent.y=event.y - self.pos[1]
+                        self.myevent.inaxes=self.figure.canvas.inaxes((event.x - self.pos[0], 
+                                                                       event.y - self.pos[1])) 
+
+                        axes = [a for a in self.figure.canvas.figure.get_axes()
+                                if a.in_axes(self.myevent)]   
+
+                        if not axes:                            
+
+                            if self.last_line:
+                                self.clear_line_prop() 
+                                if self.background:
+                                    self.figure.canvas.restore_region(self.background)
+                                    #draw (blit method)
+                                    self.figure.canvas.blit(self.figure.axes[0].bbox)                
+                                    self.figure.canvas.flush_events()
+                                    self.background = None
+                            return                    
 
     def autoscale(self):
         if self.disabled:
@@ -775,6 +901,9 @@ class MatplotFigureTwinx(Widget):
                 ax2.set_ylim(bottom=self.ymin2,top=self.ymax2) 
                 
             self.update_cursor()
+
+        if self.last_line is not None:
+            self.clear_line_prop()  
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
@@ -1145,6 +1274,9 @@ class MatplotFigureTwinx(Widget):
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                         self.touch_mode='pan'
                     self.first_touch_pan=None
+
+                if self.last_line is not None:
+                    self.clear_line_prop()                    
                 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
@@ -1169,7 +1301,10 @@ class MatplotFigureTwinx(Widget):
             self.background=None
             self.show_compare_cursor=True
             self.figure.canvas.draw_idle()
-            self.figure.canvas.flush_events()                           
+            self.figure.canvas.flush_events()   
+            if self.last_line is None or self.touch_mode!='cursor':
+                self.figure.canvas.draw_idle()
+                self.figure.canvas.flush_events()                            
             
             return True
 
@@ -1248,12 +1383,14 @@ class MatplotFigureTwinx(Widget):
 
         if self.fast_draw:   
             #use blit method            
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
-                self.background_patch_copy.set_visible(False)  
+                self.background_patch_copy.set_visible(False)
+                if self.last_line is not None:
+                    self.clear_line_prop()
             ax.figure.canvas.restore_region(self.background)
            
             for line in ax.lines:
@@ -1375,7 +1512,7 @@ class MatplotFigureTwinx(Widget):
 
         if self.fast_draw: 
             #use blit method
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 self.background_ax2_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
@@ -1383,6 +1520,8 @@ class MatplotFigureTwinx(Widget):
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 self.background_patch_copy.set_visible(False) 
                 self.background_ax2_patch_copy.set_visible(False)
+                if self.last_line is not None:
+                    self.clear_line_prop()
             ax.figure.canvas.restore_region(self.background)               
               
             for line in ax.lines:
@@ -1423,8 +1562,8 @@ class MatplotFigureTwinx(Widget):
             dy = self.transform_eval(ydata,ax.yaxis) - \
                 self.transform_eval(ypress,ax.yaxis)        
 
-        xleft,xright=self.axes.get_xlim()
-        ybottom,ytop=self.axes.get_ylim()
+        xleft,xright=self.figure.axes[0].get_xlim()
+        ybottom,ytop=self.figure.axes[0].get_ylim()
         
         #check inverted data
         inverted_x = False
@@ -1570,12 +1709,14 @@ class MatplotFigureTwinx(Widget):
 
         if self.fast_draw: 
             #use blit method               
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
-                self.background_patch_copy.set_visible(False)  
+                self.background_patch_copy.set_visible(False)
+                if self.last_line is not None:
+                    self.clear_line_prop()
             ax.figure.canvas.restore_region(self.background)                
            
             for line in ax.lines:
@@ -1858,7 +1999,7 @@ class MatplotFigureTwinx(Widget):
 
         if self.fast_draw: 
             #use blit method            
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 self.background_patch_copy.set_visible(True)
                 self.background_ax2_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
@@ -1866,6 +2007,8 @@ class MatplotFigureTwinx(Widget):
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 self.background_patch_copy.set_visible(False) 
                 self.background_ax2_patch_copy.set_visible(False)
+                if self.last_line is not None:
+                    self.clear_line_prop()   
             ax.figure.canvas.restore_region(self.background)             
             
             for line in ax.lines:
@@ -2073,7 +2216,7 @@ class MatplotFigureTwinx(Widget):
 
     def min_max(self, event):
         """ manage min/max touch mode """
-        ax=self.axes[0] #left axis
+        ax=self.figure.axes[0] #left axis
         xlabelbottom = ax.xaxis._major_tick_kw.get('tick1On')
         ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
         ylabelright = ax.yaxis._major_tick_kw.get('tick2On')
@@ -2162,7 +2305,7 @@ class MatplotFigureTwinx(Widget):
                             self.text_instance.x_text_pos=float(self.x+ax.bbox.bounds[0] + ax.bbox.bounds[2]) + dp(40)
                             self.text_instance.y_text_pos=float(self.y+ax.bbox.bounds[1]) - dp(6)
                             self.text_instance.offset_text = True
-                        self.text_instance.current_axis = self.axes[1] #left axis
+                        self.text_instance.current_axis = self.figure.axes[1] #left axis
                         self.text_instance.kind = {'axis':'y','anchor':anchor}
                             
                         self.text_instance.show_text=True
@@ -2194,12 +2337,14 @@ class MatplotFigureTwinx(Widget):
             legend._loc = tuple(loc_in_norm_axes)
             
             #use blit method               
-            if self.background is None:
+            if self.background is None or self.last_line is not None:
                 legend.set_visible(False)
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()                   
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
                 legend.set_visible(True)
+                if self.last_line is not None:
+                    self.clear_line_prop()
             ax.figure.canvas.restore_region(self.background)   
     
             ax.draw_artist(legend)
@@ -2292,6 +2437,9 @@ class MatplotFigureTwinx(Widget):
                         new_ymin, new_ymax = ymin_, ymax_ 
                 ax.set_ylim([new_ymin, new_ymax])
 
+        if self.last_line is not None:
+            self.clear_line_prop()  
+     
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()    
 
@@ -2409,6 +2557,9 @@ class MatplotFigureTwinx(Widget):
                     if new_ymin2 <= 0. or new_ymax2 <= 0.:  # Limit case
                         new_ymin2, new_ymax2 = ymin2_, ymax2_ 
                 ax2.set_ylim([new_ymin2, new_ymax2])
+
+        if self.last_line is not None:
+            self.clear_line_prop()  
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events() 
