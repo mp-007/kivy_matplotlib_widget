@@ -118,7 +118,6 @@ Screen
                     self.state='down'   
             ToggleButton:
                 group:'highlight'
-                state:'down'
                 text:"highlight 3"  
                 on_release:
                     app.set_highlight(3)
