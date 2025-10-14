@@ -37,5 +37,6 @@ See interactive_converter folder in the examples for more details.
  - several selectors widget (rectangle, lasso, ellipse and span)
  - 3D graph with cursor, figure pan and figure zoom
  - copy figure to clipboard
+ - highlight line feature
 
 ![image](https://github.com/mp-007/kivy_matplotlib_widget/assets/19823482/7709886e-0891-4fb7-a95d-eee790a6c57c)
