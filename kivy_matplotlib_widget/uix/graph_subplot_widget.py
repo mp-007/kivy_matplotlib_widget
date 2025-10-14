@@ -606,7 +606,8 @@ class MatplotFigureSubplot(MatplotFigure):
                                     ax.figure.canvas.restore_region(self.background)
                                     #draw (blit method)
                                     ax.figure.canvas.blit(ax.bbox)                 
-                                    ax.figure.canvas.flush_events()               
+                                    ax.figure.canvas.flush_events()
+                                    self.background = None
                 return
 
             if self.compare_xdata:
@@ -816,7 +817,8 @@ class MatplotFigureSubplot(MatplotFigure):
                                     ax.figure.canvas.restore_region(self.background)
                                     #draw (blit method)
                                     ax.figure.canvas.blit(ax.bbox)                 
-                                    ax.figure.canvas.flush_events()  
+                                    ax.figure.canvas.flush_events() 
+                                    self.background = None
                                 
                             return
 

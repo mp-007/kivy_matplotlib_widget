@@ -598,7 +598,9 @@ class MatplotFigure(Widget):
                                         self.axes.figure.canvas.restore_region(self.background)
                                         #draw (blit method)
                                         self.axes.figure.canvas.blit(self.axes.bbox)                 
-                                        self.axes.figure.canvas.flush_events()   
+                                        self.axes.figure.canvas.flush_events() 
+                                        self.background = None
+                                        
                                 return
 
                             #blit method (always use because same visual effect as draw)                  
@@ -704,7 +706,9 @@ class MatplotFigure(Widget):
                                     self.axes.figure.canvas.restore_region(self.background)
                                     #draw (blit method)
                                     self.axes.figure.canvas.blit(self.axes.bbox)                 
-                                    self.axes.figure.canvas.flush_events()   
+                                    self.axes.figure.canvas.flush_events() 
+                                    self.background = None
+                            
                             return
     def autoscale(self):
         if self.disabled:
