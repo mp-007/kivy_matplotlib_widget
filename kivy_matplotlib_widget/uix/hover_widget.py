@@ -179,6 +179,41 @@ class GeneralCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.add_widget(mywidget)
             self.children_names.append(label)
             self.children_list.append(mywidget)
+            
+class BoxShadowCompareHover(BaseHoverFloatLayout):
+    """ GeneralCompareHover with a box shadow""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))
+    background_color=ColorProperty([1,1,1,1])
+    hover_height = NumericProperty(dp(48))
+    y_touch_pos = NumericProperty(1) 
+    
+    def __init__(self, **kwargs):
+        """ init class """
+        super(BoxShadowCompareHover, self).__init__(**kwargs)
+        self.children_names=[]
+        self.children_list=[]
+
+    def create_child(self,lines):
+        if len(self.ids.main_box.children)>2:
+            #clear all added childrens
+            for i in range(len(self.ids.main_box.children)-2):
+                self.ids.main_box.remove_widget(self.ids.main_box.children[0])
+
+        self.children_names=[]
+        self.children_list=[]        
+        for i,line in enumerate(lines):
+            label=line.get_label()
+            if i==0:
+               self.ids.comparehoverbox.label_y=label
+               mywidget = self.ids.comparehoverbox
+            else:
+                mywidget=DotCompareHoverBox()
+                mywidget.label_y=label
+                self.ids.main_box.add_widget(mywidget)
+            self.children_names.append(label)
+            self.children_list.append(mywidget)
 
 class CompareHoverBox(BoxLayout):
     """ Hover with vertical text""" 
@@ -196,7 +231,21 @@ class CompareHoverBox(BoxLayout):
         """ init class """
         super().__init__(**kwargs)       
 
+class DotCompareHoverBox(BoxLayout):
+    """ Hover with vertical text""" 
+    text_color=ColorProperty([0,0,0,1])
+    text_font=StringProperty("Roboto")
+    text_size = NumericProperty(dp(14))    
+    label_y = StringProperty('y')
+    label_y_value = StringProperty('y')
+    x_hover_pos = NumericProperty(1)
+    y_hover_pos = NumericProperty(1)
+    show_widget = BooleanProperty(False)
+    custom_color=ColorProperty([0,0,0,1],allownone=True)
 
+    def __init__(self, **kwargs):
+        """ init class """
+        super().__init__(**kwargs) 
 
 class TagCompareHover(BaseHoverFloatLayout):
     """ TagCompareHover""" 
@@ -1043,5 +1092,102 @@ Builder.load_string('''
                         root.custom_label if root.custom_label and not '_child' in root.custom_label else ''  
                     font_size:root.text_size
                     color: root.text_color
-                    font_name : root.text_font                       
+                    font_name : root.text_font   
+
+<BoxShadowCompareHover>
+    custom_color: [0,0,0,1] 
+
+    BoxLayout:
+        id:main_box
+        x:
+            root.x_hover_pos - dp(12) - self.width  if root.x_hover_pos - dp(16) - self.width > root.figx  \
+            else root.x_hover_pos + dp(12)
+        y:
+            root.ymin_line + dp(4) if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - dp(4) - self.height
+        size_hint: None, None
+        height: self.minimum_height
+        width: 
+            self.minimum_width + dp(12) if root.show_cursor \
+            else dp(0.0001)
+        orientation:'vertical'
+        padding: 0,dp(4),0,dp(4)
+        
+        canvas:            
+            Color:
+                rgba: 0, 0, 0, .65
+            BoxShadow:
+                pos: self.pos
+                size: self.size                
+                offset: 0, -2
+                spread_radius: -4, -4
+                border_radius: 4, 4, 4, 4
+                blur_radius: 14 
+            Color:
+                rgba: root.background_color
+            SmoothRoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [7,]
+                        
+        canvas.after:            
+            Color:
+                rgba: 0,0,1,0.1
+            SmoothLine:
+                width: dp(8)
+        		points: 
+                    root.x_hover_pos, \
+           			root.ymin_line, \
+       				root.x_hover_pos, \
+       				root.ymax_line
+        
+        
+        BoxLayout:
+            size_hint:None,None
+            width:label.texture_size[0] + dp(12)
+            height:label.texture_size[1] + dp(12)
+            padding: dp(6),0,0,0
+            Label:
+                id:label
+                text: 
+                    root.label_x + ': ' + root.label_x_value if root.label_x else root.label_x_value
+                font_size:root.text_size
+                font_name : root.text_font
+                color: root.text_color
+                
+        DotCompareHoverBox: 
+            id:comparehoverbox    
+
+<DotCompareHoverBox>
+    size_hint:None,None
+    width:label.texture_size[0] + dp(12) if self.show_widget else dp(12)
+    height:label.texture_size[1] + dp(2) if self.show_widget else dp(0.01)
+    opacity:1 if self.show_widget else 0
+    padding: dp(6),0,0,0
+    extra_text:root.label_y if root.label_y and not '_child' in root.label_y else ''
+    label_format:'[size={}]'.format(int(root.text_size + dp(6))) + '[color={}]'.format(get_hex_from_color(root.custom_color)) + \
+                 '[font=NavigationIcons]' + u"{}".format("\U00000EB1") + \
+                 '[/font][/color][/size]' +  root.extra_text + ": " + root.label_y_value    
+    
+    canvas.before:  
+        Color:
+            rgb: root.custom_color if root.custom_color else [0,0,0,1]
+            a:0.7
+        SmoothEllipse:
+            size: (dp(12),dp(12))
+            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))  
+        Color:
+            rgb: [1,1,1]
+            a:1.0
+        SmoothLine:
+            width: 1.
+            ellipse: (root.x_hover_pos - dp(7), root.y_hover_pos-dp(7), dp(14), dp(14))               
+            
+
+    Label:
+        id:label
+        text: root.label_format
+        font_size:root.text_size
+        color:[0,0,0,1]
+        font_name : root.text_font
+        markup:True                   
         ''')
