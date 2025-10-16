@@ -8,13 +8,14 @@ from kivy.lang import Builder
 from kivy.app import App
 from kivy.properties import ColorProperty,NumericProperty,StringProperty,BooleanProperty
 from kivy.metrics import dp
+from kivy.core.window import Window
 
 import matplotlib.pyplot as plt
 import multiprocessing as mp   
 
 from kivy_matplotlib_widget.uix.legend_widget import MatplotlibInteractiveLegend
 from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
-from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout,TagCompareHover
+from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout,TagCompareHover,PlotlyHover
 
 KV = '''
 Screen
@@ -46,79 +47,7 @@ Screen
             max_hover_rate:app.max_hover_rate
             legend_do_scroll_x:app.legend_do_scroll_x
             hist_range:app.hist_range
-            autoscale_tight:app.autoscale_tight
-            
-<PlotlyHover2>
-    custom_color: [0,0,0,1]
-    BoxLayout:
-        id:main_box
-        x:
-            root.x_hover_pos + dp(4)
-        y:
-            root.y_hover_pos - root.hover_height/2
-        size_hint: None, None
-        height: label.texture_size[1]+ dp(4)
-        width: 
-            self.minimum_width + dp(12) if root.show_cursor \
-            else dp(0.0001)            
-        orientation:'vertical'
-        padding: 0,-dp(1),0,0
-        
-        canvas:            
-            Color:
-                rgba: root.custom_color if root.custom_color else [0,0,0,1]
-            Rectangle:
-                pos: self.pos
-                size: self.size
-            Triangle:
-                points:
-                    [ \
-                    root.x_hover_pos, root.y_hover_pos, \
-                    main_box.x, root.y_hover_pos+ dp(4), \
-                    main_box.x, root.y_hover_pos- dp(4)  \
-                    ]
-            SmoothLine:
-                width:dp(1)
-                points:
-                    [ \
-                    root.x_hover_pos, root.y_hover_pos, \
-                    main_box.x, root.y_hover_pos \
-                    ]                           
-             
-        BoxLayout:
-            size_hint_x:None
-            width:label.texture_size[0]
-            padding: dp(12),0,0,0
-            Label:
-                id:label
-                text: 
-                    '(' + root.label_x_value  +','+ root.label_y_value +')'
-                font_size:root.text_size
-                color:
-                    [0,0,0,1] if (root.custom_color[0]*0.299 + \
-                    root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186/255 \
-                    else [1,1,1,1]
-                font_name : root.text_font
-
-                font_name : root.text_font
-                
-        FloatLayout:
-            size_hint: None,None
-            width: dp(0.01) 
-            height: dp(0.01) 
-            BoxLayout:
-                size_hint:None,None
-                x:main_box.x + main_box.width + dp(4)
-                y:main_box.y + main_box.height/2 - label3.texture_size[1]/2
-                width:label3.texture_size[0]
-                height:label3.texture_size[1]
-                Label:
-                    id:label3
-                    text: 
-                        root.custom_label if root.custom_label and not '_child' in root.custom_label else ''  
-                    font_size:root.text_size
-                    color: root.text_color
-                    font_name : root.text_font      
+            autoscale_tight:app.autoscale_tight  
             
 '''
 
@@ -144,18 +73,6 @@ Screen
 
 '''
 
-class PlotlyHover2(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
-    text_color=ColorProperty([0,0,0,1])
-    text_font=StringProperty("Roboto")
-    text_size = NumericProperty(dp(14))
-    hover_height = NumericProperty(dp(24))
-
-    
-    def __init__(self, **kwargs):
-        """ init class """
-        super().__init__(**kwargs)   
-
 class GraphApp(App):
     figure = None
     compare_hover = BooleanProperty(False)
@@ -170,7 +87,7 @@ class GraphApp(App):
     def __init__(self, 
                  figure,
                  show_cursor_data=True,
-                 hover_widget=PlotlyHover2,
+                 hover_widget=PlotlyHover,
                  compare_hover_widget=TagCompareHover,
                  compare_hover=False,
                  legend_instance=None, 
@@ -184,6 +101,7 @@ class GraphApp(App):
                  fast_draw=True,
                  hist_range=True,
                  autoscale_tight=False,
+                 figsize=None,
                  **kwargs):
         """__init__ function class"""
         self.figure=figure
@@ -206,8 +124,15 @@ class GraphApp(App):
         self.fast_draw=fast_draw
         self.hist_range=hist_range
         self.autoscale_tight=autoscale_tight
+        self.figsize=figsize
         
     def build(self):
+        if self.figsize:
+            Window.size = self.figsize
+         
+        # Set minimum window size
+        Window.minimum_width, Window.minimum_height = (200, 200)
+            
         self.screen=Builder.load_string(KV)
         return self.screen
 
@@ -267,14 +192,21 @@ class GraphApp3D(App):
 
     def __init__(self, 
                  figure,
+                 figsize=None,
                  **kwargs):
         """__init__ function class"""
         self.figure=figure
+        self.figsize=figsize
         
         # print(self.figure.get())
         super(GraphApp3D, self).__init__(**kwargs)
         
     def build(self):
+        if self.figsize:
+            Window.size = self.figsize
+         
+        # Set minimum window size
+        Window.minimum_width, Window.minimum_height = (200, 200)        
         self.screen=Builder.load_string(KV3D)
         return self.screen
 
