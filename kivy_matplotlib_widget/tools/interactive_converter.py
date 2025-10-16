@@ -75,6 +75,7 @@ Screen
 
 class GraphApp(App):
     figure = None
+    figsize = None #figure size in pixel. inpu is a tuple ex: (1200,400)
     compare_hover = BooleanProperty(False)
     show_cursor_data = BooleanProperty(True)
     drag_legend = BooleanProperty(False)
@@ -189,6 +190,7 @@ def app_window(plot_queue,**kwargs):
     
 class GraphApp3D(App):
     figure = None
+    figsize = None #figure size in pixel. inpu is a tuple ex: (1200,400)
 
     def __init__(self, 
                  figure,
