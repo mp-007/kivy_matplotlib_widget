@@ -188,6 +188,7 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
     background_color=ColorProperty([1,1,1,1])
     hover_height = NumericProperty(dp(48))
     y_touch_pos = NumericProperty(1) 
+    reorder_data = BooleanProperty(True)
     
     def __init__(self, **kwargs):
         """ init class """
@@ -214,6 +215,24 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.add_widget(mywidget)
             self.children_names.append(label)
             self.children_list.append(mywidget)
+            
+    def overlap_check(self):
+        """ reorder label base on y_hover_pos of data"""
+        if self.reorder_data and len(self.ids.main_box.children)>2:
+            y_hover_pos_list=[]
+            child_list=[]
+            y_pos_list=[]
+            for child in self.ids.main_box.children[:-1]:
+                # child.hover_offset=0
+                if child.show_widget:
+                    y_hover_pos_list.append(child.y_hover_pos)
+                    child_list.append(child.ids.label)
+                    y_pos_list.append(child.y)
+            # heigh_child = child.ids.label.texture_size[1]+dp(6)
+            sorting_args= np.argsort(y_hover_pos_list)
+
+            for index in range(len(sorting_args)):    
+                child_list[sorting_args[index]].y = y_pos_list[index]
 
 class CompareHoverBox(BoxLayout):
     """ Hover with vertical text""" 
@@ -231,7 +250,7 @@ class CompareHoverBox(BoxLayout):
         """ init class """
         super().__init__(**kwargs)       
 
-class DotCompareHoverBox(BoxLayout):
+class DotCompareHoverBox(FloatLayout):
     """ Hover with vertical text""" 
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
@@ -1185,6 +1204,8 @@ Builder.load_string('''
 
     Label:
         id:label
+        x:self.parent.x
+        y:self.parent.y
         text: root.label_format
         font_size:root.text_size
         color:[0,0,0,1]
