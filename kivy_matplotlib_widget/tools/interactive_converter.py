@@ -102,6 +102,7 @@ class GraphApp(App):
                  fast_draw=True,
                  hist_range=True,
                  autoscale_tight=False,
+                 register_cursor=None,
                  figsize=None,
                  **kwargs):
         """__init__ function class"""
@@ -125,6 +126,7 @@ class GraphApp(App):
         self.fast_draw=fast_draw
         self.hist_range=hist_range
         self.autoscale_tight=autoscale_tight
+        self.register_cursor=register_cursor
         self.figsize=figsize
         
     def build(self):
@@ -148,6 +150,9 @@ class GraphApp(App):
 
         else:
             self.screen.figure_wgt.figure = figure
+            
+        if self.register_cursor:
+           self.screen.figure_wgt.register_cursor(pickables=self.register_cursor)
             
         if self.compare_hover:
             if self.compare_hover_widget:
