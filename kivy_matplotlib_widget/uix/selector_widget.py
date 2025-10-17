@@ -457,7 +457,7 @@ class ResizeSelect(FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
     alpha = NumericProperty(1)
-    dynamic_callback = BooleanProperty(True) 
+    dynamic_callback = BooleanProperty(False) 
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -4069,8 +4069,8 @@ class SpanSelect(FloatLayout):
     alpha = NumericProperty(1)
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)   
-    dynamic_callback = BooleanProperty(True) 
-    stay_in_axis_limit = BooleanProperty(True)
+    dynamic_callback = BooleanProperty(False) 
+    stay_in_axis_limit = BooleanProperty(False)
     
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
