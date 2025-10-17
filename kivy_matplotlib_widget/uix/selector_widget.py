@@ -457,6 +457,7 @@ class ResizeSelect(FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
     alpha = NumericProperty(1)
+    dynamic_callback = BooleanProperty(True) 
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -643,6 +644,10 @@ class ResizeSelect(FloatLayout):
                 if self.height + touch.dy <= MINIMUM_HEIGHT:
                     return False
                 self.height += touch.dy
+            
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
 
             elif self.selected_side == "bottom":
                 if self.height - touch.dy <= MINIMUM_HEIGHT:
@@ -650,17 +655,29 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "left":
                 if self.width - touch.dx <= MINIMUM_WIDTH:
                     return False
                 self.width -= touch.dx
                 self.x += touch.dx
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "right":
                 if self.width + touch.dx <= MINIMUM_WIDTH:
                     return False
                 self.width += touch.dx
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "top left":
                 if touch.dx > 0:
                     if self.width - touch.dx <= MINIMUM_WIDTH:
@@ -673,6 +690,10 @@ class ResizeSelect(FloatLayout):
                 self.x += touch.dx  # OK
                 self.height += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+
             elif self.selected_side == "top right":
                 if touch.dx < 0:
                     if self.width + touch.dx <= MINIMUM_WIDTH:
@@ -683,6 +704,10 @@ class ResizeSelect(FloatLayout):
 
                 self.width += touch.dx
                 self.height += touch.dy
+                
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
 
             elif self.selected_side == "bottom left":
                 if touch.dx > 0:
@@ -697,6 +722,10 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+
             elif self.selected_side == "bottom right":
                 if touch.dx < 0:
                     if self.width + touch.dx <= MINIMUM_WIDTH:
@@ -709,6 +738,10 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
                 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+                
             elif self.selected_side == "new select":
                 self.width += touch.dx
                 self.height -= touch.dy
@@ -719,6 +752,10 @@ class ResizeSelect(FloatLayout):
                     self.figure_wgt.collide_point(*self.to_window(self.pos[0] + self.size[0]+touch.dx,self.pos[1]+ self.size[1]+touch.dy )):
                     self.x += touch.dx
                     self.y += touch.dy
+
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)                    
                 
             if self.selected_side == "new select":
                 self.alpha = 0
