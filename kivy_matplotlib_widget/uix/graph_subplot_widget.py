@@ -155,6 +155,9 @@ class MatplotFigureSubplot(MatplotFigure):
                     lines.extend(ax.lines)
             self.register_lines(lines) #create maplotlib text and cursor (if needed)
             self.register_cursor()
+
+        if self.selector and self.axes:
+            self.selector.resize_wgt.ax = self.axes
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
