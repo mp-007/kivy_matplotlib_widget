@@ -147,6 +147,8 @@ class TestApp(App):
         self.screen.figure_wgt2.set_callback(self.callback_selection)
         self.screen.figure_wgt2.set_callback_clear(self.callback_clear)
         self.screen.figure_wgt2.selector.resize_wgt.span_color="blue"
+        self.screen.figure_wgt2.selector.resize_wgt.stay_in_axis_limit=True
+        self.screen.figure_wgt2.selector.resize_wgt.dynamic_callback=True
         
         self.screen.figure_wgt2.autoscale()
 
