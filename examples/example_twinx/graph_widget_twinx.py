@@ -158,7 +158,10 @@ class MatplotFigureTwinx(Widget):
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
-        
+
+        if self.selector and self.axes:
+            self.selector.resize_wgt.ax = self.axes
+ 
         #close last figure in memory (avoid max figure warning)
         matplotlib.pyplot.close()
 
