@@ -457,6 +457,7 @@ class ResizeSelect(FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
     alpha = NumericProperty(1)
+    dynamic_callback = BooleanProperty(False) 
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -643,6 +644,10 @@ class ResizeSelect(FloatLayout):
                 if self.height + touch.dy <= MINIMUM_HEIGHT:
                     return False
                 self.height += touch.dy
+            
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
 
             elif self.selected_side == "bottom":
                 if self.height - touch.dy <= MINIMUM_HEIGHT:
@@ -650,17 +655,29 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "left":
                 if self.width - touch.dx <= MINIMUM_WIDTH:
                     return False
                 self.width -= touch.dx
                 self.x += touch.dx
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "right":
                 if self.width + touch.dx <= MINIMUM_WIDTH:
                     return False
                 self.width += touch.dx
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)
+                    
             elif self.selected_side == "top left":
                 if touch.dx > 0:
                     if self.width - touch.dx <= MINIMUM_WIDTH:
@@ -673,6 +690,10 @@ class ResizeSelect(FloatLayout):
                 self.x += touch.dx  # OK
                 self.height += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+
             elif self.selected_side == "top right":
                 if touch.dx < 0:
                     if self.width + touch.dx <= MINIMUM_WIDTH:
@@ -683,6 +704,10 @@ class ResizeSelect(FloatLayout):
 
                 self.width += touch.dx
                 self.height += touch.dy
+                
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
 
             elif self.selected_side == "bottom left":
                 if touch.dx > 0:
@@ -697,6 +722,10 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+
             elif self.selected_side == "bottom right":
                 if touch.dx < 0:
                     if self.width + touch.dx <= MINIMUM_WIDTH:
@@ -709,6 +738,10 @@ class ResizeSelect(FloatLayout):
                 self.height -= touch.dy
                 self.y += touch.dy
                 
+                if self.dynamic_callback and self.verts is not None:
+                    self.verts = self._get_box_data()
+                    self.onselect(self.verts)                
+                
             elif self.selected_side == "new select":
                 self.width += touch.dx
                 self.height -= touch.dy
@@ -719,6 +752,10 @@ class ResizeSelect(FloatLayout):
                     self.figure_wgt.collide_point(*self.to_window(self.pos[0] + self.size[0]+touch.dx,self.pos[1]+ self.size[1]+touch.dy )):
                     self.x += touch.dx
                     self.y += touch.dy
+
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)                    
                 
             if self.selected_side == "new select":
                 self.alpha = 0
@@ -815,7 +852,7 @@ class ResizeSelect(FloatLayout):
             self.fc[self.ind, -1] = 1
             self.collection.set_facecolors(self.fc)
         if self.line:
-            xdata,ydata = self.line.get_data()
+            xdata,ydata = self.line.get_xydata().T
             self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
 
         self.figure_wgt.figure.canvas.draw_idle()
@@ -3456,7 +3493,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 self.fc[self.ind, -1] = 1
                 self.collection.set_facecolors(self.fc)
             if self.line:
-                xdata,ydata = self.line.get_data()
+                xdata,ydata = self.line.get_xydata().T
                 self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
     
             self.figure_wgt.figure.canvas.draw_idle()
@@ -3553,7 +3590,6 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
 
     def create_shape_with_touch(self, touch, check=True):
         shape = super(PainterWidget2, self).create_shape_with_touch(touch)
-        # print('aa')
         if check and shape.radius_x==dp(10) and shape.radius_y==dp(15):
             return None       
         
@@ -3980,7 +4016,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 self.fc[self.ind, -1] = 1
                 self.collection.set_facecolors(self.fc)
             if self.line:
-                xdata,ydata = self.line.get_data()
+                xdata,ydata = self.line.get_xydata().T
                 self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
     
             self.figure_wgt.figure.canvas.draw_idle()
@@ -4032,7 +4068,9 @@ class SpanSelect(FloatLayout):
     span_hide_on_release = BooleanProperty(False)
     alpha = NumericProperty(1)
     invert_rect_ver = BooleanProperty(False)
-    invert_rect_hor = BooleanProperty(False)    
+    invert_rect_hor = BooleanProperty(False)   
+    dynamic_callback = BooleanProperty(False) 
+    stay_in_axis_limit = BooleanProperty(False)
     
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -4106,8 +4144,8 @@ class SpanSelect(FloatLayout):
             else:
                 Window.set_system_cursor("size_all")
                 
-        elif self.figure_wgt.collide_point(*touch):
-        # else:
+        # elif self.figure_wgt.collide_point(*touch):
+        else:
             Window.set_system_cursor("arrow")
 
     def collides_with_control_points(self, _, touch):
@@ -4223,7 +4261,18 @@ class SpanSelect(FloatLayout):
 
             top = y + self.height  # top of our widget
             right = x + self.width  # right of our widget
-            
+ 
+            if self.stay_in_axis_limit:
+                #get figure boundaries (in pixels)
+                left_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[0])
+                right_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[2] +self.ax.bbox.bounds[0] )
+                top_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[3] + self.ax.bbox.bounds[1])
+                bottom_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[1])
+                
+                width = right_bound-left_bound
+                
+                left_bound,right_bound = self.to_widget(left_bound,right_bound)
+    
             if self.selected_side == "top":
                 if self.height + touch.dy <= MINIMUM_HEIGHT:
                     return False
@@ -4238,14 +4287,40 @@ class SpanSelect(FloatLayout):
             elif self.selected_side == "left":
                 if self.width - touch.dx <= MINIMUM_WIDTH:
                     return False
-                self.width -= touch.dx
-                self.x += touch.dx
+                
+                if self.stay_in_axis_limit and self.x + touch.dx <= left_bound:
+                    self.width -= (left_bound-self.x)
+                    self.x = left_bound
+                    
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)
+                        
+                else:
+                    self.width -= touch.dx
+                    self.x += touch.dx
+                    
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)
 
             elif self.selected_side == "right":
                 if self.width + touch.dx <= MINIMUM_WIDTH:
                     return False
-                self.width += touch.dx
 
+                if self.stay_in_axis_limit and self.width + touch.dx+self.x >= left_bound+width:
+                    self.width = left_bound+width-self.x
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)
+                        
+                else:
+                
+                    self.width += touch.dx
+    
+                    if self.dynamic_callback and self.verts is not None:
+                        self.verts = self._get_box_data()
+                        self.onselect(self.verts)
                 
             elif self.selected_side == "new select":
                 if self.span_orientation == 'vertical':
@@ -4256,8 +4331,23 @@ class SpanSelect(FloatLayout):
             elif not self.selected_side:
                 if self.figure_wgt.collide_point(*self.to_window(self.pos[0]+touch.dx,self.pos[1]+touch.dy )) and \
                     self.figure_wgt.collide_point(*self.to_window(self.pos[0] + self.size[0]+touch.dx,self.pos[1]+ self.size[1]+touch.dy )):
-                    if self.span_orientation == 'vertical':    
-                        self.x += touch.dx
+                    if self.span_orientation == 'vertical': 
+                        # print(touch.dx)
+                        if self.stay_in_axis_limit and self.x + touch.dx < left_bound:
+                            self.x = left_bound
+                            if self.dynamic_callback and self.verts is not None:
+                                self.verts = self._get_box_data()
+                                self.onselect(self.verts)
+                        elif self.stay_in_axis_limit and self.width + touch.dx+self.x > left_bound+width:
+                            self.x = left_bound+width-self.width 
+                            if self.dynamic_callback and self.verts is not None:
+                                self.verts = self._get_box_data()
+                                self.onselect(self.verts)                                
+                        else:
+                            self.x += touch.dx
+                            if self.dynamic_callback and self.verts is not None:
+                                self.verts = self._get_box_data()
+                                self.onselect(self.verts)
                     elif self.span_orientation == 'horizontal':
                         self.y += touch.dy
 
@@ -4286,10 +4376,22 @@ class SpanSelect(FloatLayout):
             if abs(self.size[0])<MINIMUM_WIDTH or abs(self.size[1])<MINIMUM_HEIGHT:
                 self.reset_selection()
             else:
-                if self.verts is not None:
+                out_of_bound = False
+                if self.stay_in_axis_limit:
+                    if self.first_touch and self.selected_side == "new select":
+                        box_data = self._get_box_data()
+                        if self.span_orientation == 'vertical': 
+                            box_xmin = min(np.array(box_data)[:,0])
+                            box_xmax = max(np.array(box_data)[:,0])
+                            
+                            xmin,xmax = self.ax.get_xlim()
+                            if box_xmin<xmin or box_xmax>xmax:
+                                out_of_bound=True
+                                self.reset_selection()
+                    
+                if self.verts is not None and not out_of_bound:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
-
             return True
         return super().on_touch_up(touch)
     
@@ -4298,7 +4400,6 @@ class SpanSelect(FloatLayout):
             if last_touch.x > self.first_touch[0]:
                 return
             else:
-                # print('reverse')
                 self.pos[0] = last_touch.x + 5 
                 self.size[0] = abs(self.size[0]) #self.first_touch[0] - last_touch.x
                 
@@ -4306,7 +4407,6 @@ class SpanSelect(FloatLayout):
             if last_touch.y > self.first_touch[1]:
                 return
             else:
-                # print('reverse')  
                 self.pos[1] = last_touch.y  - 5
                 self.size[1] = abs(self.size[1])
             
@@ -4381,7 +4481,7 @@ class SpanSelect(FloatLayout):
             self.fc[self.ind, -1] = 1
             self.collection.set_facecolors(self.fc)
         if self.line:
-            xdata,ydata = self.line.get_data()
+            xdata,ydata = self.line.get_xydata().T
             
             #matplotlib method if data is sorted
             # indmin, indmax = np.searchsorted(x, (xmin, xmax))

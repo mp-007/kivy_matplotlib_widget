@@ -84,7 +84,9 @@ class MatplotFigure(Widget):
     autoscale_tight = BooleanProperty(False)
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
-                                     options = ["None",'rectangle','lasso','ellipse','span','custom'])    
+                                     options = ["None",'rectangle','lasso','ellipse','span','custom']) 
+    pick_minimum_radius=NumericProperty(dp(50))
+    pick_radius_axis = OptionProperty("both", options=["both", "x", "y"])
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -100,8 +102,14 @@ class MatplotFigure(Widget):
             ax=self.figure.axes[0]
             patch_cpy=copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            for pos in ['right', 'top', 'bottom', 'left']:
-                ax.spines[pos].set_zorder(10)
+            
+            if hasattr(ax,'PolarTransform'):
+                for pos in list(ax.spines._dict.keys()):
+                    ax.spines[pos].set_zorder(10)
+                self.disabled = True #polar graph do not handle pan/zoom
+            else:
+                for pos in ['right', 'top', 'bottom', 'left']:
+                    ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy= ax.add_patch(patch_cpy)
             
@@ -285,10 +293,12 @@ class MatplotFigure(Widget):
         Return:
             None        
         """ 
-        
+        #use sel,axes limit to avoid graph rescale
+        xmin,xmax = self.axes.get_xlim()
+        ymin,ymax = self.axes.get_ylim()
         #create cross hair cusor
-        self.horizontal_line = self.axes.axhline(color='k', lw=0.8, ls='--', visible=False)
-        self.vertical_line = self.axes.axvline(color='k', lw=0.8, ls='--', visible=False)
+        self.horizontal_line = self.axes.axhline(y=self.ymin,color='k', lw=0.8, ls='--', visible=False)
+        self.vertical_line = self.axes.axvline(x=self.xmin,color='k', lw=0.8, ls='--', visible=False)
         
         #register lines
         self.lines=lines
@@ -338,7 +348,7 @@ class MatplotFigure(Widget):
                 #get only visible lines
                 if line.get_visible():  
                     #get line x,y datas
-                    self.x_cursor, self.y_cursor = line.get_data()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     
                     #check if line is not empty
                     if len(self.x_cursor)!=0:                        
@@ -383,8 +393,12 @@ class MatplotFigure(Widget):
                                 dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
                                 
                                 #store distance
-                                distance.append((dx2 + dy2)**0.5)
-                        
+                                if self.pick_radius_axis == 'both':
+                                    distance.append((dx2 + dy2)**0.5)
+                                if self.pick_radius_axis == 'x':
+                                    distance.append(abs(dx2))
+                                if self.pick_radius_axis == 'y':
+                                    distance.append(abs(dy2))                                   
                         #store all best lines and index
                         good_line.append(line)
                         good_index.append(index)
@@ -395,7 +409,7 @@ class MatplotFigure(Widget):
 
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
-            if np.nanmin(distance)<dp(50):
+            if np.nanmin(distance)<self.pick_minimum_radius:
                 #index of minimum distance
                 if self.compare_xdata:
                     if not self.hover_instance or not hasattr(self.hover_instance,'children_list'):
@@ -405,7 +419,7 @@ class MatplotFigure(Widget):
                     
                     #get datas from closest line
                     line=good_line[idx_best_list[0]]
-                    self.x_cursor, self.y_cursor = line.get_data()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     x = self.x_cursor[good_index[idx_best_list[0]]]
                     y = self.y_cursor[good_index[idx_best_list[0]]] 
 
@@ -485,7 +499,7 @@ class MatplotFigure(Widget):
                     
                     #get datas from closest line
                     line=good_line[idx_best]
-                    self.x_cursor, self.y_cursor = line.get_data()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     x = self.x_cursor[good_index[idx_best]]
                     y = self.y_cursor[good_index[idx_best]]  
                     
@@ -574,6 +588,8 @@ class MatplotFigure(Widget):
                     self.y_hover_data = None
 
     def autoscale(self):
+        if self.disabled:
+            return
         ax=self.axes
         ax.relim(visible_only=self.autoscale_visible_only)
         ax.autoscale_view(tight=self.autoscale_tight,
@@ -1313,7 +1329,7 @@ class MatplotFigure(Widget):
                     self.hover_instance.hover_outside_bound=True
 
             #update hover pos if needed
-            elif self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
+            elif self.hover_instance.show_cursor and self.x_hover_data is not None and self.y_hover_data is not None:        
                 xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1]) + self.y
@@ -1706,6 +1722,9 @@ class MatplotFigure(Widget):
                 current_legend.update_size()
         if self.hover_instance:
             self.hover_instance.figwidth = self.width
+            self.hover_instance.figheight = self.height
+            self.hover_instance.figx = self.x
+            self.hover_instance.figy = self.y
         if self.selector and self.selector.resize_wgt.verts:
             #update selector next frame to have correct position
             Clock.schedule_once(self.update_selector)  

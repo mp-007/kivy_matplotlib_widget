@@ -311,7 +311,12 @@ def _(artist, event):
         if event.compare_xdata:
             ds = abs(xy[0] - data_screen_xy[:,0])
         else:
-            ds = np.hypot(*(xy - data_screen_xy).T)
+            if event.pick_radius_axis == 'both':
+                ds = np.hypot(*(xy - data_screen_xy).T)
+            elif event.pick_radius_axis == 'x':
+                ds = abs(xy[0] - data_screen_xy[:,0])
+            elif event.pick_radius_axis == 'y':  
+                ds = abs(xy[1] - data_screen_xy[:,1])
         try:
             argmin = np.nanargmin(ds)
         except ValueError:  # Raised by nanargmin([nan]).

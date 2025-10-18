@@ -92,6 +92,8 @@ class MatplotFigureScatter(Widget):
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
                                      options = ["None",'rectangle','lasso','ellipse','span','custom'])    
+    pick_minimum_radius=NumericProperty(dp(50))
+    pick_radius_axis = OptionProperty("both", options=["both", "x", "y"])
     
     def on_figure(self, obj, value):
         self.figcanvas = _FigureCanvas(self.figure, self)
@@ -128,6 +130,9 @@ class MatplotFigureScatter(Widget):
         if self.auto_cursor and len(self.figure.axes) > 0:
             self.register_lines(list(self.axes.lines))
             self.register_scatters(list(self.axes.collections))
+
+        if self.selector and self.axes:
+            self.selector.resize_wgt.ax = self.axes
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
@@ -292,10 +297,12 @@ class MatplotFigureScatter(Widget):
         Return:
             None        
         """ 
-        
+        #use sel,axes limit to avoid graph rescale
+        xmin,xmax = self.axes.get_xlim()
+        ymin,ymax = self.axes.get_ylim()
         #create cross hair cusor
-        self.horizontal_line = self.axes.axhline(color='k', lw=0.8, ls='--', visible=False)
-        self.vertical_line = self.axes.axvline(color='k', lw=0.8, ls='--', visible=False)
+        self.horizontal_line = self.axes.axhline(y=self.ymin,color='k', lw=0.8, ls='--', visible=False)
+        self.vertical_line = self.axes.axvline(x=self.xmin,color='k', lw=0.8, ls='--', visible=False)
         
         #register lines
         self.lines=lines
@@ -366,7 +373,7 @@ class MatplotFigureScatter(Widget):
                 #get only visible lines
                 if line.get_visible():  
                     #get line x,y datas
-                    self.x_cursor, self.y_cursor = line.get_data()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     
                     #check if line is not empty
                     if len(self.x_cursor)!=0:                        
@@ -403,7 +410,12 @@ class MatplotFigureScatter(Widget):
                         dy2 = (xy_pixels_mouse[0][1]-xy_pixels[0][1])**2 
                         
                         #store distance
-                        distance.append((dx2 + dy2)**0.5)
+                        if self.pick_radius_axis == 'both':
+                            distance.append((dx2 + dy2)**0.5)
+                        if self.pick_radius_axis == 'x':
+                            distance.append(abs(dx2))
+                        if self.pick_radius_axis == 'y':
+                            distance.append(abs(dy2))  
                         
                         #store all best lines and index
                         good_line.append(line)
@@ -463,7 +475,7 @@ class MatplotFigureScatter(Widget):
 
             #if minimum distance if lower than 50 pixels, get line datas with 
             #minimum distance 
-            if np.nanmin(distance)<dp(50):
+            if np.nanmin(distance)<self.pick_minimum_radius:
                 #index of minimum distance
                 idx_best=np.nanargmin(distance)
                 # print(idx_best)
@@ -489,7 +501,7 @@ class MatplotFigureScatter(Widget):
                 else:
                     #get datas from closest line
                     line=good_line[idx_best]
-                    self.x_cursor, self.y_cursor = line.get_data()
+                    self.x_cursor, self.y_cursor = line.get_xydata().T
                     
                     if self.multi_xdata:
                         x = self.x_cursor[good_index2[idx_best]]
