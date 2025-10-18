@@ -90,6 +90,7 @@ class TestApp(App):
         # self.screen.figure_wgt.current_selector = 'rectangle'
         self.screen.figure_wgt.set_callback(self.callback_selection)
         self.screen.figure_wgt.set_callback_clear(self.callback_clear)
+        self.screen.figure_wgt.selector.resize_wgt.dynamic_callback=True
         
         self.screen.figure_wgt2.figure = figzoom
 
