@@ -30,6 +30,7 @@ import numpy as np
 from kivy.utils import get_color_from_hex
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy_matplotlib_widget.tools.pan_effects import PanEffect
 
 class MatplotlibEvent:
     x=None
@@ -93,7 +94,15 @@ class MatplotFigure(Widget):
     autoscale_tight = BooleanProperty(False)
     desktop_mode = BooleanProperty(True) #change mouse hover for selector widget 
     current_selector = OptionProperty("None",
-                                     options = ["None",'rectangle','lasso','ellipse','span','custom'])    
+                                     options = ["None",'rectangle','lasso','ellipse','span','custom']) 
+    stop_xlimits = ListProperty(None, allownone=True)
+    stop_ylimits = ListProperty(None, allownone=True)
+    velocity_panx = BooleanProperty(False)
+    pan_effect_cls = ObjectProperty(PanEffect, allownone=True)
+    effect_x = ObjectProperty(None, allownone=True)
+    _effect_x_start_x = None
+    _update_effect_bounds_ev = None   
+    last_touch_vel = 0    
     highlight_hover = BooleanProperty(False)
     highlight_prop = DictProperty({})
     highlight_alpha =  NumericProperty(0.2)
@@ -215,6 +224,10 @@ class MatplotFigure(Widget):
         #selector management
         self.kv_post_done = False
         self.selector = None        
+
+        #manage pan effect
+        effect_cls = self.pan_effect_cls
+        self.effect_x = effect_cls(target_widget=self)
 
         #highlight management
         self.last_line = None
@@ -893,12 +906,18 @@ class MatplotFigure(Widget):
                 if self._nav_stack() is None:
                     self.push_current()                
                 self.apply_pan(self.axes, event)
+                
+                if self.velocity_panx:
+                    self.effect_x.update(event.x)
  
             if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                 or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                 if self._nav_stack() is None:
                     self.push_current()                    
-                self.apply_pan(self.axes, event, mode=self.touch_mode)                
+                self.apply_pan(self.axes, event, mode=self.touch_mode) 
+                
+                if self.velocity_panx:
+                    self.effect_x.update(event.x)
  
             elif self.touch_mode=='drag_legend':
                 if self.legend_instance:
@@ -1076,6 +1095,14 @@ class MatplotFigure(Widget):
 
                 elif self.touch_mode=='minmax':
                     self.min_max(event)
+                    
+                elif self.velocity_panx and 'pan' in self.touch_mode:
+                    self._effect_x_start_x = event.x
+                    self.last_touch_vel = event.x
+                    self.effect_x.start(event.x)
+                    self.effect_x.trigger_velocity_update()
+                    self._update_effect_bounds()  
+                        
                 elif self.touch_mode=='selector':
                     pass                     
                     
@@ -1125,8 +1152,17 @@ class MatplotFigure(Widget):
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                     or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y' \
                         or self.touch_mode=='minmax': 
-                        
+    
                 self.push_current()
+                
+                if self.velocity_panx:
+                    self.effect_x.stop(event.x)
+                    ev = self._update_effect_bounds_ev
+                    if ev is None:
+                        ev = self._update_effect_bounds_ev = Clock.create_trigger(
+                            self._update_effect_bounds)
+                    ev()
+                    
                 if self.interactive_axis:
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                         or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
@@ -1179,6 +1215,11 @@ class MatplotFigure(Widget):
         
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim() 
+        
+        if self.velocity_panx:
+            #zoom in the middle because pan is only in x axis
+            xdata = (cur_xlim[1] - cur_xlim[0])*.5 + cur_xlim[0]
+            ydata = (cur_ylim[1] - cur_ylim[0])*.5 + cur_ylim[0]
 
         scale=ax.get_xscale()
         yscale=ax.get_yscale()
@@ -1213,7 +1254,23 @@ class MatplotFigure(Widget):
 
         if self.do_zoom_x:
             if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+                if self.stop_xlimits is not None:
+                    new_min = xdata - new_width * (1 - relx)
+                    new_max = xdata + new_width * (relx)
+                    if new_min > self.stop_xlimits[0] and new_max < self.stop_xlimits[1]:
+                        ax.set_xlim([new_min, new_max])
+                    elif new_min <= self.stop_xlimits[0] and new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([self.stop_xlimits[0],self.stop_xlimits[1]])
+                        ax.figure.canvas.draw_idle()
+                        ax.figure.canvas.flush_events()    
+                        return
+                        
+                    elif new_min <= self.stop_xlimits[0]:
+                        ax.set_xlim([self.stop_xlimits[0], self.stop_xlimits[0] + (new_max-new_min)])
+                    elif new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([ self.stop_xlimits[1] - (new_max-new_min),self.stop_xlimits[1]]) 
+                else:
+                    ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
@@ -1223,7 +1280,21 @@ class MatplotFigure(Widget):
                     new_min, new_max = min_, max_
                     if new_min <= 0. or new_max <= 0.:  # Limit case
                         new_min, new_max = min_, max_ 
-                ax.set_xlim([new_min, new_max])
+                if self.stop_xlimits is not None:
+                    if new_min > self.stop_xlimits[0] and new_max < self.stop_xlimits[1]:
+                        ax.set_xlim([new_min, new_max])
+                    elif new_min <= self.stop_xlimits[0] and new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([self.stop_xlimits[0],self.stop_xlimits[1]])
+                        ax.figure.canvas.draw_idle()
+                        ax.figure.canvas.flush_events()    
+                        return
+                        
+                    elif new_min <= self.stop_xlimits[0]:
+                        ax.set_xlim([self.stop_xlimits[0], self.stop_xlimits[0] + (new_max-new_min)])
+                    elif new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([ self.stop_xlimits[1] - (new_max-new_min),self.stop_xlimits[1]])                     
+                else:    
+                    ax.set_xlim([new_min, new_max])
     
         if self.do_zoom_y:
             if yscale == 'linear':
@@ -1365,12 +1436,20 @@ class MatplotFigure(Widget):
                                    self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits                   
-                if inverted_x:
-                    ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                    
+                if self.stop_xlimits is not None:
+                    if cur_xlim[0] >= self.stop_xlimits[0] and cur_xlim[1] <= self.stop_xlimits[1]:
+                        if inverted_x:
+                            ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                        else:
+                            ax.set_xlim(cur_xlim)                        
                 else:
-                    ax.set_xlim(cur_xlim)
+                    if inverted_x:
+                        ax.set_xlim(cur_xlim[1],cur_xlim[0])
+                    else:
+                        ax.set_xlim(cur_xlim)                
                 
-        if not mode=='pan_x' and not mode=='adjust_x':
+        if not (mode=='pan_x' or self.velocity_panx) and not mode=='adjust_x':
             if mode=='adjust_y':
                 if self.anchor_y is None:
                     midpoint= (cur_ylim[1] + cur_ylim[0])/2
@@ -1420,10 +1499,18 @@ class MatplotFigure(Widget):
                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits 
-                if inverted_y:
-                    ax.set_ylim(cur_ylim[1],cur_ylim[0])
+
+                if self.stop_ylimits is not None:
+                    if cur_ylim[0] >= self.stop_ylimits[0] and cur_ylim[1] <= self.stop_ylimits[1]:
+                        if inverted_y:
+                            ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                        else:
+                            ax.set_ylim(cur_ylim)
                 else:
-                    ax.set_ylim(cur_ylim)
+                    if inverted_y:
+                        ax.set_ylim(cur_ylim[1],cur_ylim[0])
+                    else:
+                        ax.set_ylim(cur_ylim)                    
 
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
@@ -1755,10 +1842,15 @@ class MatplotFigure(Widget):
         y = newcoord[1]
 
         trans = ax.transData.inverted()
-        xdata, ydata = trans.transform_point((x, y))     
-
+        xdata, ydata = trans.transform_point((x, y))   
+        
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
+        
+        if self.velocity_panx:
+            #zoom in the middle because pan is only in x axis
+            xdata = (cur_xlim[1] - cur_xlim[0])*.5 + cur_xlim[0]
+            ydata = (cur_ylim[1] - cur_ylim[0])*.5 + cur_ylim[0]
 
         scale=ax.get_xscale()
         yscale=ax.get_yscale()
@@ -1804,7 +1896,25 @@ class MatplotFigure(Widget):
 
         if self.do_zoom_x:
             if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+                if self.stop_xlimits is not None:
+                    new_min = xdata - new_width * (1 - relx)
+                    new_max = xdata + new_width * (relx)
+                    if new_min > self.stop_xlimits[0] and new_max < self.stop_xlimits[1]:
+                        ax.set_xlim([new_min, new_max])
+                    elif new_min <= self.stop_xlimits[0] and new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([self.stop_xlimits[0],self.stop_xlimits[1]])
+                        ax.figure.canvas.draw_idle()
+                        ax.figure.canvas.flush_events()    
+                        return
+                        
+                    elif new_min <= self.stop_xlimits[0]:
+                        ax.set_xlim([self.stop_xlimits[0], self.stop_xlimits[0] + (new_max-new_min)])
+                    elif new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([ self.stop_xlimits[1] - (new_max-new_min),self.stop_xlimits[1]]) 
+                else:
+                    ax.set_xlim([xdata - new_width * (1 - relx), xdata + new_width * (relx)])
+                
+                
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
@@ -1814,7 +1924,21 @@ class MatplotFigure(Widget):
                     new_min, new_max = min_, max_
                     if new_min <= 0. or new_max <= 0.:  # Limit case
                         new_min, new_max = min_, max_ 
-                ax.set_xlim([new_min, new_max])
+                if self.stop_xlimits is not None:
+                    if new_min > self.stop_xlimits[0] and new_max < self.stop_xlimits[1]:
+                        ax.set_xlim([new_min, new_max])
+                    elif new_min <= self.stop_xlimits[0] and new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([self.stop_xlimits[0],self.stop_xlimits[1]])
+                        ax.figure.canvas.draw_idle()
+                        ax.figure.canvas.flush_events()    
+                        return
+                        
+                    elif new_min <= self.stop_xlimits[0]:
+                        ax.set_xlim([self.stop_xlimits[0], self.stop_xlimits[0] + (new_max-new_min)])
+                    elif new_max >= self.stop_xlimits[1]:
+                        ax.set_xlim([ self.stop_xlimits[1] - (new_max-new_min),self.stop_xlimits[1]])                     
+                else:    
+                    ax.set_xlim([new_min, new_max])
     
         if self.do_zoom_y:
             if yscale == 'linear':
@@ -2025,6 +2149,95 @@ class MatplotFigure(Widget):
             
         self._box_pos = x0, y0
         self._box_size = x1 - x0, y1 - y0
+
+    def _update_effect_x_bounds(self, *args):
+        self.effect_x.value = self._effect_x_start_x
+
+    def _update_effect_bounds(self, *args):
+        self._update_effect_x_bounds()
+        
+    def apply_pan_w_vel(self, val):
+        """ pan method """
+
+        ax = self.axes
+        
+        if len(self._touches)>=1:
+            self.effect_x.reset(val)
+            if self.fast_draw: 
+                #use blit method               
+                if self.background is None:
+                    self.background_patch_copy.set_visible(True)
+                    ax.figure.canvas.draw_idle()
+                    ax.figure.canvas.flush_events()                   
+                    self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                    self.background_patch_copy.set_visible(False)  
+                ax.figure.canvas.restore_region(self.background)                
+               
+                for line in ax.lines:
+                    ax.draw_artist(line)
+                    
+                ax.figure.canvas.blit(ax.bbox)
+                ax.figure.canvas.flush_events() 
+                
+                self.update_hover()
+                
+            else:
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()
+            return
+        
+        trans = ax.transData.inverted()
+        xdata, ydata = trans.transform_point((val-self.pos[0], 0))
+        xpress, ypress = trans.transform_point((self.last_touch_vel-self.pos[0], 0))
+        
+        self.last_touch_vel = val
+        
+        dx = xdata - xpress
+
+        xleft,xright=self.axes.get_xlim()
+        # if xleft>xright:
+        #     return
+
+        cur_xlim=(xleft,xright)
+
+        
+        if self.stop_xlimits is not None:
+            if cur_xlim[0] > self.stop_xlimits[0] and cur_xlim[1] < self.stop_xlimits[1]:
+                cur_xlim -= dx
+                ax.set_xlim(cur_xlim)
+                # self.range = xright-xleft
+            else:
+                self.effect_x.reset(val)
+
+                if cur_xlim[0] <= self.stop_xlimits[0]:
+                    ax.set_xlim(left=self.stop_xlimits[0],right=self.stop_xlimits[0]+xright-xleft)
+                elif cur_xlim[1] >= self.stop_xlimits[1] :
+                    ax.set_xlim(left=self.stop_xlimits[1] - (xright-xleft),right=self.stop_xlimits[1])
+        else:
+            cur_xlim -= dx
+            ax.set_xlim(cur_xlim)
+
+        if self.fast_draw: 
+            #use blit method               
+            if self.background is None:
+                self.background_patch_copy.set_visible(True)
+                ax.figure.canvas.draw_idle()
+                ax.figure.canvas.flush_events()                   
+                self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
+                self.background_patch_copy.set_visible(False)  
+            ax.figure.canvas.restore_region(self.background)                
+           
+            for line in ax.lines:
+                ax.draw_artist(line)
+                
+            ax.figure.canvas.blit(ax.bbox)
+            ax.figure.canvas.flush_events() 
+            
+            self.update_hover()
+            
+        else:
+            ax.figure.canvas.draw_idle()
+            ax.figure.canvas.flush_events()
 
 class _FigureCanvas(FigureCanvasAgg):
     """Internal AGG Canvas"""
