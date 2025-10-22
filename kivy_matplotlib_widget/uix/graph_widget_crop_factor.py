@@ -38,7 +38,7 @@ class MatplotFigureCropFactor(Widget):
     _box_pos = ListProperty([0, 0])
     _box_size = ListProperty([0, 0])
     _img_texture = ObjectProperty(None)
-    _alpha_box = NumericProperty(0)   
+    _alpha_box = NumericProperty(0)
     _bitmap = None
     _pressed = False
     do_update=False
@@ -53,32 +53,32 @@ class MatplotFigureCropFactor(Widget):
     pos_x_rect_hor=NumericProperty(0)
     pos_y_rect_hor=NumericProperty(0)
     pos_x_rect_ver=NumericProperty(0)
-    pos_y_rect_ver=NumericProperty(0)  
+    pos_y_rect_ver=NumericProperty(0)
     invert_rect_ver = BooleanProperty(False)
     invert_rect_hor = BooleanProperty(False)
     legend_do_scroll_x = BooleanProperty(True)
     legend_do_scroll_y = BooleanProperty(True)
-    interactive_axis = BooleanProperty(False) 
+    interactive_axis = BooleanProperty(False)
     do_pan_x = BooleanProperty(True)
-    do_pan_y = BooleanProperty(True)    
+    do_pan_y = BooleanProperty(True)
     do_zoom_x = BooleanProperty(True)
-    do_zoom_y = BooleanProperty(True)  
+    do_zoom_y = BooleanProperty(True)
     fast_draw = BooleanProperty(True) #True will don't draw axis
     xsorted = BooleanProperty(False) #to manage x sorted data
     minzoom = NumericProperty(dp(20))
-    compare_xdata = BooleanProperty(False)   
+    compare_xdata = BooleanProperty(False)
     hover_instance = ObjectProperty(None, allownone=True)
     nearest_hover_instance = ObjectProperty(None, allownone=True)
     compare_hover_instance = ObjectProperty(None, allownone=True)
-    disable_mouse_scrolling = BooleanProperty(False) 
-    disable_double_tap = BooleanProperty(False) 
+    disable_mouse_scrolling = BooleanProperty(False)
+    disable_double_tap = BooleanProperty(False)
     text_instance = None
     auto_zoom = BooleanProperty(False)
     zoom_angle_detection=NumericProperty(15) #in degree
     auto_cursor = BooleanProperty(False)
     autoscale_visible_only = BooleanProperty(True)
     autoscale_axis = OptionProperty("both", options=["both", "x", "y"])
-    autoscale_tight = BooleanProperty(False) 
+    autoscale_tight = BooleanProperty(False)
     scale_min = NumericProperty(0.01)
     scale_max = NumericProperty(1e20)
 
@@ -87,7 +87,7 @@ class MatplotFigureCropFactor(Widget):
     x_cursor_label = StringProperty("x")
     y_cursor_label = StringProperty("y")
     show_cursor = BooleanProperty(False)
-    
+
     default_dpi=None
     crop_factor = NumericProperty(2.2)
 
@@ -95,7 +95,7 @@ class MatplotFigureCropFactor(Widget):
         if self.default_dpi is None:
             #get default matplotlib figure dpi
             self.default_dpi = self.figure.get_dpi()
-            
+
         self.figure.dpi = self.default_dpi / self.crop_factor
         self.figcanvas = _FigureCanvas(self.figure, self)
         self.figcanvas._isDrawn = False
@@ -138,13 +138,13 @@ class MatplotFigureCropFactor(Widget):
         self.text=None
         self.cursor_xaxis_formatter=None #used matplotlib formatter to display x cursor value
         self.cursor_yaxis_formatter=None #used matplotlib formatter to display y cursor value
-        
+
         # clear touches on touch up
         self._touches = []
         self._last_touch_pos = {}
-        
+
         #pan management
-        self.first_touch_pan = None        
+        self.first_touch_pan = None
 
         # background
         self.background = None
@@ -159,7 +159,7 @@ class MatplotFigureCropFactor(Widget):
             #manage matplotlib version with no Stack (replace by _Stack)
             self._nav_stack = cbook._Stack()
         else:
-            self._nav_stack = cbook.Stack()  
+            self._nav_stack = cbook.Stack()
 
         self.bind(size=self._onSize)
 
@@ -168,11 +168,11 @@ class MatplotFigureCropFactor(Widget):
             if self.default_dpi is None:
                 #get default matplotlib figure dpi
                 self.default_dpi = self.figure.get_dpi()
-    
+
             self.figure.dpi = self.default_dpi / value
-            
+
             self.figcanvas.draw()
-        
+
     def transform_eval(self, x, axis):
         custom_transform = axis.get_transform()
         return custom_transform.transform_non_affine(np.array([x]))[0]
@@ -325,28 +325,28 @@ class MatplotFigureCropFactor(Widget):
         event_pos = event.pos[0] / self.crop_factor, event.pos[1] / self.crop_factor
 
         if len(self._touches) == self.translation_touches:
-            
+
             if self.touch_mode=='pan':
                 if self._nav_stack() is None:
-                    self.push_current()                
+                    self.push_current()
                 self.apply_pan(self.axes, event)
- 
+
             if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                 or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y':
                 if self._nav_stack() is None:
-                    self.push_current()                    
-                self.apply_pan(self.axes, event, mode=self.touch_mode)                
-            
+                    self.push_current()
+                self.apply_pan(self.axes, event, mode=self.touch_mode)
+
             elif self.touch_mode=='zoombox':
                 if self._nav_stack() is None:
-                    self.push_current()                
+                    self.push_current()
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 #in case x_init is not create
                 if not hasattr(self,'x_init'):
                     self.x_init = event.x
                     self.y_init = real_y
                 self.draw_box(event, self.x_init,self.y_init, event.x, real_y)
-                
+
             changed = True
 
         #note: avoid zoom in/out on touch mode zoombox
@@ -414,7 +414,7 @@ class MatplotFigureCropFactor(Widget):
                     real_x, real_y = x - self.pos[0], y - self.pos[1]
                     self.x_init=x
                     self.y_init=real_y
-                    self.draw_box(event, x, real_y, x, real_y)                 
+                    self.draw_box(event, x, real_y, x, real_y)
                 event.grab(self)
                 self._touches.append(event)
                 self._last_touch_pos[event] = event.pos[0] / self.crop_factor, event.pos[1] / self.crop_factor
@@ -455,8 +455,8 @@ class MatplotFigureCropFactor(Widget):
             if self.touch_mode=='pan' or self.touch_mode=='zoombox' or \
                 self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
                     or self.touch_mode=='adjust_x' or self.touch_mode=='adjust_y' \
-                        or self.touch_mode=='minmax': 
-                        
+                        or self.touch_mode=='minmax':
+
                 self.push_current()
                 if self.interactive_axis:
                     if self.touch_mode=='pan_x' or self.touch_mode=='pan_y' \
@@ -466,31 +466,31 @@ class MatplotFigureCropFactor(Widget):
 
         x, y = event.x, event.y
         if abs(self._box_size[0]) > 1 or abs(self._box_size[1]) > 1 or self.touch_mode=='zoombox':
-            self.reset_box()  
+            self.reset_box()
             if not self.collide_point(x, y) and self.do_update:
                 #update axis lim if zoombox is used and touch outside widget
-                self.update_lim()            
+                self.update_lim()
                 ax=self.axes
                 ax.figure.canvas.draw_idle()
-                ax.figure.canvas.flush_events() 
+                ax.figure.canvas.flush_events()
                 return True
-            
+
         # stop propagating if its within our bounds
         if self.collide_point(x, y) and self.figure:
             self._pressed = False
 
             if self.do_update:
-                self.update_lim()            
+                self.update_lim()
 
             self.anchor_x=None
             self.anchor_y=None
-            
+
             ax=self.axes
             self.background=None
             self.show_compare_cursor=True
             ax.figure.canvas.draw_idle()
-            ax.figure.canvas.flush_events()                           
-            
+            ax.figure.canvas.flush_events()
+
             return True
 
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0), new_line=None):
@@ -573,29 +573,29 @@ class MatplotFigureCropFactor(Widget):
                                               (event.y - self.pos[1]) / self.crop_factor))
         xpress, ypress = trans.transform_point(((self._last_touch_pos[event][0] - self.pos[0] / self.crop_factor),
                                                 (self._last_touch_pos[event][1] - self.pos[1] / self.crop_factor)))
-        
+
         # trans = ax.transData.inverted()
         # xdata, ydata = trans.transform_point((event.x-self.pos[0], event.y-self.pos[1]))
         # xpress, ypress = trans.transform_point((self._last_touch_pos[event][0]-self.pos[0], self._last_touch_pos[event][1]-self.pos[1]))
-        
+
         scale=ax.get_xscale()
         yscale=ax.get_yscale()
-        
+
         if scale == 'linear':
             dx = xdata - xpress
         else:
             dx = self.transform_eval(xdata,ax.xaxis) - \
                 self.transform_eval(xpress,ax.xaxis)
-                
+
         if yscale == 'linear':
             dy = ydata - ypress
         else:
             dy = self.transform_eval(ydata,ax.yaxis) - \
-                self.transform_eval(ypress,ax.yaxis)        
+                self.transform_eval(ypress,ax.yaxis)
 
         xleft,xright=self.axes.get_xlim()
         ybottom,ytop=self.axes.get_ylim()
-        
+
         #check inverted data
         inverted_x = False
         if xleft>xright:
@@ -605,11 +605,11 @@ class MatplotFigureCropFactor(Widget):
             cur_xlim=(xleft,xright)
         inverted_y = False
         if ybottom>ytop:
-            inverted_y=True 
+            inverted_y=True
             cur_ylim=(ytop,ybottom)
         else:
-            cur_ylim=(ybottom,ytop) 
-        
+            cur_ylim=(ybottom,ytop)
+
         if self.interactive_axis and self.touch_mode=='pan' and not self.first_touch_pan=='pan':
             if (ydata < cur_ylim[0] and not inverted_y) or (ydata > cur_ylim[1] and inverted_y):
                 left_anchor_zone= (cur_xlim[1] - cur_xlim[0])*.2 + cur_xlim[0]
@@ -621,16 +621,16 @@ class MatplotFigureCropFactor(Widget):
                 self.touch_mode = mode
             elif (xdata < cur_xlim[0] and not inverted_x) or (xdata > cur_xlim[1] and inverted_x):
                 bottom_anchor_zone=  (cur_ylim[1] - cur_ylim[0])*.2 + cur_ylim[0]
-                top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]               
+                top_anchor_zone= (cur_ylim[1] - cur_ylim[0])*.8 + cur_ylim[0]
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
                     mode = 'adjust_y'
                 else:
-                    mode= 'pan_y' 
+                    mode= 'pan_y'
                 self.touch_mode = mode
             else:
                 self.touch_mode = 'pan'
 
-        if not mode=='pan_y' and not mode=='adjust_y':             
+        if not mode=='pan_y' and not mode=='adjust_y':
             if mode=='adjust_x':
                 if self.anchor_x is None:
                     midpoint= (cur_xlim[1] + cur_xlim[0])/2
@@ -638,16 +638,16 @@ class MatplotFigureCropFactor(Widget):
                         self.anchor_x='left'
                     else:
                         self.anchor_x='right'
-                if self.anchor_x=='left':                
+                if self.anchor_x=='left':
                     if xdata> cur_xlim[0]:
                         if scale == 'linear':
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]
                             except (ValueError, OverflowError):
-                                cur_xlim = cur_xlim  # Keep previous limits  
+                                cur_xlim = cur_xlim  # Keep previous limits
 
                         if self.stop_xlimits is not None:
                             if cur_xlim[0] > self.stop_xlimits[0] and cur_xlim[1] < self.stop_xlimits[1]:
@@ -655,7 +655,7 @@ class MatplotFigureCropFactor(Widget):
                                     ax.set_xlim(cur_xlim[1], None)
                                 else:
                                     ax.set_xlim(None, cur_xlim[1])
-                        else:                                
+                        else:
                             if inverted_x:
                                 ax.set_xlim(cur_xlim[1],None)
                             else:
@@ -667,17 +667,17 @@ class MatplotFigureCropFactor(Widget):
                         else:
                             try:
                                 cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
-                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
+                                           self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]
                             except (ValueError, OverflowError):
-                                cur_xlim = cur_xlim  # Keep previous limits 
-                                
+                                cur_xlim = cur_xlim  # Keep previous limits
+
                         if self.stop_xlimits is not None:
                             if cur_xlim[0] > self.stop_xlimits[0] and cur_xlim[1] < self.stop_xlimits[1]:
                                 if inverted_x:
                                     ax.set_xlim(None, cur_xlim[0])
                                 else:
                                     ax.set_xlim(cur_xlim[0], None)
-                        else:                                
+                        else:
                             if inverted_x:
                                 ax.set_xlim(None,cur_xlim[0])
                             else:
@@ -688,10 +688,10 @@ class MatplotFigureCropFactor(Widget):
                 else:
                     try:
                         cur_xlim = [self.inv_transform_eval((self.transform_eval(cur_xlim[0],ax.xaxis) - dx),ax.xaxis),
-                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]  
+                                   self.inv_transform_eval((self.transform_eval(cur_xlim[1],ax.xaxis) - dx),ax.xaxis)]
                     except (ValueError, OverflowError):
-                        cur_xlim = cur_xlim  # Keep previous limits  
-                        
+                        cur_xlim = cur_xlim  # Keep previous limits
+
                 if self.stop_xlimits is not None:
                     if cur_xlim[0] < self.stop_xlimits[0] or cur_xlim[1] > self.stop_xlimits[1]:
                         side = 'left' if (xleft - cur_xlim[0]) > 0 else 'right'
@@ -704,12 +704,12 @@ class MatplotFigureCropFactor(Widget):
                         ax.set_xlim(cur_xlim[1], cur_xlim[0])
                     else:
                         ax.set_xlim(cur_xlim)
-                else:                        
+                else:
                     if inverted_x:
                         ax.set_xlim(cur_xlim[1],cur_xlim[0])
                     else:
                         ax.set_xlim(cur_xlim)
-                
+
         if not mode=='pan_x' and not mode=='adjust_x':
             if mode=='adjust_y':
                 if self.anchor_y is None:
@@ -717,20 +717,20 @@ class MatplotFigureCropFactor(Widget):
                     if ydata>midpoint:
                         self.anchor_y='top'
                     else:
-                        self.anchor_y='bottom'               
-                
+                        self.anchor_y='bottom'
+
                 if self.anchor_y=='top':
                     if ydata> cur_ylim[0]:
                         if yscale == 'linear':
                             cur_ylim -= dy
-                        
+
                         else:
                             try:
                                 cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
                                            self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
-                                cur_ylim = cur_ylim  # Keep previous limits                        
-                        
+                                cur_ylim = cur_ylim  # Keep previous limits
+
                         if inverted_y:
                             ax.set_ylim(cur_ylim[1],None)
                         else:
@@ -739,27 +739,27 @@ class MatplotFigureCropFactor(Widget):
                     if ydata< cur_ylim[1]:
                         if yscale == 'linear':
                             cur_ylim -= dy
-                        
+
                         else:
                             try:
                                 cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
                                            self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                             except (ValueError, OverflowError):
-                                cur_ylim = cur_ylim  # Keep previous limits 
+                                cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
-                            ax.set_ylim(None,cur_ylim[0]) 
+                            ax.set_ylim(None,cur_ylim[0])
                         else:
                             ax.set_ylim(cur_ylim[0],None)
-            else:            
+            else:
                 if yscale == 'linear':
-                    cur_ylim -= dy 
-                
+                    cur_ylim -= dy
+
                 else:
                     try:
                         cur_ylim = [self.inv_transform_eval((self.transform_eval(cur_ylim[0],ax.yaxis) - dy),ax.yaxis),
                                    self.inv_transform_eval((self.transform_eval(cur_ylim[1],ax.yaxis) - dy),ax.yaxis)]
                     except (ValueError, OverflowError):
-                        cur_ylim = cur_ylim  # Keep previous limits 
+                        cur_ylim = cur_ylim  # Keep previous limits
                 if inverted_y:
                     ax.set_ylim(cur_ylim[1],cur_ylim[0])
                 else:
@@ -769,27 +769,27 @@ class MatplotFigureCropFactor(Widget):
         if self.first_touch_pan is None:
             self.first_touch_pan=self.touch_mode
 
-        if self.fast_draw: 
-            #use blit method               
+        if self.fast_draw:
+            #use blit method
             if self.background is None:
                 self.background_patch_copy.set_visible(True)
                 ax.figure.canvas.draw_idle()
-                ax.figure.canvas.flush_events()                   
+                ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(ax.figure.bbox)
-                self.background_patch_copy.set_visible(False)  
-            ax.figure.canvas.restore_region(self.background)                
-           
+                self.background_patch_copy.set_visible(False)
+            ax.figure.canvas.restore_region(self.background)
+
             for line in ax.lines:
                 ax.draw_artist(line)
-                
+
             ax.figure.canvas.blit(ax.bbox)
-            ax.figure.canvas.flush_events() 
-            
+            ax.figure.canvas.flush_events()
+
             # self.update_hover()
-            
+
         else:
             ax.figure.canvas.draw_idle()
-            ax.figure.canvas.flush_events()        
+            ax.figure.canvas.flush_events()
 
     def zoom_factory(self, event, ax, base_scale=1.1):
         """ zoom with scrolling mouse method """
@@ -896,10 +896,10 @@ class MatplotFigureCropFactor(Widget):
         if self.text:
             self.set_cross_hair_visible(False)
         self.axes.figure.canvas.draw_idle()
-        self.axes.figure.canvas.flush_events()                   
+        self.axes.figure.canvas.flush_events()
         self.background = self.axes.figure.canvas.copy_from_bbox(self.axes.figure.bbox)
         if self.text:
-            self.set_cross_hair_visible(True)         
+            self.set_cross_hair_visible(True)
 
     def _draw(self, ax):
         if self.fast_draw:
@@ -942,35 +942,35 @@ class MatplotFigureCropFactor(Widget):
             if self.hover_instance:
                 ax=self.axes
                 self.hover_instance.xmin_line = float(ax.bbox.bounds[0]) *self.crop_factor  + self.x
-                self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) *self.crop_factor + self.x              
+                self.hover_instance.xmax_line = float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) *self.crop_factor + self.x
                 self.hover_instance.ymin_line = float(ax.bbox.bounds[1])*self.crop_factor  + self.y
                 self.hover_instance.ymax_line = float(ax.bbox.bounds[1] + ax.bbox.bounds[3])*self.crop_factor
-                xy_pos = ax.transData.transform([(x,y)]) 
+                xy_pos = ax.transData.transform([(x,y)])
                 self.x_hover_data = x
                 self.y_hover_data = y
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0])*self.crop_factor + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1])*self.crop_factor + self.y
                 self.hover_instance.show_cursor=True
-                    
+
                 if self.cursor_xaxis_formatter:
                     x = self.cursor_xaxis_formatter.format_data(x)
                 else:
                     x = ax.xaxis.get_major_formatter().format_data_short(x)
                 if self.cursor_yaxis_formatter:
-                    y = self.cursor_yaxis_formatter.format_data(y) 
+                    y = self.cursor_yaxis_formatter.format_data(y)
                 else:
                     y = ax.yaxis.get_major_formatter().format_data_short(y)
                 self.hover_instance.label_x_value=f"{x}"
                 self.hover_instance.label_y_value=f"{y}"
-                
+
                 if self.hover_instance.x_hover_pos>self.x+(self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0])*self.crop_factor or \
                     self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0]*self.crop_factor or \
                     self.hover_instance.y_hover_pos>self.y+(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3])*self.crop_factor or \
-                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]*self.crop_factor:               
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]*self.crop_factor:
                     self.hover_instance.hover_outside_bound=True
                 else:
-                    self.hover_instance.hover_outside_bound=False 
-            
+                    self.hover_instance.hover_outside_bound=False
+
             elif self.text:
 
                 self.horizontal_line.set_ydata([y])
@@ -981,11 +981,11 @@ class MatplotFigureCropFactor(Widget):
         elif self.show_cursor:
             if self.hover_instance:
                 self.hover_instance.x_hover_pos=self.x
-                self.hover_instance.y_hover_pos=self.y      
+                self.hover_instance.y_hover_pos=self.y
                 self.hover_instance.show_cursor=False
                 self.x_hover_data = None
                 self.y_hover_data = None
-            elif self.text:            
+            elif self.text:
                 if self.text._text != ' ':
                     self.set_cross_hair_visible(False)
                     self._draw(self.axes)
@@ -994,33 +994,33 @@ class MatplotFigureCropFactor(Widget):
         """ update hover on fast draw (if exist)"""
         if self.hover_instance:
             #update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:        
-                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)]) 
+            if self.hover_instance.show_cursor and self.x_hover_data and self.y_hover_data:
+                xy_pos = self.axes.transData.transform([(self.x_hover_data,self.y_hover_data)])
                 self.hover_instance.x_hover_pos=float(xy_pos[0][0])*self.crop_factor + self.x
                 self.hover_instance.y_hover_pos=float(xy_pos[0][1])*self.crop_factor + self.y
-     
+
                 self.hover_instance.xmin_line = float(self.axes.bbox.bounds[0]) *self.crop_factor  + self.x
-                self.hover_instance.xmax_line = float(self.axes.bbox.bounds[0] + self.axes.bbox.bounds[2]) *self.crop_factor + self.x            
+                self.hover_instance.xmax_line = float(self.axes.bbox.bounds[0] + self.axes.bbox.bounds[2]) *self.crop_factor + self.x
                 self.hover_instance.ymin_line = float(self.axes.bbox.bounds[1])*self.crop_factor  + self.y
                 self.hover_instance.ymax_line = float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3])*self.crop_factor
-                
+
                 if self.hover_instance.x_hover_pos>self.x+(self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0])*self.crop_factor or \
                     self.hover_instance.x_hover_pos<self.x+self.axes.bbox.bounds[0]*self.crop_factor or \
                     self.hover_instance.y_hover_pos>self.y+(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3])*self.crop_factor or \
-                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]*self.crop_factor:               
+                    self.hover_instance.y_hover_pos<self.y+self.axes.bbox.bounds[1]*self.crop_factor:
                     self.hover_instance.hover_outside_bound=True
                 else:
-                    self.hover_instance.hover_outside_bound=False                
+                    self.hover_instance.hover_outside_bound=False
     def draw_box(self, event, x0, y0, x1, y1) -> None:
         """ Draw zoombox method
-        
+
         Args:
             event: touch kivy event
             x0: x coordonnate init
             x1: y coordonnate of move touch
             y0: y coordonnate init
             y1: x coordonnate of move touch
-            
+
         Return:
             None
         """
@@ -1028,34 +1028,34 @@ class MatplotFigureCropFactor(Widget):
         # Kivy coords
         y0 = pos_y + y0
         y1 = pos_y + y1
-        
+
         if abs(y1-y0)>dp(5) or abs(x1-x0)>dp(5):
-            self._alpha_box=0.3   
+            self._alpha_box=0.3
             self._alpha_rect=0
-        
+
         trans = self.axes.transData.inverted()
-        # xdata, ydata = trans.transform_point((event.x-pos_x, event.y-pos_y)) 
+        # xdata, ydata = trans.transform_point((event.x-pos_x, event.y-pos_y))
         xdata, ydata = trans.transform_point(((event.x-pos_x) / self.crop_factor, (event.y-pos_y) / self.crop_factor))
 
         xleft,xright=self.axes.get_xlim()
         ybottom,ytop=self.axes.get_ylim()
-        
+
         xmax = max(xleft,xright)
         xmin = min(xleft,xright)
         ymax = max(ybottom,ytop)
         ymin = min(ybottom,ytop)
-        
+
         #check inverted data
         inverted_x = False
         if xleft>xright:
             inverted_x=True
         inverted_y = False
         if ybottom>ytop:
-            inverted_y=True        
+            inverted_y=True
 
-        # x0data, y0data = trans.transform_point((x0-pos_x, y0-pos_y)) 
+        # x0data, y0data = trans.transform_point((x0-pos_x, y0-pos_y))
         x0data, y0data = trans.transform_point(((x0-pos_x) / self.crop_factor, (y0-pos_y) / self.crop_factor))
-         
+
         if x0data>xmax or x0data<xmin or y0data>ymax or y0data<ymin:
             return
 
@@ -1069,9 +1069,9 @@ class MatplotFigureCropFactor(Widget):
         if xdata>xmax:
             x0_max = self.axes.transData.transform([(xmax,ymin)])
             if (x1>x0 and not inverted_x) or (x1<x0 and inverted_x):
-                x1=x0_max[0][0]*self.crop_factor+pos_x 
+                x1=x0_max[0][0]*self.crop_factor+pos_x
             else:
-                x0=x0_max[0][0] *self.crop_factor                 
+                x0=x0_max[0][0] *self.crop_factor
 
         if ydata<ymin:
             y1_min = self.axes.transData.transform([(xmin,ymin)])
@@ -1086,11 +1086,11 @@ class MatplotFigureCropFactor(Widget):
                 y1=y0_max[0][1]*self.crop_factor+pos_y
             else:
                 y0=y0_max[0][1]*self.crop_factor+pos_y
-                
+
         if abs(x1-x0)<dp(20) and abs(y1-y0)>self.minzoom:
             self.pos_x_rect_ver=x0
-            self.pos_y_rect_ver=y0   
-            
+            self.pos_y_rect_ver=y0
+
             x1_min = self.axes.transData.transform([(xmin,ymin)])
             x0=x1_min[0][0]*self.crop_factor+pos_x
 
@@ -1099,22 +1099,22 @@ class MatplotFigureCropFactor(Widget):
 
             self._alpha_ver=1
             self._alpha_hor=0
-                
+
         elif abs(y1-y0)<dp(20) and abs(x1-x0)>self.minzoom:
             self.pos_x_rect_hor=x0
-            self.pos_y_rect_hor=y0  
+            self.pos_y_rect_hor=y0
 
             y1_min = self.axes.transData.transform([(xmin,ymin)])
             y0=y1_min[0][1]*self.crop_factor+pos_y
-             
+
             y0_max = self.axes.transData.transform([(xmax,ymax)])
-            y1=y0_max[0][1]*self.crop_factor+pos_y         
+            y1=y0_max[0][1]*self.crop_factor+pos_y
 
             self._alpha_hor=1
             self._alpha_ver=0
-                        
+
         else:
-            self._alpha_hor=0   
+            self._alpha_hor=0
             self._alpha_ver=0
 
         if x1>x0:
@@ -1125,20 +1125,20 @@ class MatplotFigureCropFactor(Widget):
             self.invert_rect_hor=False
         else:
             self.invert_rect_hor=True
-            
+
         self._box_pos = x0, y0
         self._box_size = x1 - x0, y1 - y0
-        
+
     def update_lim(self):
         """ update axis lim if zoombox is used"""
         ax=self.axes
 
         self.do_update=False
-        
+
         #check if inverted axis
         xleft,xright=self.axes.get_xlim()
         ybottom,ytop=self.axes.get_ylim()
-        
+
         if xright>xleft:
             ax.set_xlim(left=min(self.x0_box,self.x1_box),right=max(self.x0_box,self.x1_box))
         else:
@@ -1152,10 +1152,10 @@ class MatplotFigureCropFactor(Widget):
         """ reset zoombox and apply zoombox limit if zoombox option if selected"""
         if min(abs(self._box_size[0]),abs(self._box_size[1]))>self.minzoom:
             trans = self.axes.transData.inverted()
-            self.x0_box, self.y0_box = trans.transform_point(((self._box_pos[0]-self.pos[0])/ self.crop_factor, (self._box_pos[1]-self.pos[1])/ self.crop_factor)) 
+            self.x0_box, self.y0_box = trans.transform_point(((self._box_pos[0]-self.pos[0])/ self.crop_factor, (self._box_pos[1]-self.pos[1])/ self.crop_factor))
             self.x1_box, self.y1_box = trans.transform_point(((self._box_size[0]+self._box_pos[0]-self.pos[0])/ self.crop_factor, (self._box_size[1]+self._box_pos[1]-self.pos[1])/ self.crop_factor))
             self.do_update=True
-            
+
         self._box_size = 0, 0
         self._box_pos = 0, 0
         self._alpha_box=0
@@ -1163,8 +1163,8 @@ class MatplotFigureCropFactor(Widget):
         self._pos_x_rect_hor = 0
         self._pos_y_rect_hor = 0
         self._pos_x_rect_ver = 0
-        self._pos_y_rect_ver = 0 
-        self._alpha_hor=0 
+        self._pos_y_rect_ver = 0
+        self._alpha_hor=0
         self._alpha_ver=0
         self.invert_rect_hor = False
         self.invert_rect_ver = False
@@ -1207,7 +1207,7 @@ class _FigureCanvas(FigureCanvasAgg):
 
 Builder.load_string('''
 <MatplotFigureCropFactor>
-            
+
     canvas:
         Color:
             rgba: (1, 1, 1, 1)
@@ -1226,8 +1226,8 @@ Builder.load_string('''
                 dp(1) if root.invert_rect_ver else -dp(1), \
                 dp(1) if root.invert_rect_hor else -dp(1), \
                 dp(1) if root.invert_rect_ver else -dp(1)
-                
-    canvas.after:            
+
+    canvas.after:
         #horizontal rectangle left
 		Color:
 			rgba:0, 0, 0, self._alpha_hor
@@ -1235,7 +1235,7 @@ Builder.load_string('''
 			width: dp(1)
 			rectangle:
 				(self.pos_x_rect_hor+dp(1) if root.invert_rect_ver \
-                 else self.pos_x_rect_hor-dp(4),self.pos_y_rect_hor-dp(20), dp(4),dp(40))            
+                 else self.pos_x_rect_hor-dp(4),self.pos_y_rect_hor-dp(20), dp(4),dp(40))
 
         #horizontal rectangle right
 		Color:
@@ -1244,7 +1244,7 @@ Builder.load_string('''
 			width: dp(1)
 			rectangle:
 				(self.pos_x_rect_hor-dp(4)+self._box_size[0] if root.invert_rect_ver \
-                 else self.pos_x_rect_hor+dp(1)+self._box_size[0], self.pos_y_rect_hor-dp(20), dp(4),dp(40))             
+                 else self.pos_x_rect_hor+dp(1)+self._box_size[0], self.pos_y_rect_hor-dp(20), dp(4),dp(40))
 
         #vertical rectangle bottom
 		Color:
@@ -1253,7 +1253,7 @@ Builder.load_string('''
 			width: dp(1)
 			rectangle:
 				(self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver+dp(1) if root.invert_rect_hor else \
-                 self.pos_y_rect_ver-dp(4), dp(40),dp(4))            
+                 self.pos_y_rect_ver-dp(4), dp(40),dp(4))
 
         #vertical rectangle top
 		Color:
@@ -1263,6 +1263,6 @@ Builder.load_string('''
 			rectangle:
 				(self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver-dp(4)+self._box_size[1] \
                  if root.invert_rect_hor else self.pos_y_rect_ver+dp(1)+self._box_size[1], \
-                 dp(40),dp(4))            
+                 dp(40),dp(4))
 ''')
 FigureCanvas = _FigureCanvas
