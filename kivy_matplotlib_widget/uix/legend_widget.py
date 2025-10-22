@@ -62,7 +62,7 @@ class LegendGestures(Widget):
     # in self._persistent_pos[] and use that when the current value is
     # required.
 
-    ### touch down ###
+    # touch down
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
@@ -97,7 +97,7 @@ class LegendGestures(Widget):
 
         return super().on_touch_down(touch)
 
-    ### touch up ###
+    # touch up
     def on_touch_up(self, touch):
         if touch in self._touches:
 
@@ -120,7 +120,7 @@ class LegendGestures(Widget):
     ############################################
     #
 
-    ### single tap clock ###
+    # single tap clock
     def _single_tap_event(self, touch, x, y, dt):
         if self._gesture_state == 'Dont Know':
             if not self._long_press_schedule:
@@ -133,12 +133,12 @@ class LegendGestures(Widget):
             Clock.unschedule(self._single_tap_schedule)
             self._single_tap_schedule = None
 
-    ### Every result is in the self frame ###
+    # Every result is in the self frame
 
     def _pos_to_widget(self, x, y):
         return (x - self.x, y - self.y)
 
-    ### gesture utilities ###
+    # gesture utilities
 
     def _remove_gesture(self, touch):
         if touch and len(self._touches):

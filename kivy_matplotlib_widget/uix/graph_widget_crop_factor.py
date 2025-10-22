@@ -468,10 +468,10 @@ class MatplotFigureCropFactor(Widget):
             event.ungrab(self)
             del self._last_touch_pos[event]
             self._touches.remove(event)
-            if self.touch_mode == 'pan' or self.touch_mode == 'zoombox' or \
-                self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' \
-                    or self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y' \
-            or self.touch_mode == 'minmax':
+            if (self.touch_mode == 'pan' or self.touch_mode == 'zoombox' or
+                    self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' or
+                    self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y' or
+                    self.touch_mode == 'minmax'):
 
                 self.push_current()
                 if self.interactive_axis:
