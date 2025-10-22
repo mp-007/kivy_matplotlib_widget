@@ -1,29 +1,21 @@
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.utils import get_color_from_hex
-from kivy.clock import Clock
-from kivy.config import Config
-from kivy.utils import platform
-from functools import partial
-
-from kivy.properties import (
-    StringProperty,
-    ObjectProperty,
-    NumericProperty,
-    ListProperty,
-    BooleanProperty,
-    ColorProperty
-    )
-
-from kivy.lang import Builder
-from kivy.uix.widget import Widget
-from kivy.metrics import dp
-from matplotlib.colors import to_hex
-import matplotlib as mpl
-from math import ceil
-import numpy as np
 import copy
 import re
+from functools import partial
+from math import ceil
+
+import matplotlib as mpl
+import numpy as np
+from kivy.clock import Clock
+from kivy.config import Config
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.properties import (BooleanProperty, ColorProperty, ListProperty,
+                             NumericProperty, ObjectProperty, StringProperty)
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.widget import Widget
+from kivy.utils import get_color_from_hex, platform
+from matplotlib.colors import to_hex
 
 
 class LegendGestures(Widget):

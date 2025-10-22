@@ -5,10 +5,10 @@ mplcursors project
 https://github.com/anntzer/mplcursors
 """
 
-from collections.abc import Iterable
-from contextlib import suppress
 import copy
 import weakref
+from collections.abc import Iterable
+from contextlib import suppress
 from weakref import WeakKeyDictionary
 
 import matplotlib as mpl
@@ -17,6 +17,7 @@ from matplotlib.container import Container
 from matplotlib.figure import Figure
 
 import kivy_matplotlib_widget.tools.pick_info as pick_info
+
 
 def _get_rounded_intersection_area(bbox_1, bbox_2):
     """Compute the intersection area between two bboxes rounded to 8 digits."""
