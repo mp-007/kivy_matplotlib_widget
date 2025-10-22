@@ -1,9 +1,15 @@
 
-from kivy_matplotlib_widget.uix.hover_widget import add_hover, BaseHoverFloatLayout, TagCompareHover, PlotlyHover
-from kivy.properties import ColorProperty, NumericProperty, StringProperty, BooleanProperty
+from kivy_matplotlib_widget.uix.hover_widget import (
+    add_hover, BaseHoverFloatLayout, TagCompareHover, PlotlyHover
+)
+from kivy.properties import (
+    ColorProperty, NumericProperty, StringProperty, BooleanProperty
+)
 import multiprocessing as mp
 from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
-from kivy_matplotlib_widget.uix.legend_widget import MatplotlibInteractiveLegend
+from kivy_matplotlib_widget.uix.legend_widget import (
+    MatplotlibInteractiveLegend
+)
 import matplotlib.pyplot as plt
 from kivy.core.window import Window
 from kivy.metrics import dp
