@@ -27,18 +27,24 @@ PR #34 (https://github.com/mp-007/kivy_matplotlib_widget/pull/34) was not mergea
 To complete the update of PR #34, someone with write access needs to either:
 
 ### Option 1: Update PR #34's source branch (Recommended)
+The local repository contains the necessary commits on `copilot/format-src-files-to-pep8` branch.
+These commits need to be pushed to the remote:
 ```bash
+# From a local clone with push access:
+git fetch origin copilot/cleanup-branch
 git checkout copilot/format-src-files-to-pep8
-git pull origin copilot/cleanup-branch
-git push origin copilot/format-src-files-to-pep8
+git cherry-pick 455234d aadf8dc  # Or merge copilot/cleanup-branch
+git push origin copilot/format-src-files-to-pep8 --force-with-lease
 ```
 
 ### Option 2: Change PR #34's source branch
 - Edit PR #34 to use `copilot/cleanup-branch` instead of `copilot/format-src-files-to-pep8` as the source branch
+- This branch is already pushed and ready to merge
 
 ### Option 3: Create new PR
 - Close PR #34
 - Create a new PR from `copilot/cleanup-branch` to `cleanup`
+- This is the simplest option since `copilot/cleanup-branch` is already pushed and verified
 
 ## Commits Created
 1. **455234d** - Apply isort to organize imports with black profile
