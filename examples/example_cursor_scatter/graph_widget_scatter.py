@@ -130,6 +130,9 @@ class MatplotFigureScatter(Widget):
         if self.auto_cursor and len(self.figure.axes) > 0:
             self.register_lines(list(self.axes.lines))
             self.register_scatters(list(self.axes.collections))
+
+        if self.selector and self.axes:
+            self.selector.resize_wgt.ax = self.axes
             
         # Texture
         self._img_texture = Texture.create(size=(w, h))
