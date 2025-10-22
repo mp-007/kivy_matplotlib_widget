@@ -10,14 +10,14 @@ from kivy.properties import (
     ColorProperty
     )
 
-from kivy.lang import Builder 
-from kivy.core.window import Window 
+from kivy.lang import Builder
+from kivy.core.window import Window
 from kivy.metrics import dp
 import numpy as np
-        
+
 def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,hover_type='nearest'):
     """ add hover to matpotlib figure
-    
+
     Args:
         figure_wgt: figure widget from kivy_matplotlib_widget package
         mode : 'touch' (touch device) or 'desktop' (desktop with mouse)
@@ -25,91 +25,91 @@ def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,
     """
 
     if figure_wgt.hover_instance:
-       
+
         if hover_type=='compare':
             if not figure_wgt.compare_hover_instance:
                 if hover_widget is None:
-                    hover_widget = GeneralCompareHover()  
+                    hover_widget = GeneralCompareHover()
                 hover_widget.x_hover_pos=figure_wgt.x
-                hover_widget.y_hover_pos=figure_wgt.y 
+                hover_widget.y_hover_pos=figure_wgt.y
                 hover_widget.label_x=label_x
                 hover_widget.label_y=label_y
                 figure_wgt.parent.add_widget(hover_widget)
-                figure_wgt.compare_hover_instance = hover_widget                    
-            figure_wgt.compare_hover_instance.create_child(figure_wgt.lines)            
+                figure_wgt.compare_hover_instance = hover_widget
+            figure_wgt.compare_hover_instance.create_child(figure_wgt.lines)
             figure_wgt.hover_instance = figure_wgt.compare_hover_instance
-            figure_wgt.compare_xdata=True 
+            figure_wgt.compare_xdata=True
             if figure_wgt.nearest_hover_instance:
                 figure_wgt.nearest_hover_instance.show_cursor=False
-            
+
         else:
 
             if not figure_wgt.nearest_hover_instance:
                 if hover_widget is None:
-                    hover_widget = GeneralHover() 
+                    hover_widget = GeneralHover()
                 hover_widget.x_hover_pos=figure_wgt.x
-                hover_widget.y_hover_pos=figure_wgt.y 
+                hover_widget.y_hover_pos=figure_wgt.y
                 hover_widget.label_x=label_x
                 hover_widget.label_y=label_y
-                figure_wgt.parent.add_widget(hover_widget)                    
+                figure_wgt.parent.add_widget(hover_widget)
                 figure_wgt.nearest_hover_instance = hover_widget
-                
-            figure_wgt.hover_instance = figure_wgt.nearest_hover_instance                    
+
+            figure_wgt.hover_instance = figure_wgt.nearest_hover_instance
             figure_wgt.hover_instance.reset_hover()
             figure_wgt.hover_instance.label_x=label_x
             figure_wgt.hover_instance.label_y=label_y
-            figure_wgt.compare_xdata=False 
+            figure_wgt.compare_xdata=False
             if figure_wgt.compare_hover_instance:
-                figure_wgt.compare_hover_instance.show_cursor=False                     
+                figure_wgt.compare_hover_instance.show_cursor=False
     else:
         if hover_widget is None:
             if hover_type=='compare':
                 hover_widget = GeneralCompareHover()
             else:
                 hover_widget = GeneralHover()
-         
+
         if hover_type=='compare':
             hover_widget.create_child(figure_wgt.lines)
             figure_wgt.compare_hover_instance = hover_widget
-            figure_wgt.compare_xdata=True 
+            figure_wgt.compare_xdata=True
         else:
             figure_wgt.nearest_hover_instance = hover_widget
             figure_wgt.compare_xdata=False
 
         hover_widget.x_hover_pos=figure_wgt.x
-        hover_widget.y_hover_pos=figure_wgt.y 
+        hover_widget.y_hover_pos=figure_wgt.y
         hover_widget.label_x=label_x
         hover_widget.label_y=label_y
-        
+
         figure_wgt.parent.add_widget(hover_widget)
-        figure_wgt.hover_instance=hover_widget      
+        figure_wgt.hover_instance=hover_widget
         if mode=='desktop':
             figure_wgt.hover_on=True
-            Window.bind(mouse_pos=figure_wgt.on_motion)  
-    
-        
+            Window.bind(mouse_pos=figure_wgt.on_motion)
+
+
 class BaseHoverFloatLayout(FloatLayout):
     """ Touch egend kivy class"""
     figure_wgt = ObjectProperty(None)
     x_hover_pos = NumericProperty(1)
-    y_hover_pos = NumericProperty(1)  
-    xmin_line = NumericProperty(1) 
-    xmax_line = NumericProperty(1) 
-    ymin_line = NumericProperty(1) 
-    ymax_line = NumericProperty(1)     
+    y_hover_pos = NumericProperty(1)
+    xmin_line = NumericProperty(1)
+    xmax_line = NumericProperty(1)
+    ymin_line = NumericProperty(1)
+    ymax_line = NumericProperty(1)
     hover_outside_bound = BooleanProperty(False)
     show_cursor = BooleanProperty(False)
-    label_x = StringProperty('x')  
-    label_y = StringProperty('y')  
-    label_x_value = StringProperty('')  
-    label_y_value = StringProperty('') 
+    label_x = StringProperty('x')
+    label_y = StringProperty('y')
+    label_x_value = StringProperty('')
+    label_y_value = StringProperty('')
     custom_label = StringProperty('',allownone=True) #futur used for dynamic label
     custom_color=ColorProperty([0,0,0,1],allownone=True) #futur used for dynamic color
-    figwidth = NumericProperty(2) 
-    figheight = NumericProperty(2) 
+    figwidth = NumericProperty(2)
+    figheight = NumericProperty(2)
     figx = NumericProperty(0)
     figy = NumericProperty(0)
-    
+
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs)
@@ -118,45 +118,45 @@ class BaseHoverFloatLayout(FloatLayout):
         """ reset hover attribute """
         self.x_hover_pos = 1
         self.y_hover_pos = 1
-        self.ymin_line = 1  
-        self.ymax_line = 1 
+        self.ymin_line = 1
+        self.ymax_line = 1
 
 class GeneralHover(BaseHoverFloatLayout):
-    """ GeneralHover """ 
+    """ GeneralHover """
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color=ColorProperty([0,0,1,0.3])
     hover_height = NumericProperty(dp(24))
-    
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)    
+        super().__init__(**kwargs)
 
 class HoverVerticalText(BaseHoverFloatLayout):
-    """ Hover with vertical text"""  
+    """ Hover with vertical text"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color=ColorProperty([1,1,0,1])
     hover_height = NumericProperty(dp(48))
-    
+
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs)
 
 class GeneralCompareHover(BaseHoverFloatLayout):
-    """ GeneralCompareHover""" 
+    """ GeneralCompareHover"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color=ColorProperty([1,1,1,1])
     hover_height = NumericProperty(dp(48))
-    y_touch_pos = NumericProperty(1)    
-    
+    y_touch_pos = NumericProperty(1)
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs) 
+        super().__init__(**kwargs)
         self.children_names=[]
         self.children_list=[]
 
@@ -167,7 +167,7 @@ class GeneralCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.remove_widget(self.ids.main_box.children[0])
 
         self.children_names=[]
-        self.children_list=[]        
+        self.children_list=[]
         for i,line in enumerate(lines):
             label=line.get_label()
             if i==0:
@@ -179,17 +179,17 @@ class GeneralCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.add_widget(mywidget)
             self.children_names.append(label)
             self.children_list.append(mywidget)
-            
+
 class BoxShadowCompareHover(BaseHoverFloatLayout):
-    """ GeneralCompareHover with a box shadow""" 
+    """ GeneralCompareHover with a box shadow"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color=ColorProperty([1,1,1,1])
     hover_height = NumericProperty(dp(48))
-    y_touch_pos = NumericProperty(1) 
+    y_touch_pos = NumericProperty(1)
     reorder_data = BooleanProperty(True)
-    
+
     def __init__(self, **kwargs):
         """ init class """
         super(BoxShadowCompareHover, self).__init__(**kwargs)
@@ -203,7 +203,7 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.remove_widget(self.ids.main_box.children[0])
 
         self.children_names=[]
-        self.children_list=[]        
+        self.children_list=[]
         for i,line in enumerate(lines):
             label=line.get_label()
             if i==0:
@@ -215,7 +215,7 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.add_widget(mywidget)
             self.children_names.append(label)
             self.children_list.append(mywidget)
-            
+
     def overlap_check(self):
         """ reorder label base on y_hover_pos of data"""
         if self.reorder_data and len(self.ids.main_box.children)>2:
@@ -231,14 +231,14 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
             # heigh_child = child.ids.label.texture_size[1]+dp(6)
             sorting_args= np.argsort(y_hover_pos_list)
 
-            for index in range(len(sorting_args)):    
+            for index in range(len(sorting_args)):
                 child_list[sorting_args[index]].y = y_pos_list[index]
 
 class CompareHoverBox(BoxLayout):
-    """ Hover with vertical text""" 
+    """ Hover with vertical text"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
-    text_size = NumericProperty(dp(14))    
+    text_size = NumericProperty(dp(14))
     label_y = StringProperty('y')
     label_y_value = StringProperty('y')
     x_hover_pos = NumericProperty(1)
@@ -248,13 +248,13 @@ class CompareHoverBox(BoxLayout):
 
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)       
+        super().__init__(**kwargs)
 
 class DotCompareHoverBox(FloatLayout):
-    """ Hover with vertical text""" 
+    """ Hover with vertical text"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
-    text_size = NumericProperty(dp(14))    
+    text_size = NumericProperty(dp(14))
     label_y = StringProperty('y')
     label_y_value = StringProperty('y')
     x_hover_pos = NumericProperty(1)
@@ -264,20 +264,20 @@ class DotCompareHoverBox(FloatLayout):
 
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs) 
+        super().__init__(**kwargs)
 
 class TagCompareHover(BaseHoverFloatLayout):
-    """ TagCompareHover""" 
+    """ TagCompareHover"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color=ColorProperty([1,1,1,1])
     hover_height = NumericProperty(dp(48))
-    y_touch_pos = NumericProperty(1)    
-    
+    y_touch_pos = NumericProperty(1)
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs) 
+        super().__init__(**kwargs)
         self.children_names=[]
         self.children_list=[]
 
@@ -288,7 +288,7 @@ class TagCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.remove_widget(self.ids.main_box.children[0])
 
         self.children_names=[]
-        self.children_list=[]        
+        self.children_list=[]
         for i,line in enumerate(lines):
             label=line.get_label()
             if i==0:
@@ -300,7 +300,7 @@ class TagCompareHover(BaseHoverFloatLayout):
                 self.ids.main_box.add_widget(mywidget)
             self.children_names.append(label)
             self.children_list.append(mywidget)
-            
+
     def overlap_check(self):
         if len(self.ids.main_box.children)>2:
             y_pos_list=[]
@@ -322,10 +322,10 @@ class TagCompareHover(BaseHoverFloatLayout):
                     child_list[sorting_args[index+1]].hover_offset = offset
 
 class TagCompareHoverBox(FloatLayout):
-    """ Hover with vertical text""" 
+    """ Hover with vertical text"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
-    text_size = NumericProperty(dp(14))    
+    text_size = NumericProperty(dp(14))
     label_y = StringProperty('y')
     label_y_value = StringProperty('y')
     x_hover_pos = NumericProperty(1)
@@ -336,37 +336,37 @@ class TagCompareHoverBox(FloatLayout):
 
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)     
+        super().__init__(**kwargs)
 
 
 class InfoHover(BaseHoverFloatLayout):
-    """ InfoHover adapt the background and the font color with the line or scatter color""" 
+    """ InfoHover adapt the background and the font color with the line or scatter color"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     hover_height = NumericProperty(dp(48))
-    
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs) 
+        super().__init__(**kwargs)
 
 class MatplotlibStyleHover(BaseHoverFloatLayout):
     """MatplotlibStyleHover look like matplotlib cursor but do not use matplotlib draw.
         Usefull in live blit drawing
-    
-    """ 
+
+    """
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     hover_height = NumericProperty(dp(48))
     background_color=ColorProperty([1,1,1,1])
-    
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)              
+        super().__init__(**kwargs)
 
 class HightChartHover(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
+    """ PlotlyHover adapt the background and the font color with the line or scatter color"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -379,11 +379,11 @@ class HightChartHover(BaseHoverFloatLayout):
         options=('top', 'bottom', 'left', 'right',
                  'top_start','top_end','bottom_start','bottom_end',
                  'left_start','left_end','right_start','right_end'))
-    
-    
+
+
     def __init__(self, **kwargs):
         """ init class """
-        super().__init__(**kwargs)  
+        super().__init__(**kwargs)
 
 class RichTooltip(BoxLayout):
     position = OptionProperty('top',
@@ -392,7 +392,7 @@ class RichTooltip(BoxLayout):
                  'left_start','left_end','right_start','right_end'))
 
 class PlotlyHover(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color""" 
+    """ PlotlyHover adapt the background and the font color with the line or scatter color"""
     text_color=ColorProperty([0,0,0,1])
     text_font=StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -400,7 +400,7 @@ class PlotlyHover(BaseHoverFloatLayout):
     use_position = StringProperty('right')
     position = OptionProperty('right',
         options=('right', 'left'))
-    
+
     def __init__(self, **kwargs):
         """ init class """
         super().__init__(**kwargs)
@@ -409,10 +409,10 @@ Builder.load_string('''
 
 <BaseHoverFloatLayout>
     size_hint: None,None
-    width: dp(0.01) 
+    width: dp(0.01)
     height: dp(0.01)
     opacity:1 if root.show_cursor and not root.hover_outside_bound else 0
-       
+
 <GeneralHover>
     BoxLayout:
         x:
@@ -423,39 +423,39 @@ Builder.load_string('''
         size_hint: None, None
         padding: dp(4),0,dp(4),0
         height: root.hover_height
-        width: 
+        width:
             label.texture_size[0] + self.padding[0] * 2 if root.show_cursor \
-            else dp(0.0001)            
-            
-        canvas:            
+            else dp(0.0001)
+
+        canvas:
             Color:
                 rgba: root.background_color
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius: [dp(7)]  
-        canvas.after:            
+                radius: [dp(7)]
+        canvas.after:
             Color:
                 rgba: 0,0,1,1
             Ellipse:
                 size: (dp(8),dp(8))
-                pos: 
+                pos:
                     (root.x_hover_pos-dp(8/2), \
                      root.y_hover_pos-dp(8/2))
             Color:
                 rgba: 0,0,1,1
             Line:
                 width: dp(1)
-        		points: 
+        		points:
                     root.x_hover_pos, \
            			root.ymin_line, \
        				root.x_hover_pos, \
-       				root.ymax_line                
+       				root.ymax_line
         Label:
             id:label
-            text: 
+            text:
                 root.label_x + ': ' + root.label_x_value + ', ' + \
-                root.label_y + ': ' + root.label_y_value    
+                root.label_y + ': ' + root.label_y_value
             font_size:root.text_size
             color: root.text_color
             font_name : root.text_font
@@ -469,61 +469,61 @@ Builder.load_string('''
             root.y_hover_pos + dp(4)
         size_hint: None, None
         height: root.hover_height
-        width: 
+        width:
             max(label.texture_size[0],label2.texture_size[0]) + dp(12) if root.show_cursor \
-            else dp(0.0001)            
+            else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: root.background_color
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius: [dp(4)]  
+                radius: [dp(4)]
             Color:
                 rgba: 0,0,0,1
-             
+
             Line:
-                width: 1    
+                width: 1
                 rounded_rectangle:
                     (self.x, self.y, self.width, self.height,\
                     dp(4), dp(4), dp(4), dp(4),\
-                    self.height)                 
-                
-                
-        canvas.after:            
+                    self.height)
+
+
+        canvas.after:
             Color:
                 rgba: 0,0,0,1
             Rectangle:
                 size: (dp(8),dp(8))
-                pos: 
+                pos:
                     (root.x_hover_pos-dp(8/2), \
                      root.y_hover_pos-dp(8/2))
-        
+
         BoxLayout:
             size_hint_x:None
             width:label.texture_size[0]
             padding: dp(12),0,0,0
             Label:
                 id:label
-                text: 
-                    root.label_x + ': ' + root.label_x_value  
+                text:
+                    root.label_x + ': ' + root.label_x_value
                 font_size:root.text_size
                 color: root.text_color
                 font_name : root.text_font
 
         BoxLayout:
             size_hint_x:None
-            width:label2.texture_size[0]   
+            width:label2.texture_size[0]
             padding: dp(12),0,0,0
             Label:
                 id:label2
                 text:
-                    root.label_y + ': ' + root.label_y_value    
+                    root.label_y + ': ' + root.label_y_value
                 font_size:root.text_size
-                color: root.text_color 
+                color: root.text_color
                 font_name : root.text_font
 
 <InfoHover>
@@ -537,13 +537,13 @@ Builder.load_string('''
             root.y_hover_pos + dp(4)
         size_hint: None, None
         height: root.hover_height
-        width: 
+        width:
             max(label.texture_size[0],label2.texture_size[0]) + dp(12) if root.show_cursor \
-            else dp(0.0001)            
+            else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: root.custom_color if root.custom_color else [0,0,0,1]
             Rectangle:
@@ -551,32 +551,32 @@ Builder.load_string('''
                 size: self.size
             Color:
                 rgba: 0,0,0,1
-             
+
             Line:
-                width: 1    
+                width: 1
                 rounded_rectangle:
                     (self.x, self.y, self.width, self.height,\
                     dp(4), dp(4), dp(4), dp(4),\
-                    self.height)                 
-                
-                
-        canvas.after:            
+                    self.height)
+
+
+        canvas.after:
             Color:
                 rgba: 0,0,0,1
             Rectangle:
                 size: (dp(8),dp(8))
-                pos: 
+                pos:
                     (root.x_hover_pos-dp(8/2), \
                      root.y_hover_pos-dp(8/2))
-        
+
         BoxLayout:
             size_hint_x:None
             width:label.texture_size[0]
             padding: dp(12),0,0,0
             Label:
                 id:label
-                text: 
-                    root.label_x + ': ' + root.label_x_value  
+                text:
+                    root.label_x + ': ' + root.label_x_value
                 font_size:root.text_size
                 color:
                     [0,0,0,1] if (root.custom_color[0]*0.299 + \
@@ -586,12 +586,12 @@ Builder.load_string('''
 
         BoxLayout:
             size_hint_x:None
-            width:label2.texture_size[0]   
+            width:label2.texture_size[0]
             padding: dp(12),0,0,0
             Label:
                 id:label2
                 text:
-                    root.label_y + ': ' + root.label_y_value    
+                    root.label_y + ': ' + root.label_y_value
                 font_size:root.text_size
                 color:
                     [0,0,0,1] if (root.custom_color[0]*0.299 + \
@@ -600,8 +600,8 @@ Builder.load_string('''
                 font_name : root.text_font
         FloatLayout:
             size_hint: None,None
-            width: dp(0.01) 
-            height: dp(0.01) 
+            width: dp(0.01)
+            height: dp(0.01)
             BoxLayout:
                 size_hint:None,None
                 x:main_box.x + main_box.width + dp(4)
@@ -610,15 +610,15 @@ Builder.load_string('''
                 height:label3.texture_size[1]
                 Label:
                     id:label3
-                    text: 
-                        root.custom_label if root.custom_label else ''  
+                    text:
+                        root.custom_label if root.custom_label else ''
                     font_size:root.text_size
                     color: root.text_color
-                    font_name : root.text_font     
-                    
+                    font_name : root.text_font
+
 <GeneralCompareHover>
-    custom_color: [0,0,0,1]    
-    
+    custom_color: [0,0,0,1]
+
     BoxLayout:
         id:main_box
         x:
@@ -628,41 +628,41 @@ Builder.load_string('''
             root.ymin_line + dp(4) if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - dp(4) - self.height
         size_hint: None, None
         height: self.minimum_height
-        width: 
+        width:
             self.minimum_width + dp(12) if root.show_cursor \
             else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: root.background_color
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius: [dp(4)]  
+                radius: [dp(4)]
             Color:
                 rgba: 0,0,0,1
-             
+
             Line:
-                width: 1    
+                width: 1
                 rounded_rectangle:
                     (self.x, self.y, self.width, self.height,\
                     dp(4), dp(4), dp(4), dp(4),\
-                    self.height) 
-                        
-        canvas.after:            
+                    self.height)
+
+        canvas.after:
             Color:
                 rgba: 0,0,1,1
             Line:
                 width: dp(1)
-        		points: 
+        		points:
                     root.x_hover_pos, \
            			root.ymin_line, \
        				root.x_hover_pos, \
        				root.ymax_line
-        
-        
+
+
         BoxLayout:
             size_hint:None,None
             width:label.texture_size[0] + dp(12)
@@ -670,15 +670,15 @@ Builder.load_string('''
             padding: dp(12),0,0,0
             Label:
                 id:label
-                text: 
-                    root.label_x + ': ' + root.label_x_value  
+                text:
+                    root.label_x + ': ' + root.label_x_value
                 font_size:root.text_size
                 font_name : root.text_font
                 color: root.text_color
-                
-        CompareHoverBox: 
-            id:comparehoverbox              
-                
+
+        CompareHoverBox:
+            id:comparehoverbox
+
 <CompareHoverBox>
     size_hint:None,None
     width:label.texture_size[0] + dp(12) + dp(24) if self.show_widget else dp(12)
@@ -688,22 +688,22 @@ Builder.load_string('''
     Widget:
         size_hint_x:None
         width:dp(16)
-        canvas:            
+        canvas:
             Color:
                 rgba: root.custom_color if root.custom_color else [0,0,0,1]
             Rectangle:
                 pos: self.pos[0],self.pos[1]+self.height/2-dp(6)
-                size: dp(12),dp(12)    
+                size: dp(12),dp(12)
     Label:
         id:label
-        text: root.label_y + ': ' + root.label_y_value  
+        text: root.label_y + ': ' + root.label_y_value
         color: root.text_color
         font_size:root.text_size
-        font_name : root.text_font  
+        font_name : root.text_font
 
 <TagCompareHover>
-    custom_color: [0,0,0,1]    
-    
+    custom_color: [0,0,0,1]
+
     BoxLayout:
         id:main_box
         x:
@@ -713,40 +713,40 @@ Builder.load_string('''
             root.ymin_line if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - self.height
         size_hint: None, None
         height: root.hover_height
-        width: 
+        width:
             self.minimum_width + dp(12) if root.show_cursor \
             else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-                                
-        canvas.after:            
+
+        canvas.after:
             Color:
                 rgba: 0,0,1,0
             Line:
                 width: dp(1)
-        		points: 
+        		points:
                     root.x_hover_pos, \
            			root.ymin_line, \
        				root.x_hover_pos, \
        				root.ymax_line
-        
-        
+
+
         FloatLayout:
             size_hint:None,None
             width:dp(0.01)
             height:dp(0.01)
-            BoxLayout:            
+            BoxLayout:
                 size_hint:None,None
                 width:label.texture_size[0] + dp(8)
                 height:label.texture_size[1] + dp(6)
                 x: root.x_hover_pos - label.texture_size[0]/2 - dp(4)
                 y: root.ymin_line - label.texture_size[1] - dp(10)
-                canvas.before:            
+                canvas.before:
                     Color:
                         rgba: [0,0,0,1]
                     Rectangle:
                         pos: self.pos
-                        size: self.size  
+                        size: self.size
                     Triangle:
                         points:
                             [ \
@@ -754,19 +754,19 @@ Builder.load_string('''
                             root.x_hover_pos, root.ymin_line, \
                             root.x_hover_pos +dp(4), root.ymin_line-dp(4) \
                             ]
-                        
+
                 Label:
                     id:label
-                    text: 
-                        root.label_x_value  
+                    text:
+                        root.label_x_value
                     font_size:root.text_size
                     font_name : root.text_font
                     color: [1,1,1,1]
-                
-        TagCompareHoverBox: 
-            id:ycomparehoverbox 
 
-                
+        TagCompareHoverBox:
+            id:ycomparehoverbox
+
+
 <TagCompareHoverBox>
     size_hint:None,None
     width:dp(0.01)
@@ -780,13 +780,13 @@ Builder.load_string('''
         padding: dp(2),0,0,0
         x: root.x_hover_pos + dp(4)
         y: root.y_hover_pos - label.texture_size[1]/2-dp(3) + root.hover_offset
-    
-        canvas.before:            
+
+        canvas.before:
             Color:
                 rgba: root.custom_color if root.custom_color else [0,0,0,1]
             Rectangle:
                 pos: self.pos
-                size: self.size  
+                size: self.size
 
             Triangle:
                 points:
@@ -801,93 +801,93 @@ Builder.load_string('''
                     [ \
                     root.x_hover_pos, root.y_hover_pos, \
                     main_box.x, root.y_hover_pos + root.hover_offset \
-                    ]                
+                    ]
         Label:
             id:label
-            text: root.label_y_value  
+            text: root.label_y_value
             color:
                 [0,0,0,1] if (root.custom_color[0]*0.299 + \
                 root.custom_color[1]*0.587 + root.custom_color[2]*0.114) > 186/255 \
                 else [1,1,1,1]
             font_size:root.text_size
-            font_name : root.text_font  
-            
+            font_name : root.text_font
+
         FloatLayout:
             size_hint: None,None
-            width: dp(0.01) 
-            height: dp(0.01) 
+            width: dp(0.01)
+            height: dp(0.01)
             BoxLayout:
                 size_hint:None,None
                 x:main_box.x + main_box.width + dp(2)
                 y:main_box.y + main_box.height/2-label2.texture_size[1]/2
                 width:label2.texture_size[0]
                 height:label2.texture_size[1]
-                canvas.before:            
+                canvas.before:
                     Color:
                         rgba: [1,1,1,0.7]
                     Rectangle:
                         pos: self.pos
-                        size: self.size                 
+                        size: self.size
                 Label:
                     id:label2
-                    text: root.label_y 
+                    text: root.label_y
                     font_size:root.text_size
                     color: [0,0,0,1]
-                    font_name : root.text_font  
-                    
+                    font_name : root.text_font
+
 <MatplotlibStyleHover>
-    custom_color: [0,0,0,1]    
-    
+    custom_color: [0,0,0,1]
+
     BoxLayout:
         id:main_box
         x:root.xmin_line
-        y: root.ymax_line + dp(4) 
+        y: root.ymax_line + dp(4)
         size_hint: None, None
         height: self.minimum_height
-        width: 
+        width:
             self.minimum_width + dp(12) if root.show_cursor \
             else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: root.background_color
             Rectangle:
                 pos: self.pos
                 size: self.size
-                        
-        canvas.after:  
+
+        canvas.after:
             Color:
                 rgba: 0,0,0,1
             Line:
                 width: dp(1)
-        		points: 
+        		points:
                     root.x_hover_pos, \
            			root.ymin_line, \
        				root.x_hover_pos, \
        				root.ymax_line
                 dash_offset: 2
                 dash_length: 10
-                
+
             Line:
                 width: dp(1)
-        		points: 
+        		points:
                     root.xmin_line, \
            			root.y_hover_pos, \
        				root.xmax_line, \
-       				root.y_hover_pos 
+       				root.y_hover_pos
                 dash_offset: 2
-                dash_length: 10                
-        
+                dash_length: 10
+
         BoxLayout:
             size_hint:None,None
             width:label.texture_size[0] + dp(12)
             height:label.texture_size[1] + dp(12)
             Label:
                 id:label
-                text: 
-                    root.label_x + ': ' + root.label_x_value + '  ' + root.label_y + ': ' + root.label_y_value   
+                text:
+                    root.label_x + ': ' + root.label_x_value + '  ' + root.label_y + ': ' + root.label_y_value
                 font_size:root.text_size
                 font_name : root.text_font
                 color: root.text_color
@@ -901,20 +901,20 @@ Builder.load_string('''
                  '[/font][/color][/size]' +  root.extra_text + "\\n" + 'x:' + \
                  root.label_x_value  +"\\n"+ "y:" + root.label_y_value
 
-    canvas.before:               
+    canvas.before:
         Color:
             rgb: root.custom_color if root.custom_color else [0,0,0,1]
             a:0.5
         Ellipse:
             size: (dp(12),dp(12))
-            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))  
-            
-    use_position: 
+            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))
+
+    use_position:
         'left_' + root.position.split('_')[1]  if ('right_' in root.position and root.x_hover_pos + main_box.width + dp(14) > root.figwidth + root.figx) else \
         'left' if ('right'==root.position and root.x_hover_pos + main_box.width + dp(14) > root.figwidth + root.figx) else \
         'right' if ('left'==root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else \
-        'right_' + root.position.split('_')[1]  if ('left_' in root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else root.position 
-         
+        'right_' + root.position.split('_')[1]  if ('left_' in root.position and root.x_hover_pos - main_box.width -dp(14) < root.figx) else root.position
+
     RichTooltip:
         id:main_box
         x:
@@ -925,16 +925,16 @@ Builder.load_string('''
             root.y_hover_pos + dp(14) if 'top' in root.position else \
             root.y_hover_pos - self.height - dp(14) if 'bottom' in root.position else \
             root.y_hover_pos - self.height/2 - main_box.offset2
-                
+
         size_hint: None, None
         height: label.texture_size[1]+ root.label_padding_height*2
-        width: 
+        width:
             label.texture_size[0] + root.label_padding_width*2 if root.show_cursor \
-            else dp(0.0001)            
+            else dp(0.0001)
         orientation:'vertical'
         padding: 0,-dp(1),0,0
         position:root.use_position
-    
+
         Label:
             id:label
             text: root.label_format
@@ -948,10 +948,10 @@ Builder.load_string('''
     size_hint: None,None
     width:dp(200)
     height:dp(60)
-    offset1: 
+    offset1:
         0 if not '_' in root.position else -mainbox.width//2 + dp(20) \
         if 'start' in root.position else mainbox.width//2 - dp(20)
-    offset2: 
+    offset2:
         0 if not '_' in root.position else mainbox.height//2 - dp(20) \
         if 'start' in root.position else - mainbox.height//2 + dp(20)
     canvas.before:
@@ -959,18 +959,18 @@ Builder.load_string('''
             rgba: 0, 0, 0, .65
         BoxShadow:
             pos: self.pos
-            size: self.size                
+            size: self.size
             offset: 0, -2
             spread_radius: -4, -4
             border_radius: 4, 4, 4, 4
-            blur_radius: 14 
+            blur_radius: 14
         Color:
             rgba: 1, 1, 1, 1
         SmoothRoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [7,]              
-                
+            radius: [7,]
+
     FloatLayout:
         size_hint: None,None
         size:dp(0.01),dp(0.01)
@@ -979,14 +979,14 @@ Builder.load_string('''
                 mainbox.x+mainbox.width//2 - self.width//2 + root.offset1 \
                 if ('top' in root.position or 'bottom' in root.position) \
                 else mainbox.x +mainbox.width - self.width//2 - dp(1) \
-                if 'left' in root.position else mainbox.x - self.width//2 + dp(1) 
+                if 'left' in root.position else mainbox.x - self.width//2 + dp(1)
             y:
                 mainbox.y - self.height//2 +dp(1) if 'top' in root.position \
                 else mainbox.y +  mainbox.height - self.height//2 - dp(1) \
-                if 'bottom' in root.position else mainbox.y + mainbox.height//2 - self.height//2 + root.offset2 
+                if 'bottom' in root.position else mainbox.y + mainbox.height//2 - self.height//2 + root.offset2
             size_hint: None,None
             width:dp(12)
-            height:dp(12)    
+            height:dp(12)
             canvas.before:
                 StencilPush
                 Rectangle:
@@ -999,7 +999,7 @@ Builder.load_string('''
                         (self.size[0]+self.width,self.size[1]+dp(5)) \
                         if ('top' in root.position  or 'bottom' in root.position ) \
                         else (self.size[0]+dp(5) ,self.size[1] + dp(40))
-                StencilUse                    
+                StencilUse
                 Color:
                     rgba: 0, 0, 0, .65
                 PushMatrix
@@ -1017,35 +1017,35 @@ Builder.load_string('''
                     rgba: 1, 1, 1, 1
                 SmoothRectangle:
                     pos: self.pos
-                    size: self.size  
-                PopMatrix  
-                StencilPop   
+                    size: self.size
+                PopMatrix
+                StencilPop
 
 <PlotlyHover>
     custom_color: [0,0,0,1]
-    
-    use_position: 
+
+    use_position:
         'left' if ('right'==root.position and root.x_hover_pos + main_box.width + label3.texture_size[0] + dp(6)  > root.figwidth + root.figx) else \
         'right' if ('left'==root.position and root.x_hover_pos - main_box.width - label3.texture_size[0] - dp(6) < root.figx) else \
         root.position
-        
+
     BoxLayout:
         id:main_box
         x:
             root.x_hover_pos + dp(4) if 'right' in root.use_position else \
-            root.x_hover_pos - self.width - dp(4) 
+            root.x_hover_pos - self.width - dp(4)
         y:
             root.y_hover_pos - root.hover_height/2
-  
+
         size_hint: None, None
         height: label.texture_size[1]+ dp(4)
-        width: 
+        width:
             self.minimum_width + dp(12) if root.show_cursor \
-            else dp(0.0001)            
+            else dp(0.0001)
         orientation:'vertical'
         padding: 0,-dp(1),0,0
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: root.custom_color if root.custom_color else [0,0,0,1]
             Rectangle:
@@ -1062,7 +1062,7 @@ Builder.load_string('''
                     root.x_hover_pos, root.y_hover_pos, \
                     main_box.x + main_box.width, root.y_hover_pos+ dp(4), \
                     main_box.x + main_box.width, root.y_hover_pos- dp(4)  \
-                    ]                        
+                    ]
             SmoothLine:
                 width:dp(1)
                 points:
@@ -1074,15 +1074,15 @@ Builder.load_string('''
                     root.x_hover_pos, root.y_hover_pos, \
                     main_box.x + main_box.width, root.y_hover_pos \
                     ]
-                                             
-             
+
+
         BoxLayout:
             size_hint_x:None
             width:label.texture_size[0]
             padding: dp(12),0,0,0
             Label:
                 id:label
-                text: 
+                text:
                     '(' + root.label_x_value  +','+ root.label_y_value +')'
                 font_size:root.text_size
                 color:
@@ -1092,11 +1092,11 @@ Builder.load_string('''
                 font_name : root.text_font
 
                 font_name : root.text_font
-                
+
         FloatLayout:
             size_hint: None,None
-            width: dp(0.01) 
-            height: dp(0.01) 
+            width: dp(0.01)
+            height: dp(0.01)
             BoxLayout:
                 size_hint:None,None
                 x:
@@ -1107,14 +1107,14 @@ Builder.load_string('''
                 height:label3.texture_size[1]
                 Label:
                     id:label3
-                    text: 
-                        root.custom_label if root.custom_label and not '_child' in root.custom_label else ''  
+                    text:
+                        root.custom_label if root.custom_label and not '_child' in root.custom_label else ''
                     font_size:root.text_size
                     color: root.text_color
-                    font_name : root.text_font   
+                    font_name : root.text_font
 
 <BoxShadowCompareHover>
-    custom_color: [0,0,0,1] 
+    custom_color: [0,0,0,1]
 
     BoxLayout:
         id:main_box
@@ -1125,41 +1125,41 @@ Builder.load_string('''
             root.ymin_line + dp(4) if abs(root.y_touch_pos -root.ymin_line) > abs(root.y_touch_pos -root.ymax_line) else root.ymax_line - dp(4) - self.height
         size_hint: None, None
         height: self.minimum_height
-        width: 
+        width:
             self.minimum_width + dp(12) if root.show_cursor \
             else dp(0.0001)
         orientation:'vertical'
         padding: 0,dp(4),0,dp(4)
-        
-        canvas:            
+
+        canvas:
             Color:
                 rgba: 0, 0, 0, .65
             BoxShadow:
                 pos: self.pos
-                size: self.size                
+                size: self.size
                 offset: 0, -2
                 spread_radius: -4, -4
                 border_radius: 4, 4, 4, 4
-                blur_radius: 14 
+                blur_radius: 14
             Color:
                 rgba: root.background_color
             SmoothRoundedRectangle:
                 pos: self.pos
                 size: self.size
                 radius: [7,]
-                        
-        canvas.after:            
+
+        canvas.after:
             Color:
                 rgba: 0,0,1,0.1
             SmoothLine:
                 width: dp(8)
-        		points: 
+        		points:
                     root.x_hover_pos, \
            			root.ymin_line, \
        				root.x_hover_pos, \
        				root.ymax_line
-        
-        
+
+
         BoxLayout:
             size_hint:None,None
             width:label.texture_size[0] + dp(12)
@@ -1167,14 +1167,14 @@ Builder.load_string('''
             padding: dp(6),0,0,0
             Label:
                 id:label
-                text: 
+                text:
                     root.label_x + ': ' + root.label_x_value if root.label_x else root.label_x_value
                 font_size:root.text_size
                 font_name : root.text_font
                 color: root.text_color
-                
-        DotCompareHoverBox: 
-            id:comparehoverbox    
+
+        DotCompareHoverBox:
+            id:comparehoverbox
 
 <DotCompareHoverBox>
     size_hint:None,None
@@ -1185,22 +1185,22 @@ Builder.load_string('''
     extra_text:root.label_y if root.label_y and not '_child' in root.label_y else ''
     label_format:'[size={}]'.format(int(root.text_size + dp(6))) + '[color={}]'.format(get_hex_from_color(root.custom_color)) + \
                  '[font=NavigationIcons]' + u"{}".format("\U00000EB1") + \
-                 '[/font][/color][/size]' +  root.extra_text + ": " + root.label_y_value    
-    
-    canvas.before:  
+                 '[/font][/color][/size]' +  root.extra_text + ": " + root.label_y_value
+
+    canvas.before:
         Color:
             rgb: root.custom_color if root.custom_color else [0,0,0,1]
             a:0.7
         SmoothEllipse:
             size: (dp(12),dp(12))
-            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))  
+            pos: (root.x_hover_pos - dp(6),root.y_hover_pos-dp(6))
         Color:
             rgb: [1,1,1]
             a:1.0
         SmoothLine:
             width: 1.
-            ellipse: (root.x_hover_pos - dp(7), root.y_hover_pos-dp(7), dp(14), dp(14))               
-            
+            ellipse: (root.x_hover_pos - dp(7), root.y_hover_pos-dp(7), dp(14), dp(14))
+
 
     Label:
         id:label
@@ -1210,5 +1210,5 @@ Builder.load_string('''
         font_size:root.text_size
         color:[0,0,0,1]
         font_name : root.text_font
-        markup:True                   
+        markup:True
         ''')

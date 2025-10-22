@@ -1,4 +1,4 @@
-"""This file is based on mplcursors project. Some changes as been made to 
+"""This file is based on mplcursors project. Some changes as been made to
 worked with kivy and my project
 
 mplcursors project
@@ -174,8 +174,8 @@ class Cursor:
             return hl
 
     # def _on_select_event(self, event):
-        
-        
+
+
     #     if (not self._filter_mouse_event(event)
     #             # See _on_pick.  (We only suppress selects, not deselects.)
     #             or event in self._suppressed_events):
@@ -209,7 +209,7 @@ class Cursor:
     #         pass
 
     def xy_event(self, event):
-        
+
         # Work around lack of support for twinned axes.
         per_axes_event = {ax: _reassigned_axes_event(event, ax)
                           for ax in {artist.axes for artist in self.artists}}
@@ -231,7 +231,7 @@ class Cursor:
                              == (other.artist, tuple(other.target))
                              for other in self._selections)),
                  key=lambda pi: pi.dist, default=None)
-            
+
         if pi:
             if event.compare_xdata:
                 min_distance=pi.dist

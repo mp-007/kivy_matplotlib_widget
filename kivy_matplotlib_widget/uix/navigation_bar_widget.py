@@ -7,7 +7,7 @@ from kivy.clock import Clock
 from kivy.factory import Factory
 from kivy_matplotlib_widget.uix.hover_widget import add_hover
 from kivy.core.window import Window
-from kivy.metrics import dp 
+from kivy.metrics import dp
 
 class MatplotNavToolbar(BoxLayout):
 
@@ -39,7 +39,7 @@ class _NavigationToolbar(NavigationToolbar2):
     def __init__(self, canvas, widget):
         self.widget = widget
         super(_NavigationToolbar, self).__init__(canvas)
-        
+
     def on_kv_post(self):
         if self.figure_widget:
             self._init_toolbar()
@@ -48,7 +48,7 @@ class _NavigationToolbar(NavigationToolbar2):
         print('init toolbar')
         self.widget.home_btn.bind(on_press=self.home)
         self.widget.pan_btn.bind(on_press=self.pan)
-        self.widget.zoom_btn.bind(on_press=self.zoom) 
+        self.widget.zoom_btn.bind(on_press=self.zoom)
         self.widget.back_btn.bind(on_press=self.back)
         self.widget.forward_btn.bind(on_press=self.forward)
 
@@ -78,8 +78,8 @@ class KivyMatplotNavToolbar(RelativeLayout):
     nav_icon = OptionProperty(
         "normal", options=["minimal", "normal","all","3D","custom"])
     hover_mode = OptionProperty(
-        "touch", options=["touch", "desktop"])    
-    
+        "touch", options=["touch", "desktop"])
+
     custom_icon = ListProperty([])
     show_cursor_data = BooleanProperty(False)
     cursor_data_font_size = NumericProperty(dp(12))
@@ -92,7 +92,7 @@ class KivyMatplotNavToolbar(RelativeLayout):
     def __init__(self, figure_wgt=None, *args, **kwargs):
         super(KivyMatplotNavToolbar, self).__init__(*args, **kwargs)
         self.figure_wgt = figure_wgt
-           
+
     def on_kv_post(self,_):
         if self.nav_icon=="minimal" and not self.custom_icon:
 
@@ -120,13 +120,13 @@ class KivyMatplotNavToolbar(RelativeLayout):
                 #nearest hover button
                 self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='hover_type')
                 #compare hover button
-                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type')                
-                
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type')
+
             elif self.compare_hover:
                 #nearest hover button
                 self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='hover_type')
                 #compare hover button
-                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type') 
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='hover_type')
 
         elif self.nav_icon=="all" and not self.custom_icon:
 
@@ -137,8 +137,8 @@ class KivyMatplotNavToolbar(RelativeLayout):
             self.add_nav_btn("back",self.back)
 
             #home button
-            self.add_nav_btn("forward",self.forward)            
-            
+            self.add_nav_btn("forward",self.forward)
+
             #pan button
             self.add_nav_btn("pan",self.set_touch_mode,mode='pan',btn_type='group')
 
@@ -153,46 +153,46 @@ class KivyMatplotNavToolbar(RelativeLayout):
                 #nearest hover button
                 self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='group')
                 #compare hover button
-                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group')                
-                
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group')
+
             elif self.compare_hover:
                 #nearest hover button
                 self.add_nav_btn("hover",self.change_hover_type,mode='nearest',btn_type='group')
                 #compare hover button
-                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group') 
+                self.add_nav_btn("hover_compare",self.change_hover_type,mode='compare',btn_type='group')
 
             #minmax button
             self.add_nav_btn("minmax",self.set_touch_mode,mode='minmax',btn_type='group')
 
             #home button
             self.add_nav_btn("autoscale",self.autoscale)
-            
+
             #add_drag_legend
             if self.drag_legend:
                 self.add_nav_btn("drag_legend",self.set_touch_mode,mode='drag_legend',btn_type='group')
 
         elif self.custom_icon:
             pass
-        
+
         if self.nav_icon=="3D" and not self.custom_icon:
             #home button
-            self.add_nav_btn("home",self.home_3D)           
+            self.add_nav_btn("home",self.home_3D)
 
             #data pan/zoom button
-            self.add_nav_btn("axis-z-rotate-clockwise",self.set_touch_mode_3D,mode='rotate',btn_type='group')  
-                        
+            self.add_nav_btn("axis-z-rotate-clockwise",self.set_touch_mode_3D,mode='rotate',btn_type='group')
+
             #data pan/zoom button
-            self.add_nav_btn("pan",self.set_touch_mode_3D,mode='pan',btn_type='group')  
-            
+            self.add_nav_btn("pan",self.set_touch_mode_3D,mode='pan',btn_type='group')
+
             #figure pan/zoom button
-            self.add_nav_btn("magnify",self.set_touch_mode_3D,mode='figure_zoom_pan',btn_type='group')            
+            self.add_nav_btn("magnify",self.set_touch_mode_3D,mode='figure_zoom_pan',btn_type='group')
 
             #cursor button
             self.add_nav_btn("cursor",self.set_touch_mode_3D,mode='cursor',btn_type='group')
 
-            
+
         if self.show_cursor_data:
-            Window.bind(mouse_pos=self.on_motion) 
+            Window.bind(mouse_pos=self.on_motion)
 
     def on_motion(self,*args):
         '''Kivy Event to trigger mouse event on motion
@@ -205,14 +205,14 @@ class KivyMatplotNavToolbar(RelativeLayout):
         x = newcoord[0]
         y = newcoord[1]
         inside = self.figure_wgt.collide_point(x,y)
-        if inside: 
+        if inside:
 
             # will receive all motion events.
             if self.figure_wgt.figcanvas:
                 #avoid in motion if touch is detected
                 if not len(self.figure_wgt._touches)==0:
                     return
-               
+
                 #transform kivy x,y touch event to x,y data
                 x_format,y_format=self.figure_wgt.get_data_xy(x,y)
 
@@ -220,23 +220,23 @@ class KivyMatplotNavToolbar(RelativeLayout):
                     self.current_label.text=f"{x_format}\n{y_format}"
                 else:
                     self.current_label.text=""
-                
+
     def add_nav_btn(self,icon,fct,mode=None,btn_type=None):
         if btn_type=='group':
             if 'hover' in icon:
                 btn = Factory.NavToggleButton(group= "hover_type")
                 if self.hover_mode=="touch":
                     btn.bind(on_release=lambda x:self.set_touch_mode('cursor'))
-                    
+
                 elif mode == 'nearest':
                     btn.state='down'
-                    
-                    
+
+
             else:
                 btn = Factory.NavToggleButton(group= "toolbar_btn")
             btn.orientation_type=self.orientation_type
         else:
-            btn = Factory.NavButton()  
+            btn = Factory.NavButton()
             btn.orientation_type=self.orientation_type
         btn.icon = icon
         btn.icon_font_size=self.icon_font_size
@@ -245,16 +245,16 @@ class KivyMatplotNavToolbar(RelativeLayout):
             btn.bind(on_release=lambda x:fct(mode))
         else:
             btn.bind(on_release=lambda x:fct())
-            
+
         if self.nav_icon!="3D" and mode == 'pan':
             #by default pan button is press down
             btn.state='down'
-            
+
         if self.nav_icon=="3D" and mode =='rotate':
             btn.state='down'
 
-        self.ids.container.add_widget(btn)        
-          
+        self.ids.container.add_widget(btn)
+
     def set_touch_mode(self,mode):
         self.figure_wgt.touch_mode=mode
     def home(self):
@@ -263,12 +263,12 @@ class KivyMatplotNavToolbar(RelativeLayout):
         else:
             self.figure_wgt.home()
     def back(self):
-        self.figure_wgt.back()   
+        self.figure_wgt.back()
     def forward(self):
-        self.figure_wgt.forward()  
+        self.figure_wgt.forward()
     def autoscale(self):
-        self.figure_wgt.autoscale()        
-        
+        self.figure_wgt.autoscale()
+
     def change_hover_type(self,hover_type):
         add_hover(self.figure_wgt,mode=self.hover_mode,hover_type=hover_type)
 
@@ -280,8 +280,8 @@ class KivyMatplotNavToolbar(RelativeLayout):
 Factory.register('MatplotNavToolbar', MatplotNavToolbar)
 
 Builder.load_string('''
-#:import nav_icons kivy_matplotlib_widget.icon_definitions.nav_icons                    
-                    
+#:import nav_icons kivy_matplotlib_widget.icon_definitions.nav_icons
+
 <MatplotNavToolbar>:
     orientation: 'vertical'
     home_btn: home_btn
@@ -292,7 +292,7 @@ Builder.load_string('''
     forward_btn: forward_btn
     Label:
         id: info_lbl
-        size_hint: 1, 0.3    
+        size_hint: 1, 0.3
     BoxLayout:
         size_hint: 1, 0.7
         Button:
@@ -304,7 +304,7 @@ Builder.load_string('''
             font_name:"NavigationIcons"
         Button:
             id: forward_btn
-            text: "Forward" 
+            text: "Forward"
             font_name:"NavigationIcons"
         ToggleButton:
             id: pan_btn
@@ -316,7 +316,7 @@ Builder.load_string('''
             text: "Zoom"
             group: "toolbar_btn"
             font_name:"NavigationIcons"
-                    
+
 <KivyMatplotNavToolbar>:
     current_label: info_lbl2 if root.orientation_type=='rail' else info_lbl
     info_lbl: info_lbl
@@ -333,12 +333,12 @@ Builder.load_string('''
                 rgba: (1, 1, 1, 1)
             Rectangle:
                 pos: self.pos
-                size: self.size        
+                size: self.size
         BoxLayout:
             size_hint_y: None
             size_hint_x: None if root.orientation_type=='rail' else 1
-            height: "0.01dp" if root.orientation_type=='rail'else root.nav_btn_size 
-            width:root.nav_btn_size           
+            height: "0.01dp" if root.orientation_type=='rail'else root.nav_btn_size
+            width:root.nav_btn_size
             Label:
                 id: info_lbl
                 color: 0,0,0,1
@@ -352,7 +352,7 @@ Builder.load_string('''
             height: root.nav_btn_size*len(self.children) if root.orientation_type=='rail'else root.nav_btn_size
             width: root.nav_btn_size if root.orientation_type=='rail'else root.nav_btn_size*len(self.children)
 
-        BoxLayout: 
+        BoxLayout:
             size_hint_y: 1 if root.orientation_type=='rail' else None
             size_hint_x: None
             height:root.nav_btn_size
@@ -362,7 +362,7 @@ Builder.load_string('''
                 color: 0,0,0,1
                 font_size: root.cursor_data_font_size
                 font_name:root.cursor_data_font
-                
+
 
 <NavToggleButton@ToggleButton>
     icon:"pan"
@@ -376,12 +376,12 @@ Builder.load_string('''
     color: 0,0,0,1 if self.state=='down' else 0.38
     size_hint:1 if root.orientation_type=='rail' else None,None if root.orientation_type=='rail' else 1
     height: root.nav_btn_size
-    width:root.nav_btn_size 
+    width:root.nav_btn_size
     background_normal: ''
     background_down: ''
-    background_color :1,1,1,1  
+    background_color :1,1,1,1
     on_release:
-        self.state='down'     
+        self.state='down'
 
 <NavButton@Button>
     icon:"home"
@@ -394,7 +394,7 @@ Builder.load_string('''
     font_size:root.icon_font_size
     color: 0,0,0,1
     height: root.nav_btn_size
-    width:root.nav_btn_size 
+    width:root.nav_btn_size
     background_normal: ''
     background_color :1,1,1,1
 

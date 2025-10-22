@@ -1,4 +1,4 @@
-"""This file is based on mplcursors project. Some changes as been made to 
+"""This file is based on mplcursors project. Some changes as been made to
 worked with kivy and my project
 
 mplcursors project
@@ -315,7 +315,7 @@ def _(artist, event):
                 ds = np.hypot(*(xy - data_screen_xy).T)
             elif event.pick_radius_axis == 'x':
                 ds = abs(xy[0] - data_screen_xy[:,0])
-            elif event.pick_radius_axis == 'y':  
+            elif event.pick_radius_axis == 'y':
                 ds = abs(xy[1] - data_screen_xy[:,1])
         try:
             argmin = np.nanargmin(ds)
@@ -324,7 +324,7 @@ def _(artist, event):
         else:
             target = _untransform(  # More precise than transforming back.
                 data_xy[argmin], data_screen_xy[argmin], artist.axes)
-            
+
             sels.append(
                 Selection(artist, target, argmin, ds[argmin], None, None))
     # If lines are visible, find the closest projection.
@@ -362,7 +362,7 @@ def _(artist, event):
     offsets = artist.get_offsets()
     paths = artist.get_paths()
     if _is_scatter(artist):
-        
+
         # Use the C implementation to prune the list of segments -- but only
         # for scatter plots as that implementation is inconsistent with Line2D
         # for segment-like collections (matplotlib/matplotlib#17279).
@@ -375,7 +375,7 @@ def _(artist, event):
         if offsets.any():
             offsets_screen = artist.get_offset_transform().transform(offsets)
             ds = np.hypot(*(offsets_screen - [event.x, event.y]).T)
-        
+
             argmin = ds.argmin()
             target = _untransform(
                 offsets[argmin], offsets_screen[argmin], artist.axes)
@@ -458,7 +458,7 @@ def _(container, event):
             if patch.contains(event)[0]}
     except ValueError:
         return
-    
+
     if event.projection:
         target = [event.xdata, event.ydata]
         if patch.sticky_edges.x:
@@ -468,11 +468,11 @@ def _(container, event):
         if patch.sticky_edges.y:
             target[1], = (
                 y for y in [patch.get_y(), patch.get_y() + patch.get_height()]
-                if y not in patch.sticky_edges.y)             
-        
+                if y not in patch.sticky_edges.y)
+
     else:
         x, y, width, height = container[idx].get_bbox().bounds
-        target = [x + width / 2, y + height]        
+        target = [x + width / 2, y + height]
     return Selection(container, target, idx, 0, None, None)
 
 @compute_pick.register(Wedge)
@@ -481,16 +481,16 @@ def _(container, event):
         ang = (container.theta2 - container.theta1)/2. + container.theta1
         radius=container.r
         center_x,center_y=container.center
-        y = np.sin(np.deg2rad(ang))*radius*.95+center_x  
-        x = np.cos(np.deg2rad(ang))*radius*.95+center_y 
+        y = np.sin(np.deg2rad(ang))*radius*.95+center_x
+        x = np.cos(np.deg2rad(ang))*radius*.95+center_y
     except ValueError:
         return
-    
-    target = [x, y]       
+
+    target = [x, y]
     offsets_screen = container.get_data_transform().transform(target)
     ds = np.hypot(*(offsets_screen - [event.x, event.y]).T)
     argmin=0
-    
+
     sel = Selection(container, target, argmin, ds, None, None)
     return sel if sel and sel.dist < event.pickradius else None
 

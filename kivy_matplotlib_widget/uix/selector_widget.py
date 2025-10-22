@@ -29,14 +29,14 @@ import copy
 
 
 kv = '''
-<ResizeSelect>:     
+<ResizeSelect>:
     canvas.before:
         # TOP LINE
         Color:
             rgba: root.top_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.x + dp(7), self.top, self.right - dp(7), self.top) if root.alpha \
                 else (self.x, self.top, self.right, self.top)# Top line
             cap: 'round'
@@ -50,7 +50,7 @@ kv = '''
             rgba: root.bottom_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.x + dp(7), self.y, self.right - dp(7), self.y)  if root.alpha \
                 else (self.x, self.y, self.right, self.y)# Bottom
             cap: 'round'
@@ -64,8 +64,8 @@ kv = '''
             rgba: root.left_color
         Line:
             width: dp(1)
-            points: 
-                (self.x, self.y+dp(7), self.x, self.top - dp(7)) if root.alpha \ 
+            points:
+                (self.x, self.y+dp(7), self.x, self.top - dp(7)) if root.alpha \
                 else (self.x, self.y, self.x, self.top)# Left
             cap: 'round'
             joint: 'round'
@@ -78,7 +78,7 @@ kv = '''
             rgba: root.right_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.right, self.y + dp(7), self.right, self.top - dp(7)) if root.alpha \
                 else (self.right, self.y, self.right, self.top)# Right
             cap: 'round'
@@ -97,7 +97,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]                
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -119,7 +119,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -141,7 +141,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -152,7 +152,7 @@ kv = '''
             cap: 'round'
             joint: 'round'
             close: True
-            
+
         # Upper right rectangle
         Color:
             rgba: 62/255, 254/255, 1, root.alpha
@@ -163,7 +163,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -185,7 +185,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -207,7 +207,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -230,7 +230,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -253,7 +253,7 @@ kv = '''
             rgba:
                 [0,0,0,root.alpha] if (root.bg_color[0]*0.299 + \
                 root.bg_color[1]*0.587 + root.bg_color[2]*0.114) > 186/255 \
-                else [1,1,1,root.alpha]  
+                else [1,1,1,root.alpha]
         Line:
             width: dp(1)
             points: ( \
@@ -265,16 +265,16 @@ kv = '''
             cap: 'round'
             joint: 'round'
             close: True
- 
-        
-<SpanSelect>:     
+
+
+<SpanSelect>:
     canvas.before:
         # TOP LINE
         Color:
             rgba: root.top_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.x, self.top, self.right, self.top) if root.alpha \
                 else (self.x, self.top, self.right, self.top)# Top line
 
@@ -283,7 +283,7 @@ kv = '''
             rgba: root.bottom_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.x, self.y, self.right, self.y)  if root.alpha \
                 else (self.x, self.y, self.right, self.y)# Bottom
 
@@ -292,8 +292,8 @@ kv = '''
             rgba: root.left_color
         Line:
             width: dp(1)
-            points: 
-                (self.x, self.y, self.x, self.top) if root.alpha \ 
+            points:
+                (self.x, self.y, self.x, self.top) if root.alpha \
                 else (self.x, self.y, self.x, self.top)# Left
 
 
@@ -302,24 +302,24 @@ kv = '''
             rgba: root.right_color
         Line:
             width: dp(1)
-            points: 
+            points:
                 (self.right, self.y, self.right, self.top) if root.alpha \
                 else (self.right, self.y, self.right, self.top)# Right
-                
+
         Color:
             rgba: root.span_color[0], root.span_color[1], root.span_color[2], self.span_alpha
         Rectangle:
 
             pos: self.pos
             size: self.size
-              
 
-    
-<ResizeRelativeLayout>  
+
+
+<ResizeRelativeLayout>
     resize_wgt:resize_wgt
     size_hint: None,None
     height: dp(0.001)
-    width:dp(0.001)         
+    width:dp(0.001)
     ResizeSelect:
         id:resize_wgt
         desktop_mode:root.desktop_mode
@@ -328,12 +328,12 @@ kv = '''
         size: dp(0.001),dp(0.001)
         pos: 0, 0
         opacity:0
-        
-<LassoRelativeLayout>  
+
+<LassoRelativeLayout>
     resize_wgt:resize_wgt
     size_hint: None,None
     height: dp(0.001)
-    width:dp(0.001)         
+    width:dp(0.001)
     PainterWidget:
         id:resize_wgt
         pointsize:dp(0.01)
@@ -346,12 +346,12 @@ kv = '''
         opacity:1
         line_color : 0, 0, 0, 1
         selection_point_color : 62/255, 254/255, 1,1
-        
-<EllipseRelativeLayout>  
+
+<EllipseRelativeLayout>
     resize_wgt:resize_wgt
     size_hint: None,None
     height: dp(0.001)
-    width:dp(0.001)         
+    width:dp(0.001)
     PainterWidget2:
         id:resize_wgt
         pointsize:dp(0.01)
@@ -364,12 +364,12 @@ kv = '''
         opacity:1
         line_color : 0, 0, 0, 1
         selection_point_color : 62/255, 254/255, 1,1
-        
-<SpanRelativeLayout>  
+
+<SpanRelativeLayout>
     resize_wgt:resize_wgt
     size_hint: None,None
     height: dp(0.001)
-    width:dp(0.001)         
+    width:dp(0.001)
     SpanSelect:
         id:resize_wgt
         desktop_mode:root.desktop_mode
@@ -392,7 +392,7 @@ class ResizeRelativeLayout(RelativeLayout):
         self.figure_wgt=figure_wgt
         self.desktop_mode=desktop_mode
         super().__init__(**kwargs)
-        
+
 class LassoRelativeLayout(RelativeLayout):
     figure_wgt = ObjectProperty()
     resize_wgt = ObjectProperty()
@@ -401,7 +401,7 @@ class LassoRelativeLayout(RelativeLayout):
         self.figure_wgt=figure_wgt
         self.desktop_mode=desktop_mode
         super().__init__(**kwargs)
-        
+
 class EllipseRelativeLayout(RelativeLayout):
     figure_wgt = ObjectProperty()
     resize_wgt = ObjectProperty()
@@ -410,7 +410,7 @@ class EllipseRelativeLayout(RelativeLayout):
         self.figure_wgt=figure_wgt
         self.desktop_mode=desktop_mode
         super().__init__(**kwargs)
-        
+
 class SpanRelativeLayout(RelativeLayout):
     figure_wgt = ObjectProperty()
     resize_wgt = ObjectProperty()
@@ -419,7 +419,7 @@ class SpanRelativeLayout(RelativeLayout):
         self.figure_wgt=figure_wgt
         self.desktop_mode=desktop_mode
         super().__init__(**kwargs)
-        
+
 def line_dists(points, start, end):
     if np.all(start == end):
         return np.linalg.norm(points - start, axis=1)
@@ -457,7 +457,7 @@ class ResizeSelect(FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
     alpha = NumericProperty(1)
-    dynamic_callback = BooleanProperty(False) 
+    dynamic_callback = BooleanProperty(False)
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -465,7 +465,7 @@ class ResizeSelect(FloatLayout):
         self.verts = []
         self.ax = None
         self.callback = None
-        
+
         self.alpha_other = 0.3
         self.ind = []
 
@@ -473,16 +473,16 @@ class ResizeSelect(FloatLayout):
         self.xys = None
         self.Npts = None
         self.fc = None
-        
-        self.line = None  
+
+        self.line = None
         self.ind_line=[]
-        
+
         self.first_touch=None
 
-    def on_kv_post(self,_):     
+    def on_kv_post(self,_):
         if platform != 'android' and self.desktop_mode: #only bind mouse position if not android or if the user set desktop mode to false
             Window.bind(mouse_pos=self.on_mouse_pos)
-            
+
     def update_bg_color(self):
         fig_bg_color = self.figure_wgt.figure.get_facecolor()
         rgb_fig_bg_color = mcolors.to_rgb(fig_bg_color)
@@ -491,13 +491,13 @@ class ResizeSelect(FloatLayout):
             self.bottom_color = (
                 self.top_colors
             ) = self.left_color = self.right_color = [1,1,1,1]
-            
+
         else:
             self.bg_color = [0,0,0,1]
             self.bottom_color = (
                 self.top_colors
             ) = self.left_color = self.right_color = [0,0,0,1]
-        
+
     def set_collection(self,collection):
         self.collection = collection
         self.xys = collection.get_offsets()
@@ -509,9 +509,9 @@ class ResizeSelect(FloatLayout):
             raise ValueError('Collection must have a facecolor')
         elif len(self.fc) == 1:
             self.fc = np.tile(self.fc, (self.Npts, 1))
-            
+
     def set_line(self,line):
-        self.line = line          
+        self.line = line
 
     def on_mouse_pos(self, something, touch):
         """
@@ -519,7 +519,7 @@ class ResizeSelect(FloatLayout):
         and update the cursor accordingly.
         """
         if self.opacity and self.figure_wgt.touch_mode=='selector' and self.collide_point(*self.to_widget(*touch)):
-            
+
             collision = self.collides_with_control_points(something, self.to_widget(*touch))
             if collision in ["top left", "bottom right"]:
                 Window.set_system_cursor("size_nwse")
@@ -531,7 +531,7 @@ class ResizeSelect(FloatLayout):
                 Window.set_system_cursor("size_we")
             else:
                 Window.set_system_cursor("size_all")
-                
+
         elif self.figure_wgt.collide_point(*touch):
             Window.set_system_cursor("arrow")
 
@@ -571,7 +571,7 @@ class ResizeSelect(FloatLayout):
     def on_touch_down(self, touch):
         if self.figure_wgt.touch_mode != 'selector':
             return
-        
+
         if self.collide_point(*touch.pos) and self.opacity:
             touch.grab(self)
             x, y = touch.pos[0], touch.pos[1]
@@ -618,7 +618,7 @@ class ResizeSelect(FloatLayout):
                 if touch.is_double_tap and self.callback_clear:
                     self.callback_clear()
                     return
-                
+
                 touch.grab(self)
                 x, y = touch.pos[0], touch.pos[1]
                 self.pos = (x,y-5)
@@ -626,25 +626,25 @@ class ResizeSelect(FloatLayout):
                 self.opacity=1
                 self.first_touch = (x,y-5)
                 self.selected_side = "new select"
-                
-            
+
+
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
         if self.figure_wgt.touch_mode != 'selector':
             return
-        
+
         if touch.grab_current is self:
             x, y = self.to_window(*self.pos)
 
             top = y + self.height  # top of our widget
             right = x + self.width  # right of our widget
-            
+
             if self.selected_side == "top":
                 if self.height + touch.dy <= MINIMUM_HEIGHT:
                     return False
                 self.height += touch.dy
-            
+
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
@@ -658,7 +658,7 @@ class ResizeSelect(FloatLayout):
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
-                    
+
             elif self.selected_side == "left":
                 if self.width - touch.dx <= MINIMUM_WIDTH:
                     return False
@@ -668,7 +668,7 @@ class ResizeSelect(FloatLayout):
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
-                    
+
             elif self.selected_side == "right":
                 if self.width + touch.dx <= MINIMUM_WIDTH:
                     return False
@@ -677,7 +677,7 @@ class ResizeSelect(FloatLayout):
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
-                    
+
             elif self.selected_side == "top left":
                 if touch.dx > 0:
                     if self.width - touch.dx <= MINIMUM_WIDTH:
@@ -692,7 +692,7 @@ class ResizeSelect(FloatLayout):
 
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
-                    self.onselect(self.verts)                
+                    self.onselect(self.verts)
 
             elif self.selected_side == "top right":
                 if touch.dx < 0:
@@ -704,10 +704,10 @@ class ResizeSelect(FloatLayout):
 
                 self.width += touch.dx
                 self.height += touch.dy
-                
+
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
-                    self.onselect(self.verts)                
+                    self.onselect(self.verts)
 
             elif self.selected_side == "bottom left":
                 if touch.dx > 0:
@@ -724,7 +724,7 @@ class ResizeSelect(FloatLayout):
 
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
-                    self.onselect(self.verts)                
+                    self.onselect(self.verts)
 
             elif self.selected_side == "bottom right":
                 if touch.dx < 0:
@@ -737,15 +737,15 @@ class ResizeSelect(FloatLayout):
                 self.width += touch.dx
                 self.height -= touch.dy
                 self.y += touch.dy
-                
+
                 if self.dynamic_callback and self.verts is not None:
                     self.verts = self._get_box_data()
-                    self.onselect(self.verts)                
-                
+                    self.onselect(self.verts)
+
             elif self.selected_side == "new select":
                 self.width += touch.dx
                 self.height -= touch.dy
-                self.y += touch.dy  
+                self.y += touch.dy
 
             elif not self.selected_side:
                 if self.figure_wgt.collide_point(*self.to_window(self.pos[0]+touch.dx,self.pos[1]+touch.dy )) and \
@@ -755,8 +755,8 @@ class ResizeSelect(FloatLayout):
 
                     if self.dynamic_callback and self.verts is not None:
                         self.verts = self._get_box_data()
-                        self.onselect(self.verts)                    
-                
+                        self.onselect(self.verts)
+
             if self.selected_side == "new select":
                 self.alpha = 0
             else:
@@ -767,7 +767,7 @@ class ResizeSelect(FloatLayout):
     def on_touch_up(self, touch):
         if self.figure_wgt.touch_mode != 'selector':
             return
-        
+
         if touch.grab_current is self:
             touch.ungrab(self)
             self.alpha = 1
@@ -779,11 +779,11 @@ class ResizeSelect(FloatLayout):
             else:
                 self.bottom_color = (
                     self.top_colors
-                ) = self.left_color = self.right_color = [1,1,1,1]                
-            
+                ) = self.left_color = self.right_color = [1,1,1,1]
+
             if self.first_touch and self.selected_side == "new select":
                 self.check_if_reverse_selection(touch)
-            
+
             if abs(self.size[0])<MINIMUM_WIDTH or abs(self.size[1])<MINIMUM_HEIGHT:
                 self.reset_selection()
             else:
@@ -793,24 +793,24 @@ class ResizeSelect(FloatLayout):
 
             return True
         return super().on_touch_up(touch)
-    
-    def check_if_reverse_selection(self,last_touch):  
+
+    def check_if_reverse_selection(self,last_touch):
 
         if last_touch.x > self.first_touch[0] and \
             last_touch.y < self.first_touch[1]:
 
                 return
-            
+
         else:
             #reverse selection'
             if last_touch.x < self.first_touch[0]:
                 self.pos[0] = last_touch.x
                 self.size[0] = self.first_touch[0] - last_touch.x + 5
-                
+
             if last_touch.y > self.first_touch[1]:
-                self.size[1] = last_touch.y - self.first_touch[1] 
+                self.size[1] = last_touch.y - self.first_touch[1]
                 self.pos[1] = last_touch.y - self.size[1]
-                
+
             return
 
 
@@ -819,9 +819,9 @@ class ResizeSelect(FloatLayout):
         self.size = (dp(0.01),dp(0.01))
         self.opacity=0
 
-        
+
     def _get_box_data(self):
-        trans = self.ax.transData.inverted() 
+        trans = self.ax.transData.inverted()
         #get box 4points xis data
         x0 = self.to_window(*self.pos)[0]-self.figure_wgt.pos[0]
         y0 = self.to_window(*self.pos)[1]-self.figure_wgt.pos[1]
@@ -831,8 +831,8 @@ class ResizeSelect(FloatLayout):
         y3 = self.to_window(*self.pos)[1]-self.figure_wgt.pos[1]
         x2 = self.to_window(*self.pos)[0] + self.width -self.figure_wgt.pos[0]
         y2 = self.to_window(*self.pos)[1] + self.height  -self.figure_wgt.pos[1]
-        
-        x0_box, y0_box = trans.transform_point((x0, y0)) 
+
+        x0_box, y0_box = trans.transform_point((x0, y0))
         x1_box, y1_box = trans.transform_point((x1, y1))
         x2_box, y2_box = trans.transform_point((x2, y2))
         x3_box, y3_box = trans.transform_point((x3, y3))
@@ -853,18 +853,18 @@ class ResizeSelect(FloatLayout):
             self.collection.set_facecolors(self.fc)
         if self.line:
             xdata,ydata = self.line.get_xydata().T
-            self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
+            self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]
 
         self.figure_wgt.figure.canvas.draw_idle()
         if self.callback:
             self.callback(self)
-            
+
     def set_callback(self,callback):
         self.callback=callback
 
     def set_callback_clear(self,callback):
-        self.callback_clear=callback           
-        
+        self.callback_clear=callback
+
     def clear_selection(self):
 
         if self.collection:
@@ -873,9 +873,9 @@ class ResizeSelect(FloatLayout):
             self.collection.set_facecolors(self.fc)
         if self.line:
             self.ind_line=[]
-            
+
         self.reset_selection()
-        self.figure_wgt.figure.canvas.draw_idle() 
+        self.figure_wgt.figure.canvas.draw_idle()
 
 
 def _rotate_pos(x, y, cx, cy, angle, base_angle=0.):
@@ -1307,7 +1307,7 @@ class PaintCanvasBehaviorBase(EventDispatcher):
 
         if super(PaintCanvasBehaviorBase, self).on_touch_down(touch):
             return True
-                
+
         if not self.collide_point(touch.x, touch.y):
             return False
 
@@ -2172,7 +2172,7 @@ class PaintEllipse(PaintShape):
     ready_to_finish = True
 
     is_valid = True
-    
+
     during_creation = False
 
     def __init__(self, **kwargs):
@@ -2220,7 +2220,7 @@ class PaintEllipse(PaintShape):
             x, y = self.center
             rx, ry = self.radius_x, self.radius_y
             angle = self.angle
-            
+
             PushMatrix(group=name)
             Rotate(angle=angle / pi * 180., origin=(x, y), group=name)
             Ellipse(size=(rx * 2., ry * 2.), pos=(x - rx, y - ry), group=name)
@@ -2231,7 +2231,7 @@ class PaintEllipse(PaintShape):
             return False
 
         colors = self.color_instructions = []
-        
+
         x, y = self.center
         rx, ry = self.radius_x, self.radius_y
         angle = self.angle
@@ -2247,11 +2247,11 @@ class PaintEllipse(PaintShape):
         i4 = self.perim_ellipse_inst = Line(
             ellipse=(x - rx, y - ry, 2 * rx, 2 * ry),
             width=self.line_width, group=self.graphics_name)
-        
+
         i66 = self.perim_color_inst2 = Color(
             *self.selection_point_color, group=self.graphics_name)
         colors.append(i66)
-        
+
         i6 = self.selection_point_inst2 = Point(
             points=[x, y + ry], pointsize=self.pointsize,
             group=self.graphics_name)
@@ -2442,25 +2442,25 @@ class PaintEllipse(PaintShape):
         cx, cy = self.center
         x0,y0 = self._get_coord_from_angle(self.selection_point_inst.points)
         x1,y1 = self._get_coord_from_angle(self.selection_point_inst2.points,base_angle = pi / 2.)
-        
+
         return np.array([[cx,cy],
                          [x0,y0],
                          [x1,y1]])
- 
+
     def _get_coord_from_angle(self,pos,base_angle=0.):
         x1, y1 = pos
 
         x2, y2 = self.center
         x, y = _rotate_pos(x1, y1, x2, y2, self.angle, base_angle=base_angle)
         return x,y
-    
+
     def get_min_max(self):
         """
         Calculates the min/max x and y coordinates for a rotated ellipse.
-        
+
         Args:
             None
-            
+
         Returns:
             dict: A dictionary containing min_x, max_x, min_y, max_y.
         """
@@ -2468,30 +2468,30 @@ class PaintEllipse(PaintShape):
         a = self.radius_x  # semi-major axis
         b = self.radius_y  # semi-minor axis
         theta = self.angle  # convert angle to radians
-        
+
         # Parametric equations for the ellipse
         t = np.linspace(0, 2 * pi, 1000)  # Parameter t from 0 to 2*pi
-    
+
         # Parametric points on the unrotated ellipse
         x_ellipse = a * np.cos(t)
         y_ellipse = b * np.sin(t)
-        
+
         # Rotation matrix applied to the points
         x_rotated = x_ellipse * cos(theta) - y_ellipse * sin(theta)
         y_rotated = x_ellipse * sin(theta) + y_ellipse * cos(theta)
-        
+
         # Translating the rotated points to the ellipse's center
         x_final = cx + x_rotated
         y_final = cy + y_rotated
-        
+
         # Finding the min and max values of x and y
         min_x = np.min(x_final)
         max_x = np.max(x_final)
         min_y = np.min(y_final)
         max_y = np.max(y_final)
-        
-        return min_x, max_x, min_y, max_y       
-        
+
+        return min_x, max_x, min_y, max_y
+
 
 class PaintPolygon(PaintShape):
     """A shape that represents a polygon.
@@ -2634,11 +2634,11 @@ class PaintPolygon(PaintShape):
         i2 = self.perim_line_inst = Line(
             points=self.points, width=self.line_width,
             close=self.finished, group=self.graphics_name)
-        
+
         i33 = self.perim_color_inst2 = Color(
             *self.selection_point_color, group=self.graphics_name)
         colors.append(i33)
-        
+
         i3 = self.perim_points_inst = Point(
             points=self.points, pointsize=self.pointsize,
             group=self.graphics_name)
@@ -2858,7 +2858,7 @@ class PaintPolygon(PaintShape):
 
         points = [val for point in zip(x_vals, y_vals) for val in point]
         self.points = points
-        self.selection_point = points[:2]    
+        self.selection_point = points[:2]
 
 class PaintFreeformPolygon(PaintPolygon):
     """A shape that represents a polygon.
@@ -3007,7 +3007,7 @@ class PaintCanvasBehavior(PaintCanvasBehaviorBase):
         if add:
             self.add_shape(shape)
         return shape
-    
+
 class PainterWidget(PaintCanvasBehavior, FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
@@ -3015,7 +3015,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
     max_rate = NumericProperty(2/60)
 
     def __init__(self,**kwargs):
-        super().__init__(**kwargs)    
+        super().__init__(**kwargs)
         self.selected_side = None
         self.last_touch_time=None
         self.verts = []
@@ -3023,7 +3023,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
         self.ax = None
         self.callback = None
         self.callback_clear = None
-        
+
         self.alpha_other = 0.3
         self.ind = []
 
@@ -3031,18 +3031,18 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
         self.xys = None
         self.Npts = None
         self.fc = None
-        
-        self.line = None  
+
+        self.line = None
         self.ind_line=[]
-        
+
         self.first_touch=None
         self.current_shape_close=None
 
     #TODO manage mouse system cursor
-    # def on_kv_post(self,_):     
+    # def on_kv_post(self,_):
     #     if platform != 'android' and self.desktop_mode: #only bind mouse position if not android or if the user set desktop mode to false
     #         Window.bind(mouse_pos=self.on_mouse_pos)
-            
+
     def on_mouse_pos(self, something, touch):
         """
         TODO
@@ -3050,7 +3050,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
         and update the cursor accordingly.
         """
         if self.opacity and self.collide_point(*self.to_widget(*touch)):
-            
+
             collision = self.collides_with_control_points(something, self.to_widget(*touch))
             if collision in ["top left", "bottom right"]:
                 Window.set_system_cursor("size_nwse")
@@ -3062,10 +3062,10 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 Window.set_system_cursor("size_we")
             else:
                 Window.set_system_cursor("size_all")
-                
+
         elif self.figure_wgt.collide_point(*touch):
             Window.set_system_cursor("arrow")
-    
+
 
     def create_shape_with_touch(self, touch):
         shape = super(PainterWidget, self).create_shape_with_touch(touch)
@@ -3078,7 +3078,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             shape.add_shape_to_canvas(self)
             return True
         return False
-    
+
     def on_touch_down(self, touch):
         if self.figure_wgt.touch_mode!='selector':
             return False
@@ -3109,7 +3109,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 if touch.is_double_tap and self.callback_clear:
                     self.callback_clear()
                     return
-                
+
                 x, y = touch.pos[0], touch.pos[1]
                 result=False
                 if self.shapes and self.opacity==1:
@@ -3133,7 +3133,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                                 touch, outside=not self.collide_point(touch.x, touch.y))
                             if self.check_new_shape_done(shape2, 'up'):
                                 self.finish_current_shape()
-                        
+
                     else:
                         self.selected_side = "pan"
                 else:
@@ -3155,15 +3155,15 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                                 touch, outside=not self.collide_point(touch.x, touch.y))
                             if self.check_new_shape_done(shape2, 'up'):
                                 self.finish_current_shape()
-      
+
                     else:
                         self.selected_side = "new select"
                         self.delete_all_shapes()
-                
+
                 ud['paint_interacted'] = True
                 self._processing_touch = touch
                 touch.grab(self)
-        
+
                 # if we have a current shape, all touch will go to it
                 current_shape = self.current_shape
                 if current_shape is not None:
@@ -3172,13 +3172,13 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                         >= dp(self.min_touch_dist)
                     if ud['paint_cleared_selection']:
                         self.finish_current_shape()
-        
+
                     else:
                         ud['paint_interaction'] = 'current'
                         current_shape.handle_touch_down(touch)
 
                         return True
-        
+
                 # next try to interact by selecting or interacting with selected shapes
                 shape = self.get_closest_selection_point_shape(touch.x, touch.y)
                 if shape is not None:
@@ -3186,7 +3186,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                     ud['paint_selected_shape'] = shape
                     ud['paint_was_selected'] = shape not in self.selected_shapes
                     return True
-        
+
                 if self._ctrl_down:
                     ud['paint_interaction'] = 'done'
                     return True
@@ -3195,37 +3195,37 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
 
                     for shape in self.shapes:
                         shape.pointsize = dp(0.01)
-                        
-                return True                
-                
+
+                return True
+
         elif not self.collide_point(touch.x, touch.y):
             return False
 
 
     def on_touch_move(self, touch):
         if self.figure_wgt.touch_mode!='selector':
-            return False        
+            return False
 
         ud = touch.ud
 
         if touch.grab_current is self:
             # for move, only use normal touch, not touch outside range
             x, y = self.to_window(*self.pos)
-                
+
             if self.selected_side == "new select" or self.selected_side == "modify":
 
                 if ud['paint_interaction'] == 'done':
                     return True
 
                 ud['paint_touch_moved'] = True
-                
+
                 if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
 
                     if not ud['paint_interaction']:
                         if ud['paint_cleared_selection'] or self.clear_selected_shapes():
                             ud['paint_interaction'] = 'done'
                             return True
-    
+
                         # finally try creating a new shape
                         # touch must have originally collided otherwise we wouldn't be here
                         shape = self.create_shape_with_touch(touch)
@@ -3237,21 +3237,21 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                                 self.finish_current_shape()
                                 ud['paint_interaction'] = 'done'
                                 return True
-    
+
                             ud['paint_interaction'] = 'current_new'
                         else:
                             ud['paint_interaction'] = 'done'
                             return True
-    
+
                     if ud['paint_interaction'] in ('current', 'current_new'):
                         if self.current_shape is None:
                             ud['paint_interaction'] = 'done'
                         else:
                             self.current_shape.handle_touch_move(touch)
                         return True
-    
+
             if self.selected_side == "pan":
-                
+
                     shape = ud['paint_selected_shape']
 
                     dataxy = np.array(self.shapes[0].points).reshape(-1,2)
@@ -3269,11 +3269,11 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
 
     def on_touch_up(self, touch):
         if self.figure_wgt.touch_mode!='selector':
-            return False        
+            return False
         ud = touch.ud
 
         if touch.grab_current is self:
-            touch.ungrab(self)  
+            touch.ungrab(self)
             # don't process the same touch up again
             paint_interaction = ud['paint_interaction']
             ud['paint_interaction'] = 'done'
@@ -3281,7 +3281,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             self.finish_current_shape()
             self.alpha = 1
 
-                
+
             if self.selected_side != "modify":
                 if self.selected_side == "new select" and self.shapes:
                     self.filter_path(self.shapes[0])
@@ -3298,15 +3298,15 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 else:
                     for shape in self.shapes:
                         shape.pointsize = dp(7)
-                        
+
                 if self.widget_verts is not None:
                     self.verts = self._get_lasso_data(self.widget_verts)
                     self.onselect(self.verts)
-                    
+
             if self.selected_side == "modify":
 
                 paint_interaction = ud['paint_interaction']
-                ud['paint_interaction'] = 'done' 
+                ud['paint_interaction'] = 'done'
                 self._processing_touch = None
 
                 if not paint_interaction:
@@ -3356,20 +3356,20 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                             self.selected_shapes[0] != shape:
                         self.clear_selected_shapes()
                         self.select_shape(shape)
-                        
+
 
                 return True
-                    
-            return True  
-            
-        if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):        
+
+            return True
+
+        if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
             self._processing_touch = None
 
-            return True        
-        
+            return True
+
 
         return super().on_touch_up(touch)
-       
+
 
     def check_if_inside_path(self,pts,x,y):
         verts = np.array(pts).reshape(-1, 2)
@@ -3379,7 +3379,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             return True
         else:
             return False
-        
+
     def get_closest_selection_point_shape(self, x, y):
         """Given a position, it returns the shape whose selection point is the
         closest to this position among all the shapes.
@@ -3405,7 +3405,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 min_dist = dist
 
         return closest_shape
-    
+
     def do_long_touch(self, touch, *largs):
         """Handles a long touch by the user.
         """
@@ -3432,41 +3432,41 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             self.start_shape_interaction(shape, (touch.x, touch.y))
         else:
             ud['paint_interaction'] = 'done'
-        touch.pop() 
-        
+        touch.pop()
+
     def filter_path(self,shape):
         pts = shape.points
         verts = np.array(pts).reshape(-1, 2)
         filter_pts = rdp(verts,5.0)
-        
+
         if len(filter_pts) < 6 :
             self.widget_verts = None
             return
-        
-        
+
+
         #delete old shape
         self.delete_all_shapes()
-        
+
         shape = self.create_shape_with_touch(self.first_touch)
         if shape is not None:
             shape.handle_touch_down(self.first_touch, opos=self.first_touch.opos)
             self.current_shape = shape
-        
-        
+
+
         #crete new filter shape
         for data_xy in filter_pts:
-            
+
             if not self.current_shape.selection_point:
                 self.current_shape.selection_point = data_xy
-    
+
             self.current_shape.points.extend(data_xy)
             if self.current_shape.perim_close_inst is not None:
                 self.current_shape.perim_close_inst.points = self.current_shape.points[-2:] + self.current_shape.points[:2]
             if len(self.current_shape.points) >= 6:
                 self.current_shape.is_valid = True
-                
+
         self.finish_current_shape()
-        
+
         self.widget_verts = filter_pts
 
     def set_collection(self,collection):
@@ -3480,10 +3480,10 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             raise ValueError('Collection must have a facecolor')
         elif len(self.fc) == 1:
             self.fc = np.tile(self.fc, (self.Npts, 1))
-            
+
     def set_line(self,line):
-        self.line = line            
- 
+        self.line = line
+
     def onselect(self, verts):
         if verts:
             path = Path(verts)
@@ -3494,18 +3494,18 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
                 self.collection.set_facecolors(self.fc)
             if self.line:
                 xdata,ydata = self.line.get_xydata().T
-                self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
-    
+                self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]
+
             self.figure_wgt.figure.canvas.draw_idle()
             if self.callback:
                 self.callback(self)
-            
+
     def set_callback(self,callback):
         self.callback=callback
-        
+
     def set_callback_clear(self,callback):
-        self.callback_clear=callback          
-        
+        self.callback_clear=callback
+
     def clear_selection(self):
 
         if self.collection:
@@ -3516,11 +3516,11 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             self.ind_line=[]
 
         self.delete_all_shapes()
-        self.figure_wgt.figure.canvas.draw_idle()  
-        
+        self.figure_wgt.figure.canvas.draw_idle()
+
     def _get_lasso_data(self,widget_verts):
-        trans = self.ax.transData.inverted() 
-        
+        trans = self.ax.transData.inverted()
+
         verts=[]
         for data_xy in widget_verts:
             x, y = trans.transform_point((data_xy[0] + self.to_window(*self.pos)[0]-self.figure_wgt.pos[0],
@@ -3528,7 +3528,7 @@ class PainterWidget(PaintCanvasBehavior, FloatLayout):
             verts.append((x, y))
 
         return verts
-    
+
 class PainterWidget2(PaintCanvasBehavior, FloatLayout):
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
@@ -3536,7 +3536,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
     max_rate = NumericProperty(2/60)
 
     def __init__(self,**kwargs):
-        super().__init__(**kwargs)    
+        super().__init__(**kwargs)
         self.selected_side = None
         self.last_touch_time=None
         self.verts = []
@@ -3544,7 +3544,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
         self.ax = None
         self.callback = None
         self.callback_clear = None
-        
+
         self.alpha_other = 0.3
         self.ind = []
 
@@ -3552,18 +3552,18 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
         self.xys = None
         self.Npts = None
         self.fc = None
-        
-        self.line = None  
+
+        self.line = None
         self.ind_line=[]
-        
+
         self.first_touch=None
         self.current_shape_close=None
 
     #TODO manage mouse system cursor
-    # def on_kv_post(self,_):     
+    # def on_kv_post(self,_):
     #     if platform != 'android' and self.desktop_mode: #only bind mouse position if not android or if the user set desktop mode to false
     #         Window.bind(mouse_pos=self.on_mouse_pos)
-            
+
     def on_mouse_pos(self, something, touch):
         """
         TODO
@@ -3571,7 +3571,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
         and update the cursor accordingly.
         """
         if self.opacity and self.collide_point(*self.to_widget(*touch)):
-            
+
             collision = self.collides_with_control_points(something, self.to_widget(*touch))
             if collision in ["top left", "bottom right"]:
                 Window.set_system_cursor("size_nwse")
@@ -3583,16 +3583,16 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 Window.set_system_cursor("size_we")
             else:
                 Window.set_system_cursor("size_all")
-                
+
         elif self.figure_wgt.collide_point(*touch):
             Window.set_system_cursor("arrow")
-    
+
 
     def create_shape_with_touch(self, touch, check=True):
         shape = super(PainterWidget2, self).create_shape_with_touch(touch)
         if check and shape.radius_x==dp(10) and shape.radius_y==dp(15):
-            return None       
-        
+            return None
+
         if shape is not None:
             shape.add_shape_to_canvas(self)
         return shape
@@ -3602,7 +3602,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
             shape.add_shape_to_canvas(self)
             return True
         return False
-    
+
     def on_touch_down(self, touch):
         if self.figure_wgt.touch_mode!='selector':
             return False
@@ -3627,12 +3627,12 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
 
         if super(PaintCanvasBehaviorBase, self).on_touch_down(touch):
             return True
-        
+
         if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
-            
-            
+
+
             if self.figure_wgt.touch_mode=='selector':
-                
+
                 if touch.is_double_tap and self.callback_clear:
                     self.callback_clear()
                     return
@@ -3641,7 +3641,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 result=False
                 if self.shapes and self.opacity==1:
                     result = self.check_if_inside_path(self.shapes[0],x,y)
-                    
+
                 self.opacity=1
                 if result:
                     shape = self.get_closest_selection_point_shape(touch.x, touch.y)
@@ -3660,7 +3660,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                                 touch, outside=not self.collide_point(touch.x, touch.y))
                             if self.check_new_shape_done(shape2, 'up'):
                                 self.finish_current_shape()
-                        
+
                     else:
                         self.selected_side = "pan"
                         touch.grab(self)
@@ -3684,11 +3684,11 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                                 touch, outside=not self.collide_point(touch.x, touch.y))
                             if self.check_new_shape_done(shape2, 'up'):
                                 self.finish_current_shape()
-      
+
                     else:
                         self.selected_side = "new select"
                         self.delete_all_shapes()
-                
+
                 ud['paint_interacted'] = True
                 self._processing_touch = touch
                 touch.grab(self)
@@ -3700,14 +3700,14 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                         >= dp(self.min_touch_dist)
                     if ud['paint_cleared_selection']:
                         self.finish_current_shape()
-        
+
                     else:
                         ud['paint_interaction'] = 'current'
                         current_shape.handle_touch_down(touch)
-                        
+
 
                         return True
-        
+
                 # next try to interact by selecting or interacting with selected shapes
                 shape = self.get_closest_selection_point_shape(touch.x, touch.y)
                 if shape is not None:
@@ -3715,7 +3715,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                     ud['paint_selected_shape'] = shape
                     ud['paint_was_selected'] = shape not in self.selected_shapes
                     return True
-        
+
                 if self._ctrl_down:
                     ud['paint_interaction'] = 'done'
                     return True
@@ -3724,10 +3724,10 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
 
                     for shape in self.shapes:
                         shape.pointsize = dp(7)
-                        
-                return True 
-                
-                
+
+                return True
+
+
         elif not self.collide_point(touch.x, touch.y):
             if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
                 self.delete_all_shapes()
@@ -3736,28 +3736,28 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
 
     def on_touch_move(self, touch):
         if self.figure_wgt.touch_mode!='selector':
-            return False        
+            return False
 
         ud = touch.ud
 
         if touch.grab_current is self:
             # for move, only use normal touch, not touch outside range
             x, y = self.to_window(*self.pos)
-                
+
             if self.selected_side == "new select" or self.selected_side == "modify":
 
                 # if ud['paint_interaction'] == 'done':
                 #     return True
 
                 ud['paint_touch_moved'] = True
-                
+
                 if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
 
                     if not ud['paint_interaction']:
                         if ud['paint_cleared_selection'] or self.clear_selected_shapes():
                             ud['paint_interaction'] = 'done'
                             return True
-    
+
                         # finally try creating a new shape
                         # touch must have originally collided otherwise we wouldn't be here
                         shape = self.create_shape_with_touch(touch,check=False)
@@ -3766,20 +3766,20 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                             self.first_touch = touch
                             self.current_shape = shape
                             self.current_shape.during_creation = True
-                            
+
                             if self.check_new_shape_done(shape, 'down'):
-                                
+
                                 self.finish_current_shape()
                                 self.current_shape = self.shapes[0]
                                 ud['paint_interaction'] = 'done'
                                 return True
-    
+
                             ud['paint_interaction'] = 'current_new'
                         else:
                             ud['paint_interaction'] = 'done'
                             shape.handle_touch_move(touch)
                             return True
-    
+
                     # if ud['paint_interaction'] in ('current', 'current_new'):
                     else:
                         if self.current_shape is None:
@@ -3788,7 +3788,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                             self.current_shape.start_interaction((touch.x, touch.y))
                             self.current_shape.handle_touch_move(touch)
                         return True
-    
+
             if self.selected_side == "pan":
                 shape = ud['paint_selected_shape']
 
@@ -3804,23 +3804,23 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
         return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
-        
+
         if self.figure_wgt.touch_mode!='selector':
-            return False 
-            
+            return False
+
         ud = touch.ud
-        
+
         if touch.grab_current is self:
-            touch.ungrab(self)  
+            touch.ungrab(self)
             # don't process the same touch up again
             paint_interaction = ud['paint_interaction']
             ud['paint_interaction'] = 'done'
             self._processing_touch = None
             self.finish_current_shape()
             self.alpha = 1
-            
 
-                
+
+
             if self.selected_side != "modify":
                 if self.selected_side == "new select" and self.shapes:
                     self.shapes[0].during_creation = False
@@ -3838,16 +3838,16 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 else:
                     for shape in self.shapes:
                         shape.pointsize = dp(7)
-                        
+
                 if self.widget_verts is not None:
                     self.verts = self._get_ellipse_data(self.widget_verts)
                     self.onselect(self.verts)
-    
-                    
+
+
             if self.selected_side == "modify":
 
                 paint_interaction = ud['paint_interaction']
-                ud['paint_interaction'] = 'done' 
+                ud['paint_interaction'] = 'done'
                 self._processing_touch = None
 
                 if not paint_interaction:
@@ -3898,35 +3898,35 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                             self.selected_shapes[0] != shape:
                         self.clear_selected_shapes()
                         self.select_shape(shape)
-                        
+
 
                 return True
-                    
-            return True  
-            
-        if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):        
+
+            return True
+
+        if self.figure_wgt.collide_point(*self.to_window(*touch.pos)):
             self._processing_touch = None
 
-            return True        
-        
+            return True
+
         self.finish_current_shape()
 
         return super().on_touch_up(touch)
-       
+
 
     def check_if_inside_path(self,shape,x,y):
         cx, cy = shape.center
         width= shape.radius_x * 2
         height= shape.radius_y * 2
         angle= shape.rotate_inst.angle
-        
+
         path = Ellipse_mpl((cx,cy), width, height,angle=angle)
         ind = np.nonzero(path.contains_points(np.array([[x,y]])))[0]
         if len(ind)!=0:
             return True
         else:
             return False
-        
+
     def get_closest_selection_point_shape(self, x, y):
         """Given a position, it returns the shape whose selection point is the
         closest to this position among all the shapes.
@@ -3952,7 +3952,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 min_dist = dist
 
         return closest_shape
-    
+
     def do_long_touch(self, touch, *largs):
         """Handles a long touch by the user.
         """
@@ -3979,8 +3979,8 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
             self.start_shape_interaction(shape, (touch.x, touch.y))
         else:
             ud['paint_interaction'] = 'done'
-        touch.pop() 
-        
+        touch.pop()
+
 
     def set_collection(self,collection):
         self.collection = collection
@@ -3993,21 +3993,21 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
             raise ValueError('Collection must have a facecolor')
         elif len(self.fc) == 1:
             self.fc = np.tile(self.fc, (self.Npts, 1))
-            
+
     def set_line(self,line):
-        self.line = line            
- 
+        self.line = line
+
     def onselect(self, verts):
-        if verts and self.shapes:           
+        if verts and self.shapes:
             cx, cy = self.shapes[0].center
             width= self.shapes[0].radius_x * 2
             height= self.shapes[0].radius_y * 2
             angle= self.shapes[0].rotate_inst.angle
-            
+
             path = Ellipse_mpl((cx,cy), width, height,angle=angle)
-            
+
             newverts = self._get_ellipse_data(path.get_verts())
-            
+
             path = Path(newverts)
 
             if self.collection:
@@ -4017,18 +4017,18 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
                 self.collection.set_facecolors(self.fc)
             if self.line:
                 xdata,ydata = self.line.get_xydata().T
-                self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
-    
+                self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]
+
             self.figure_wgt.figure.canvas.draw_idle()
             if self.callback:
                 self.callback(self)
-                
+
     def set_callback(self,callback):
         self.callback=callback
-        
+
     def set_callback_clear(self,callback):
-        self.callback_clear=callback          
-        
+        self.callback_clear=callback
+
     def clear_selection(self):
 
         if self.collection:
@@ -4039,11 +4039,11 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
             self.ind_line=[]
 
         self.delete_all_shapes()
-        self.figure_wgt.figure.canvas.draw_idle()  
-        
+        self.figure_wgt.figure.canvas.draw_idle()
+
     def _get_ellipse_data(self,widget_verts):
-        trans = self.ax.transData.inverted() 
-        
+        trans = self.ax.transData.inverted()
+
         verts=[]
         for data_xy in widget_verts:
             x, y = trans.transform_point((data_xy[0] + self.to_window(*self.pos)[0]-self.figure_wgt.pos[0],
@@ -4051,7 +4051,7 @@ class PainterWidget2(PaintCanvasBehavior, FloatLayout):
             verts.append((x, y))
 
         return verts
-    
+
 
 class SpanSelect(FloatLayout):
     top_color = ColorProperty("black")
@@ -4059,7 +4059,7 @@ class SpanSelect(FloatLayout):
     left_color = ColorProperty("black")
     right_color = ColorProperty("black")
     highlight_color = ColorProperty("red")
-    bg_color = ColorProperty([1,1,1,1])    
+    bg_color = ColorProperty([1,1,1,1])
     figure_wgt = ObjectProperty()
     desktop_mode = BooleanProperty(True)
     span_orientation = OptionProperty('vertical', options=['vertical','horizontal'])
@@ -4068,16 +4068,16 @@ class SpanSelect(FloatLayout):
     span_hide_on_release = BooleanProperty(False)
     alpha = NumericProperty(1)
     invert_rect_ver = BooleanProperty(False)
-    invert_rect_hor = BooleanProperty(False)   
-    dynamic_callback = BooleanProperty(False) 
+    invert_rect_hor = BooleanProperty(False)
+    dynamic_callback = BooleanProperty(False)
     stay_in_axis_limit = BooleanProperty(False)
-    
+
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
         self.verts = []
         self.ax = None
         self.callback = None
-        
+
         self.alpha_other = 0.3
         self.ind = []
 
@@ -4085,16 +4085,16 @@ class SpanSelect(FloatLayout):
         self.xys = None
         self.Npts = None
         self.fc = None
-        
-        self.line = None  
+
+        self.line = None
         self.ind_line=[]
-        
+
         self.first_touch=None
 
-    def on_kv_post(self,_):     
+    def on_kv_post(self,_):
         if platform != 'android' and self.desktop_mode: #only bind mouse position if not android or if the user set desktop mode to false
             Window.bind(mouse_pos=self.on_mouse_pos)
-            
+
     def update_bg_color(self):
         fig_bg_color = self.figure_wgt.figure.get_facecolor()
         rgb_fig_bg_color = mcolors.to_rgb(fig_bg_color)
@@ -4103,13 +4103,13 @@ class SpanSelect(FloatLayout):
             self.bottom_color = (
                 self.top_colors
             ) = self.left_color = self.right_color = [1,1,1,1]
-            
+
         else:
             self.bg_color = [0,0,0,1]
             self.bottom_color = (
                 self.top_colors
             ) = self.left_color = self.right_color = [0,0,0,1]
-        
+
     def set_collection(self,collection):
         self.collection = collection
         self.xys = collection.get_offsets()
@@ -4121,9 +4121,9 @@ class SpanSelect(FloatLayout):
             raise ValueError('Collection must have a facecolor')
         elif len(self.fc) == 1:
             self.fc = np.tile(self.fc, (self.Npts, 1))
-            
+
     def set_line(self,line):
-        self.line = line          
+        self.line = line
 
     def on_mouse_pos(self, something, touch):
         """
@@ -4131,7 +4131,7 @@ class SpanSelect(FloatLayout):
         and update the cursor accordingly.
         """
         if self.opacity and self.figure_wgt.touch_mode=='selector' and self.collide_point(*self.to_widget(*touch)):
-            
+
             collision = self.collides_with_control_points(something, self.to_widget(*touch))
             if collision in ["top left", "bottom right"]:
                 Window.set_system_cursor("size_nwse")
@@ -4143,7 +4143,7 @@ class SpanSelect(FloatLayout):
                 Window.set_system_cursor("size_we")
             else:
                 Window.set_system_cursor("size_all")
-                
+
         # elif self.figure_wgt.collide_point(*touch):
         else:
             Window.set_system_cursor("arrow")
@@ -4154,7 +4154,7 @@ class SpanSelect(FloatLayout):
         """
         x, y = touch[0], touch[1]
 
-        
+
         if self.span_orientation == 'vertical':
             # Checking mouse is on left edge
             if self.x - dp(7) <= x <= self.x + dp(7):
@@ -4168,7 +4168,7 @@ class SpanSelect(FloatLayout):
                 if self.y<= y <= self.y + self.height:
                     return "right"
                 else:
-                    return False 
+                    return False
             else:
                 return False
 
@@ -4217,62 +4217,62 @@ class SpanSelect(FloatLayout):
                 if touch.is_double_tap and self.callback_clear:
                     self.callback_clear()
                     return
-                
+
                 touch.grab(self)
                 #get figure boundaries (in pixels)
-                
+
                 left_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[0])
                 right_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[2] +self.ax.bbox.bounds[0] )
                 top_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[3] + self.ax.bbox.bounds[1])
                 bottom_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[1])
-                
+
                 width = right_bound-left_bound
-                
+
                 left_bound,right_bound = self.to_widget(left_bound,right_bound)
 
                 x, y = touch.pos[0], touch.pos[1]
-                
+
                 self.opacity=1
-                
+
                 if self.span_orientation == 'vertical':
                     self.pos = (x,bottom_bound - self.figure_wgt.y)
-                    self.size = (5,top_bound-bottom_bound) 
+                    self.size = (5,top_bound-bottom_bound)
                 elif self.span_orientation == 'horizontal':
                     self.pos = (left_bound,y)
-                    self.size = (width,-5) 
-                    
+                    self.size = (width,-5)
+
                 # self.size = (5,5)
                 self.opacity=1
                 if self.span_orientation == 'vertical':
-                    self.first_touch = (x,bottom_bound - self.figure_wgt.y) 
+                    self.first_touch = (x,bottom_bound - self.figure_wgt.y)
                 elif self.span_orientation == 'horizontal':
                     self.first_touch = (left_bound,y)
                 self.selected_side = "new select"
-                
-            
+
+
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
         if self.figure_wgt.touch_mode != 'selector':
             return
-        
+
         if touch.grab_current is self:
             x, y = self.to_window(*self.pos)
 
             top = y + self.height  # top of our widget
             right = x + self.width  # right of our widget
- 
+
             if self.stay_in_axis_limit:
                 #get figure boundaries (in pixels)
                 left_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[0])
                 right_bound = float(self.figure_wgt.x +self.ax.bbox.bounds[2] +self.ax.bbox.bounds[0] )
                 top_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[3] + self.ax.bbox.bounds[1])
                 bottom_bound = float(self.figure_wgt.y +self.ax.bbox.bounds[1])
-                
+
                 width = right_bound-left_bound
-                
+
                 left_bound,right_bound = self.to_widget(left_bound,right_bound)
-    
+
             if self.selected_side == "top":
                 if self.height + touch.dy <= MINIMUM_HEIGHT:
                     return False
@@ -4287,19 +4287,19 @@ class SpanSelect(FloatLayout):
             elif self.selected_side == "left":
                 if self.width - touch.dx <= MINIMUM_WIDTH:
                     return False
-                
+
                 if self.stay_in_axis_limit and self.x + touch.dx <= left_bound:
                     self.width -= (left_bound-self.x)
                     self.x = left_bound
-                    
+
                     if self.dynamic_callback and self.verts is not None:
                         self.verts = self._get_box_data()
                         self.onselect(self.verts)
-                        
+
                 else:
                     self.width -= touch.dx
                     self.x += touch.dx
-                    
+
                     if self.dynamic_callback and self.verts is not None:
                         self.verts = self._get_box_data()
                         self.onselect(self.verts)
@@ -4313,15 +4313,15 @@ class SpanSelect(FloatLayout):
                     if self.dynamic_callback and self.verts is not None:
                         self.verts = self._get_box_data()
                         self.onselect(self.verts)
-                        
+
                 else:
-                
+
                     self.width += touch.dx
-    
+
                     if self.dynamic_callback and self.verts is not None:
                         self.verts = self._get_box_data()
                         self.onselect(self.verts)
-                
+
             elif self.selected_side == "new select":
                 if self.span_orientation == 'vertical':
                     self.width += touch.dx
@@ -4331,7 +4331,7 @@ class SpanSelect(FloatLayout):
             elif not self.selected_side:
                 if self.figure_wgt.collide_point(*self.to_window(self.pos[0]+touch.dx,self.pos[1]+touch.dy )) and \
                     self.figure_wgt.collide_point(*self.to_window(self.pos[0] + self.size[0]+touch.dx,self.pos[1]+ self.size[1]+touch.dy )):
-                    if self.span_orientation == 'vertical': 
+                    if self.span_orientation == 'vertical':
                         # print(touch.dx)
                         if self.stay_in_axis_limit and self.x + touch.dx < left_bound:
                             self.x = left_bound
@@ -4339,10 +4339,10 @@ class SpanSelect(FloatLayout):
                                 self.verts = self._get_box_data()
                                 self.onselect(self.verts)
                         elif self.stay_in_axis_limit and self.width + touch.dx+self.x > left_bound+width:
-                            self.x = left_bound+width-self.width 
+                            self.x = left_bound+width-self.width
                             if self.dynamic_callback and self.verts is not None:
                                 self.verts = self._get_box_data()
-                                self.onselect(self.verts)                                
+                                self.onselect(self.verts)
                         else:
                             self.x += touch.dx
                             if self.dynamic_callback and self.verts is not None:
@@ -4356,7 +4356,7 @@ class SpanSelect(FloatLayout):
     def on_touch_up(self, touch):
         if self.figure_wgt.touch_mode != 'selector':
             return
-        
+
         if touch.grab_current is self:
             touch.ungrab(self)
             self.alpha = 1
@@ -4368,11 +4368,11 @@ class SpanSelect(FloatLayout):
             else:
                 self.bottom_color = (
                     self.top_colors
-                ) = self.left_color = self.right_color = [1,1,1,1]                
-            
+                ) = self.left_color = self.right_color = [1,1,1,1]
+
             if self.first_touch and self.selected_side == "new select":
                 self.check_if_reverse_selection(touch)
-            
+
             if abs(self.size[0])<MINIMUM_WIDTH or abs(self.size[1])<MINIMUM_HEIGHT:
                 self.reset_selection()
             else:
@@ -4380,36 +4380,36 @@ class SpanSelect(FloatLayout):
                 if self.stay_in_axis_limit:
                     if self.first_touch and self.selected_side == "new select":
                         box_data = self._get_box_data()
-                        if self.span_orientation == 'vertical': 
+                        if self.span_orientation == 'vertical':
                             box_xmin = min(np.array(box_data)[:,0])
                             box_xmax = max(np.array(box_data)[:,0])
-                            
+
                             xmin,xmax = self.ax.get_xlim()
                             if box_xmin<xmin or box_xmax>xmax:
                                 out_of_bound=True
                                 self.reset_selection()
-                    
+
                 if self.verts is not None and not out_of_bound:
                     self.verts = self._get_box_data()
                     self.onselect(self.verts)
             return True
         return super().on_touch_up(touch)
-    
-    def check_if_reverse_selection(self,last_touch):  
+
+    def check_if_reverse_selection(self,last_touch):
         if self.span_orientation == 'vertical':
             if last_touch.x > self.first_touch[0]:
                 return
             else:
-                self.pos[0] = last_touch.x + 5 
+                self.pos[0] = last_touch.x + 5
                 self.size[0] = abs(self.size[0]) #self.first_touch[0] - last_touch.x
-                
+
         elif self.span_orientation == 'horizontal':
             if last_touch.y > self.first_touch[1]:
                 return
             else:
                 self.pos[1] = last_touch.y  - 5
                 self.size[1] = abs(self.size[1])
-            
+
         else:
             return
 
@@ -4418,9 +4418,9 @@ class SpanSelect(FloatLayout):
         self.size = (dp(0.01),dp(0.01))
         self.opacity=0
 
-        
+
     def _get_box_data(self):
-        trans = self.ax.transData.inverted() 
+        trans = self.ax.transData.inverted()
         #get box 4points xis data
         x0 = self.to_window(*self.pos)[0]-self.figure_wgt.pos[0]
         y0 = self.to_window(*self.pos)[1]-self.figure_wgt.pos[1]
@@ -4430,9 +4430,9 @@ class SpanSelect(FloatLayout):
         y3 = self.to_window(*self.pos)[1]-self.figure_wgt.pos[1]
         x2 = self.to_window(*self.pos)[0] + self.width -self.figure_wgt.pos[0]
         y2 = self.to_window(*self.pos)[1] + self.height  -self.figure_wgt.pos[1]
-        
-        
-        x0_box, y0_box = trans.transform_point((x0, y0)) 
+
+
+        x0_box, y0_box = trans.transform_point((x0, y0))
         x1_box, y1_box = trans.transform_point((x1, y1))
         x2_box, y2_box = trans.transform_point((x2, y2))
         x3_box, y3_box = trans.transform_point((x3, y3))
@@ -4441,7 +4441,7 @@ class SpanSelect(FloatLayout):
         verts.append((x1_box, y1_box))
         verts.append((x2_box, y2_box))
         verts.append((x3_box, y3_box))
-        
+
         if self.span_orientation == 'vertical':
             if self.collection:
                 ymin = np.nanmin(self.xys[:,1])
@@ -4449,27 +4449,27 @@ class SpanSelect(FloatLayout):
             if self.line:
                 ydata = self.line.get_ydata()
                 ymin = np.nanmin(ydata)
-                ymax = np.nanmax(ydata)                
-                
+                ymax = np.nanmax(ydata)
+
             verts[0] = (verts[0][0],ymin-1)
             verts[3] = (verts[3][0],ymin-1)
             verts[1] = (verts[1][0],ymax+1)
             verts[2] = (verts[2][0],ymax+1)
-            
+
         elif self.span_orientation == 'horizontal':
             if self.collection:
                 xmin = np.nanmin(self.xys[:,1])
                 xmax = np.nanmax(self.xys[:,1])
             if self.line:
-                xdata = self.line.get_xdata() 
+                xdata = self.line.get_xdata()
                 xmin = np.nanmin(xdata)
                 xmax = np.nanmax(xdata)
-                   
+
             verts[0] = (xmin-1,verts[0][1])
             verts[1] = (xmin-1,verts[1][1])
             verts[2] = (xmax+1,verts[2][1])
-            verts[3] = (xmax+1 ,verts[3][1])           
-            
+            verts[3] = (xmax+1 ,verts[3][1])
+
 
         return verts
 
@@ -4482,26 +4482,26 @@ class SpanSelect(FloatLayout):
             self.collection.set_facecolors(self.fc)
         if self.line:
             xdata,ydata = self.line.get_xydata().T
-            
+
             #matplotlib method if data is sorted
             # indmin, indmax = np.searchsorted(x, (xmin, xmax))
             # indmax = min(len(x) - 1, indmax)
-            
+
             # region_x = x[indmin:indmax]
             # region_y = y[indmin:indmax]
-            
-            self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]                  
+
+            self.ind_line = np.nonzero(path.contains_points(np.array([xdata,ydata]).T))[0]
 
         self.figure_wgt.figure.canvas.draw_idle()
         if self.callback:
             self.callback(self)
-            
+
     def set_callback(self,callback):
         self.callback=callback
 
     def set_callback_clear(self,callback):
-        self.callback_clear=callback  
-        
+        self.callback_clear=callback
+
     def clear_selection(self):
 
         if self.collection:
@@ -4510,8 +4510,8 @@ class SpanSelect(FloatLayout):
             self.collection.set_facecolors(self.fc)
         if self.line:
             self.ind_line=[]
-            
+
         self.reset_selection()
         self.figure_wgt.figure.canvas.draw_idle()
-    
+
 Builder.load_string(kv)
