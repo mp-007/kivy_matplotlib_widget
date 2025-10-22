@@ -7,7 +7,7 @@ from kivy.properties import (
     NumericProperty,
     StringProperty,
     BooleanProperty,
-    ColorProperty
+    ColorProperty,
 )
 
 from kivy.lang import Builder
@@ -17,13 +17,14 @@ import numpy as np
 
 
 def add_hover(
-        figure_wgt,
-        mode='touch',
-        label_x='x',
-        label_y='y',
-        hover_widget=None,
-        hover_type='nearest'):
-    """ add hover to matpotlib figure
+    figure_wgt,
+    mode="touch",
+    label_x="x",
+    label_y="y",
+    hover_widget=None,
+    hover_type="nearest",
+):
+    """add hover to matpotlib figure
 
     Args:
         figure_wgt: figure widget from kivy_matplotlib_widget package
@@ -33,7 +34,7 @@ def add_hover(
 
     if figure_wgt.hover_instance:
 
-        if hover_type == 'compare':
+        if hover_type == "compare":
             if not figure_wgt.compare_hover_instance:
                 if hover_widget is None:
                     hover_widget = GeneralCompareHover()
@@ -70,12 +71,12 @@ def add_hover(
                 figure_wgt.compare_hover_instance.show_cursor = False
     else:
         if hover_widget is None:
-            if hover_type == 'compare':
+            if hover_type == "compare":
                 hover_widget = GeneralCompareHover()
             else:
                 hover_widget = GeneralHover()
 
-        if hover_type == 'compare':
+        if hover_type == "compare":
             hover_widget.create_child(figure_wgt.lines)
             figure_wgt.compare_hover_instance = hover_widget
             figure_wgt.compare_xdata = True
@@ -90,13 +91,14 @@ def add_hover(
 
         figure_wgt.parent.add_widget(hover_widget)
         figure_wgt.hover_instance = hover_widget
-        if mode == 'desktop':
+        if mode == "desktop":
             figure_wgt.hover_on = True
             Window.bind(mouse_pos=figure_wgt.on_motion)
 
 
 class BaseHoverFloatLayout(FloatLayout):
-    """ Touch egend kivy class"""
+    """Touch egend kivy class"""
+
     figure_wgt = ObjectProperty(None)
     x_hover_pos = NumericProperty(1)
     y_hover_pos = NumericProperty(1)
@@ -106,12 +108,12 @@ class BaseHoverFloatLayout(FloatLayout):
     ymax_line = NumericProperty(1)
     hover_outside_bound = BooleanProperty(False)
     show_cursor = BooleanProperty(False)
-    label_x = StringProperty('x')
-    label_y = StringProperty('y')
-    label_x_value = StringProperty('')
-    label_y_value = StringProperty('')
+    label_x = StringProperty("x")
+    label_y = StringProperty("y")
+    label_x_value = StringProperty("")
+    label_y_value = StringProperty("")
     # futur used for dynamic label
-    custom_label = StringProperty('', allownone=True)
+    custom_label = StringProperty("", allownone=True)
     # futur used for dynamic color
     custom_color = ColorProperty([0, 0, 0, 1], allownone=True)
     figwidth = NumericProperty(2)
@@ -120,11 +122,11 @@ class BaseHoverFloatLayout(FloatLayout):
     figy = NumericProperty(0)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
     def reset_hover(self):
-        """ reset hover attribute """
+        """reset hover attribute"""
         self.x_hover_pos = 1
         self.y_hover_pos = 1
         self.ymin_line = 1
@@ -132,7 +134,8 @@ class BaseHoverFloatLayout(FloatLayout):
 
 
 class GeneralHover(BaseHoverFloatLayout):
-    """ GeneralHover """
+    """GeneralHover"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -140,12 +143,13 @@ class GeneralHover(BaseHoverFloatLayout):
     hover_height = NumericProperty(dp(24))
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class HoverVerticalText(BaseHoverFloatLayout):
-    """ Hover with vertical text"""
+    """Hover with vertical text"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -153,12 +157,13 @@ class HoverVerticalText(BaseHoverFloatLayout):
     hover_height = NumericProperty(dp(48))
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class GeneralCompareHover(BaseHoverFloatLayout):
-    """ GeneralCompareHover"""
+    """GeneralCompareHover"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -167,7 +172,7 @@ class GeneralCompareHover(BaseHoverFloatLayout):
     y_touch_pos = NumericProperty(1)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
         self.children_names = []
         self.children_list = []
@@ -194,7 +199,8 @@ class GeneralCompareHover(BaseHoverFloatLayout):
 
 
 class BoxShadowCompareHover(BaseHoverFloatLayout):
-    """ GeneralCompareHover with a box shadow"""
+    """GeneralCompareHover with a box shadow"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -204,7 +210,7 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
     reorder_data = BooleanProperty(True)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super(BoxShadowCompareHover, self).__init__(**kwargs)
         self.children_names = []
         self.children_list = []
@@ -230,7 +236,7 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
             self.children_list.append(mywidget)
 
     def overlap_check(self):
-        """ reorder label base on y_hover_pos of data"""
+        """reorder label base on y_hover_pos of data"""
         if self.reorder_data and len(self.ids.main_box.children) > 2:
             y_hover_pos_list = []
             child_list = []
@@ -249,41 +255,44 @@ class BoxShadowCompareHover(BaseHoverFloatLayout):
 
 
 class CompareHoverBox(BoxLayout):
-    """ Hover with vertical text"""
+    """Hover with vertical text"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
-    label_y = StringProperty('y')
-    label_y_value = StringProperty('y')
+    label_y = StringProperty("y")
+    label_y_value = StringProperty("y")
     x_hover_pos = NumericProperty(1)
     y_hover_pos = NumericProperty(1)
     show_widget = BooleanProperty(False)
     custom_color = ColorProperty([0, 0, 0, 1], allownone=True)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class DotCompareHoverBox(FloatLayout):
-    """ Hover with vertical text"""
+    """Hover with vertical text"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
-    label_y = StringProperty('y')
-    label_y_value = StringProperty('y')
+    label_y = StringProperty("y")
+    label_y_value = StringProperty("y")
     x_hover_pos = NumericProperty(1)
     y_hover_pos = NumericProperty(1)
     show_widget = BooleanProperty(False)
     custom_color = ColorProperty([0, 0, 0, 1], allownone=True)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class TagCompareHover(BaseHoverFloatLayout):
-    """ TagCompareHover"""
+    """TagCompareHover"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -292,7 +301,7 @@ class TagCompareHover(BaseHoverFloatLayout):
     y_touch_pos = NumericProperty(1)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
         self.children_names = []
         self.children_list = []
@@ -330,22 +339,28 @@ class TagCompareHover(BaseHoverFloatLayout):
 
             for index in range(len(sorting_args) - 1):
                 # chneck overlap
-                if y_pos_list[sorting_args[index + 1]] - heigh_child / 2 <= y_pos_list[sorting_args[index]
-                                                                                       ] + heigh_child / 2 and child_list[sorting_args[index + 1]].show_widget:
-                    offset = -((y_pos_list[sorting_args[index + 1]] - heigh_child / 2) - (
-                        y_pos_list[sorting_args[index]] + heigh_child / 2))
+                if (
+                    y_pos_list[sorting_args[index + 1]] - heigh_child / 2
+                    <= y_pos_list[sorting_args[index]] + heigh_child / 2
+                    and child_list[sorting_args[index + 1]].show_widget
+                ):
+                    offset = -(
+                        (y_pos_list[sorting_args[index + 1]] - heigh_child / 2)
+                        - (y_pos_list[sorting_args[index]] + heigh_child / 2)
+                    )
 
                     y_pos_list[sorting_args[index + 1]] += offset
                     child_list[sorting_args[index + 1]].hover_offset = offset
 
 
 class TagCompareHoverBox(FloatLayout):
-    """ Hover with vertical text"""
+    """Hover with vertical text"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
-    label_y = StringProperty('y')
-    label_y_value = StringProperty('y')
+    label_y = StringProperty("y")
+    label_y_value = StringProperty("y")
     x_hover_pos = NumericProperty(1)
     y_hover_pos = NumericProperty(1)
     show_widget = BooleanProperty(False)
@@ -353,27 +368,29 @@ class TagCompareHoverBox(FloatLayout):
     hover_offset = NumericProperty(0)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class InfoHover(BaseHoverFloatLayout):
-    """ InfoHover adapt the background and the font color with the line or scatter color"""
+    """InfoHover adapt the background and the font color with the line or scatter color"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     hover_height = NumericProperty(dp(48))
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class MatplotlibStyleHover(BaseHoverFloatLayout):
     """MatplotlibStyleHover look like matplotlib cursor but do not use matplotlib draw.
-        Usefull in live blit drawing
+    Usefull in live blit drawing
 
     """
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -381,12 +398,13 @@ class MatplotlibStyleHover(BaseHoverFloatLayout):
     background_color = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class HightChartHover(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color"""
+    """PlotlyHover adapt the background and the font color with the line or scatter color"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -396,60 +414,65 @@ class HightChartHover(BaseHoverFloatLayout):
     label_padding_height = NumericProperty(dp(8))
 
     position = OptionProperty(
-        'top',
+        "top",
         options=(
-            'top',
-            'bottom',
-            'left',
-            'right',
-            'top_start',
-            'top_end',
-            'bottom_start',
-            'bottom_end',
-            'left_start',
-            'left_end',
-            'right_start',
-            'right_end'))
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_start",
+            "top_end",
+            "bottom_start",
+            "bottom_end",
+            "left_start",
+            "left_end",
+            "right_start",
+            "right_end",
+        ),
+    )
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
 class RichTooltip(BoxLayout):
     position = OptionProperty(
-        'top',
+        "top",
         options=(
-            'top',
-            'bottom',
-            'left',
-            'right',
-            'top_start',
-            'top_end',
-            'bottom_start',
-            'bottom_end',
-            'left_start',
-            'left_end',
-            'right_start',
-            'right_end'))
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top_start",
+            "top_end",
+            "bottom_start",
+            "bottom_end",
+            "left_start",
+            "left_end",
+            "right_start",
+            "right_end",
+        ),
+    )
 
 
 class PlotlyHover(BaseHoverFloatLayout):
-    """ PlotlyHover adapt the background and the font color with the line or scatter color"""
+    """PlotlyHover adapt the background and the font color with the line or scatter color"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     hover_height = NumericProperty(dp(24))
-    use_position = StringProperty('right')
-    position = OptionProperty('right',
-                              options=('right', 'left'))
+    use_position = StringProperty("right")
+    position = OptionProperty("right", options=("right", "left"))
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
-Builder.load_string('''
+Builder.load_string(
+    """
 
 <BaseHoverFloatLayout>
     size_hint: None,None
@@ -941,7 +964,7 @@ Builder.load_string('''
     custom_color: [0,0,0,1]
     extra_text:root.custom_label if root.custom_label and not '_child' in root.custom_label else ''
     label_format:'[size={}]'.format(int(root.text_size + dp(6))) + '[color={}]'.format(get_hex_from_color(root.custom_color)) + \
-                 '[font=NavigationIcons]' + u"{}".format("\U00000EB1") + \
+                 '[font=NavigationIcons]' + u"{}".format("\U00000eb1") + \
                  '[/font][/color][/size]' +  root.extra_text + "\\n" + 'x:' + \
                  root.label_x_value  +"\\n"+ "y:" + root.label_y_value
 
@@ -1228,7 +1251,7 @@ Builder.load_string('''
     padding: dp(6),0,0,0
     extra_text:root.label_y if root.label_y and not '_child' in root.label_y else ''
     label_format:'[size={}]'.format(int(root.text_size + dp(6))) + '[color={}]'.format(get_hex_from_color(root.custom_color)) + \
-                 '[font=NavigationIcons]' + u"{}".format("\U00000EB1") + \
+                 '[font=NavigationIcons]' + u"{}".format("\U00000eb1") + \
                  '[/font][/color][/size]' +  root.extra_text + ": " + root.label_y_value
 
     canvas.before:
@@ -1255,4 +1278,5 @@ Builder.load_string('''
         color:[0,0,0,1]
         font_name : root.text_font
         markup:True
-        ''')
+        """
+)

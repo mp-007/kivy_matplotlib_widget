@@ -25,7 +25,10 @@ from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import RendererBase
 from matplotlib.collections import (
-    LineCollection, PatchCollection, PathCollection)
+    LineCollection,
+    PatchCollection,
+    PathCollection,
+)
 from matplotlib.container import BarContainer, ErrorbarContainer, StemContainer
 from matplotlib.figure import Figure
 from matplotlib.image import AxesImage
@@ -52,6 +55,7 @@ def _register_scatter():
     def __init__(self, *args, **kwargs):
         _nonscatter_pathcollections.add(self)
         return __init__.__wrapped__(self, *args, **kwargs)
+
     PathCollection.__init__ = __init__
 
     @functools.wraps(Axes.scatter)
@@ -60,6 +64,7 @@ def _register_scatter():
         with suppress(KeyError):
             _nonscatter_pathcollections.remove(paths)
         return paths
+
     Axes.scatter = scatter
 
 
@@ -68,8 +73,10 @@ _register_scatter()
 
 
 def _is_scatter(artist):
-    return (isinstance(artist, PathCollection)
-            and artist not in _nonscatter_pathcollections)
+    return (
+        isinstance(artist, PathCollection)
+        and artist not in _nonscatter_pathcollections
+    )
 
 
 def _artist_in_container(container):
@@ -86,7 +93,8 @@ class ContainerArtist:
         # the ContainerArtist; as no one else strongly references the
         # ContainerArtist, it will get GC'd whenever the Container is.
         vars(container).setdefault(
-            f"_{__class__.__name__}__keep_alive", []).append(self)
+            f"_{__class__.__name__}__keep_alive", []
+        ).append(self)
 
     def __str__(self):
         return f"<{type(self).__name__}({self.container})>"
@@ -102,7 +110,8 @@ class ContainerArtist:
 
 
 Selection = namedtuple(
-    "Selection", "artist target_ index dist annotation extras")
+    "Selection", "artist target_ index dist annotation extras"
+)
 Selection.__doc__ = """
     A selection.
 
@@ -117,22 +126,23 @@ Selection.__doc__ = """
 # artists are already non-comparable.
 Selection.__eq__ = lambda self, other: self is other
 Selection.__ne__ = lambda self, other: self is not other
-Selection.artist.__doc__ = (
-    "The selected artist.")
+Selection.artist.__doc__ = "The selected artist."
 Selection.target_.__doc__ = """
 The point picked within the artist, in data coordinates.
 
 :meta private:
 """
 Selection.index.__doc__ = (
-    "The index of the selected point, within the artist data.")
+    "The index of the selected point, within the artist data."
+)
 Selection.dist.__doc__ = (
-    "The distance from the click to the target, in pixels.")
-Selection.annotation.__doc__ = (
-    "The instantiated `matplotlib.text.Annotation`.")
+    "The distance from the click to the target, in pixels."
+)
+Selection.annotation.__doc__ = "The instantiated `matplotlib.text.Annotation`."
 Selection.extras.__doc__ = (
     "An additional list of artists (e.g., highlighters) that will be cleared "
-    "at the same time as the annotation.")
+    "at the same time as the annotation."
+)
 
 
 class _Target(np.ndarray):
@@ -145,12 +155,14 @@ class _Target(np.ndarray):
     def index(self):
         warnings.warn(
             "Selection.target.index is deprecated and will be removed in the "
-            "future; use Selection.index instead.")
+            "future; use Selection.index instead."
+        )
         return self._sel.index
 
 
 Selection.target = property(
-    _Target, doc="The point picked within the artist, in data coordinates.")
+    _Target, doc="The point picked within the artist, in data coordinates."
+)
 
 
 @functools.singledispatch
@@ -206,20 +218,20 @@ class Index:
     def mid_index(cls, n_pts, index):
         i, frac = divmod(index, 1)
         if i == 0:
-            frac = .5 + frac / 2
+            frac = 0.5 + frac / 2
         elif i == 2 * n_pts - 2:  # One less line than points.
             frac = frac / 2
         quot, odd = divmod(i, 2)
         if not odd:
-            if frac < .5:
+            if frac < 0.5:
                 i = quot - 1
-                x, y = frac + .5, 1
+                x, y = frac + 0.5, 1
             else:
                 i = quot
-                x, y = frac - .5, 0
+                x, y = frac - 0.5, 0
         else:
             i = quot
-            x, y = .5, frac
+            x, y = 0.5, frac
         return cls(i, x, y)
 
 
@@ -237,9 +249,12 @@ def _compute_projection_pick(artist, path, xy):
     needed.
     """
     transform = artist.get_transform().frozen()
-    tpath = (path.cleaned(transform) if transform.is_affine
-             # `cleaned` only handles affine transforms.
-             else transform.transform_path(path).cleaned())
+    tpath = (
+        path.cleaned(transform)
+        if transform.is_affine
+        # `cleaned` only handles affine transforms.
+        else transform.transform_path(path).cleaned()
+    )
     # `cleaned` should return a path where the first element is `MOVETO`, the
     # following are `LINETO` or `CLOSEPOLY`, and the last one is `STOP`, i.e.
     #     codes = path.codes
@@ -247,8 +262,8 @@ def _compute_projection_pick(artist, path, xy):
     #     assert np.in1d(codes[1:-1], [path.LINETO, path.CLOSEPOLY]).all()
     vertices = tpath.vertices[:-1]
     codes = tpath.codes[:-1]
-    mt_idxs, = (codes == tpath.MOVETO).nonzero()
-    cp_idxs, = (codes == tpath.CLOSEPOLY).nonzero()
+    (mt_idxs,) = (codes == tpath.MOVETO).nonzero()
+    (cp_idxs,) = (codes == tpath.CLOSEPOLY).nonzero()
     vertices[cp_idxs] = vertices[mt_idxs[mt_idxs.searchsorted(cp_idxs) - 1]]
     # Unit vectors for each segment.
     us = vertices[1:] - vertices[:-1]
@@ -271,8 +286,9 @@ def _compute_projection_pick(artist, path, xy):
         return
     else:
         target = artist.axes.transData.inverted().transform(projs[argmin])
-        index = ((argmin + dot[argmin] / ls[argmin])
-                 / (path._interpolation_steps / tpath._interpolation_steps))
+        index = (argmin + dot[argmin] / ls[argmin]) / (
+            path._interpolation_steps / tpath._interpolation_steps
+        )
         return Selection(artist, target, index, ds[argmin], None, None)
 
 
@@ -291,7 +307,8 @@ def _untransform(orig_xy, screen_xy, ax):
     return (
         orig_xy
         if ((tr_xy == screen_xy) | np.isnan(tr_xy) & np.isnan(screen_xy)).all()
-        else ax.transData.inverted().transform(screen_xy))
+        else ax.transData.inverted().transform(screen_xy)
+    )
 
 
 @compute_pick.register(Line2D)
@@ -311,11 +328,11 @@ def _(artist, event):
         if event.compare_xdata:
             ds = abs(xy[0] - data_screen_xy[:, 0])
         else:
-            if event.pick_radius_axis == 'both':
+            if event.pick_radius_axis == "both":
                 ds = np.hypot(*(xy - data_screen_xy).T)
-            elif event.pick_radius_axis == 'x':
+            elif event.pick_radius_axis == "x":
                 ds = abs(xy[0] - data_screen_xy[:, 0])
-            elif event.pick_radius_axis == 'y':
+            elif event.pick_radius_axis == "y":
                 ds = abs(xy[1] - data_screen_xy[:, 1])
         try:
             argmin = np.nanargmin(ds)
@@ -323,22 +340,29 @@ def _(artist, event):
             pass
         else:
             target = _untransform(  # More precise than transforming back.
-                data_xy[argmin], data_screen_xy[argmin], artist.axes)
+                data_xy[argmin], data_screen_xy[argmin], artist.axes
+            )
 
             sels.append(
-                Selection(artist, target, argmin, ds[argmin], None, None))
+                Selection(artist, target, argmin, ds[argmin], None, None)
+            )
     # If lines are visible, find the closest projection.
-    if (artist.get_linestyle() not in ["None", "none", " ", "", None]
-            and len(artist.get_xydata()) > 1) and event.projection:
+    if (
+        artist.get_linestyle() not in ["None", "none", " ", "", None]
+        and len(artist.get_xydata()) > 1
+    ) and event.projection:
         sel = _compute_projection_pick(artist, artist.get_path(), xy)
         if sel is not None:
-            sel = sel._replace(index={
-                "_draw_lines": lambda _, index: index,
-                "_draw_steps_pre": Index.pre_index,
-                "_draw_steps_mid": Index.mid_index,
-                "_draw_steps_post": Index.post_index}[
-                    Line2D.drawStyles[artist.get_drawstyle()]](
-                        len(data_xy), sel.index))
+            sel = sel._replace(
+                index={
+                    "_draw_lines": lambda _, index: index,
+                    "_draw_steps_pre": Index.pre_index,
+                    "_draw_steps_mid": Index.mid_index,
+                    "_draw_steps_post": Index.post_index,
+                }[Line2D.drawStyles[artist.get_drawstyle()]](
+                    len(data_xy), sel.index
+                )
+            )
             sels.append(sel)
     sel = min(sels, key=lambda sel: sel.dist, default=None)
     return sel if sel and sel.dist < event.pickradius else None
@@ -349,7 +373,8 @@ def _(artist, event):
 @compute_pick.register(Rectangle)
 def _(artist, event):
     sel = _compute_projection_pick(
-        artist, artist.get_path(), (event.x, event.y))
+        artist, artist.get_path(), (event.x, event.y)
+    )
     if sel and sel.dist < event.pickradius:
         return sel
 
@@ -378,7 +403,8 @@ def _(artist, event):
 
             argmin = ds.argmin()
             target = _untransform(
-                offsets[argmin], offsets_screen[argmin], artist.axes)
+                offsets[argmin], offsets_screen[argmin], artist.axes
+            )
             # return Selection(artist, target, inds[argmin], ds[argmin], None,
             # None)
             sel = Selection(artist, target, argmin, ds[argmin], None, None)
@@ -387,13 +413,21 @@ def _(artist, event):
             return None
     elif len(paths) and len(offsets):
         # Note that this won't select implicitly closed paths.
-        sels = [*filter(None, [
-            _compute_projection_pick(
-                artist,
-                Affine2D().translate(*offsets[ind % len(offsets)])
-                .transform_path(paths[ind % len(paths)]),
-                (event.x, event.y))
-            for ind in range(max(len(offsets), len(paths)))])]
+        sels = [
+            *filter(
+                None,
+                [
+                    _compute_projection_pick(
+                        artist,
+                        Affine2D()
+                        .translate(*offsets[ind % len(offsets)])
+                        .transform_path(paths[ind % len(paths)]),
+                        (event.x, event.y),
+                    )
+                    for ind in range(max(len(offsets), len(paths)))
+                ],
+            )
+        ]
         if not sels:
             return None
         idx = min(range(len(sels)), key=lambda idx: sels[idx].dist)
@@ -435,7 +469,8 @@ def _(artist, event):
     argmin = np.nanargmin(ds)
     if ds[argmin] < event.pickradius:
         target = _untransform(
-            offsets[argmin], offsets_screen[argmin], artist.axes)
+            offsets[argmin], offsets_screen[argmin], artist.axes
+        )
         return Selection(artist, target, argmin, ds[argmin], None, None)
     else:
         return None
@@ -454,22 +489,28 @@ def _(artist, event):
 @compute_pick.register(BarContainer)
 def _(container, event):
     try:
-        (idx, patch), = {
-            (idx, patch) for idx, patch in enumerate(container.patches)
-            if patch.contains(event)[0]}
+        ((idx, patch),) = {
+            (idx, patch)
+            for idx, patch in enumerate(container.patches)
+            if patch.contains(event)[0]
+        }
     except ValueError:
         return
 
     if event.projection:
         target = [event.xdata, event.ydata]
         if patch.sticky_edges.x:
-            target[0], = (
-                x for x in [patch.get_x(), patch.get_x() + patch.get_width()]
-                if x not in patch.sticky_edges.x)
+            (target[0],) = (
+                x
+                for x in [patch.get_x(), patch.get_x() + patch.get_width()]
+                if x not in patch.sticky_edges.x
+            )
         if patch.sticky_edges.y:
-            target[1], = (
-                y for y in [patch.get_y(), patch.get_y() + patch.get_height()]
-                if y not in patch.sticky_edges.y)
+            (target[1],) = (
+                y
+                for y in [patch.get_y(), patch.get_y() + patch.get_height()]
+                if y not in patch.sticky_edges.y
+            )
 
     else:
         x, y, width, height = container[idx].get_bbox().bounds
@@ -480,11 +521,11 @@ def _(container, event):
 @compute_pick.register(Wedge)
 def _(container, event):
     try:
-        ang = (container.theta2 - container.theta1) / 2. + container.theta1
+        ang = (container.theta2 - container.theta1) / 2.0 + container.theta1
         radius = container.r
         center_x, center_y = container.center
-        y = np.sin(np.deg2rad(ang)) * radius * .95 + center_x
-        x = np.cos(np.deg2rad(ang)) * radius * .95 + center_y
+        y = np.sin(np.deg2rad(ang)) * radius * 0.95 + center_x
+        x = np.cos(np.deg2rad(ang)) * radius * 0.95 + center_y
     except ValueError:
         return
 
@@ -503,8 +544,10 @@ def _(container, event):
     sel_data = compute_pick(data_line, event) if data_line else None
     sel_err = min(
         filter(None, (compute_pick(err_lc, event) for err_lc in err_lcs)),
-        key=lambda sel: sel.dist, default=None)
-    if (sel_data and sel_data.dist < getattr(sel_err, "dist", np.inf)):
+        key=lambda sel: sel.dist,
+        default=None,
+    )
+    if sel_data and sel_data.dist < getattr(sel_err, "dist", np.inf):
         return sel_data
     elif sel_err:
         idx, _ = sel_err.index
@@ -523,8 +566,10 @@ def _(container, event):
     if sel:
         return sel
     if not isinstance(container.stemlines, LineCollection):
-        warnings.warn("Only stem plots created with use_line_collection=True "
-                      "are supported.")
+        warnings.warn(
+            "Only stem plots created with use_line_collection=True "
+            "are supported."
+        )
         return
     sel = compute_pick(container.stemlines, event)
     if sel:
@@ -540,18 +585,29 @@ def _call_with_selection(func=None, *, argname="artist"):
         return functools.partial(_call_with_selection, argname=argname)
 
     wrapped_kwonly_params = [
-        param for param in inspect.signature(func).parameters.values()
-        if param.kind == param.KEYWORD_ONLY]
+        param
+        for param in inspect.signature(func).parameters.values()
+        if param.kind == param.KEYWORD_ONLY
+    ]
     sel_sig = inspect.signature(Selection)
     default_sel_sig = sel_sig.replace(
-        parameters=[param.replace(default=None) if param.default is param.empty
-                    else param
-                    for param in sel_sig.parameters.values()])
+        parameters=[
+            (
+                param.replace(default=None)
+                if param.default is param.empty
+                else param
+            )
+            for param in sel_sig.parameters.values()
+        ]
+    )
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        extra_kw = {param.name: kwargs.pop(param.name)
-                    for param in wrapped_kwonly_params if param.name in kwargs}
+        extra_kw = {
+            param.name: kwargs.pop(param.name)
+            for param in wrapped_kwonly_params
+            if param.name in kwargs
+        }
         ba = default_sel_sig.bind(*args, **kwargs)
         ba.apply_defaults()
         sel = Selection(*ba.args, **ba.kwargs)
@@ -567,10 +623,13 @@ def _format_coord_unspaced(ax, xy):
     # Un-space-pad, remove empty coordinates from the output of
     # `format_{x,y}data`, and rejoin with newlines.
     return "\n".join(
-        line for line, empty in zip(
+        line
+        for line, empty in zip(
             re.split(",? +", ax.format_coord(*xy)),
-            itertools.chain(["x=", "y=", "z="], itertools.repeat(None)))
-        if line != empty).rstrip()
+            itertools.chain(["x=", "y=", "z="], itertools.repeat(None)),
+        )
+        if line != empty
+    ).rstrip()
 
 
 @functools.singledispatch
@@ -583,7 +642,8 @@ def get_ann_text(sel):
     classes follow.
     """
     warnings.warn(
-        f"Annotation support for {type(sel.artist).__name__} is missing.")
+        f"Annotation support for {type(sel.artist).__name__} is missing."
+    )
     return ""
 
 
@@ -620,12 +680,14 @@ def _(sel):
     artist = sel.artist
     label = artist.get_label() or ""
     text = _format_coord_unspaced(artist.axes, sel.target)
-    if (_is_scatter(artist)
-            # Heuristic: is the artist colormapped?
-            # Note that this doesn't handle size-mapping (which is more likely
-            # to involve an arbitrary scaling).
-            and artist.get_array() is not None
-            and len(artist.get_array()) == len(artist.get_offsets())):
+    if (
+        _is_scatter(artist)
+        # Heuristic: is the artist colormapped?
+        # Note that this doesn't handle size-mapping (which is more likely
+        # to involve an arbitrary scaling).
+        and artist.get_array() is not None
+        and len(artist.get_array()) == len(artist.get_offsets())
+    ):
         value = _format_scalarmappable_value(artist, sel.index)
         text = f"{text}\n{value}"
     if re.match("[^_]", label):
@@ -651,7 +713,8 @@ def _(sel):
     artist = sel.artist
     text = "{}\n{}".format(
         _format_coord_unspaced(artist.axes, sel.target),
-        (artist.u[sel.index], artist.v[sel.index]))
+        (artist.u[sel.index], artist.v[sel.index]),
+    )
     return text
 
 
@@ -661,7 +724,8 @@ def _(sel):
     artist = sel.artist
     text = "{}\n{}".format(
         _format_coord_unspaced(artist.axes, sel.target),
-        (artist.U[sel.index], artist.V[sel.index]))
+        (artist.U[sel.index], artist.V[sel.index]),
+    )
     return text
 
 
@@ -675,7 +739,8 @@ def _(sel):
 @_call_with_selection(argname="container")
 def _(sel):
     return _format_coord_unspaced(
-        _artist_in_container(sel.artist).axes, sel.target)
+        _artist_in_container(sel.artist).axes, sel.target
+    )
 
 
 @get_ann_text.register(ErrorbarContainer)
@@ -686,13 +751,20 @@ def _(sel):
     if isinstance(sel.index, Integral):
         err_lcs = iter(err_lcs)
         for idx, (dir, has) in enumerate(
-                zip("xy", [sel.artist.has_xerr, sel.artist.has_yerr])):
+            zip("xy", [sel.artist.has_xerr, sel.artist.has_yerr])
+        ):
             if has:
-                err = (next(err_lcs).get_paths()[sel.index].vertices
-                       - data_line.get_xydata()[sel.index])[:, idx]
-                err_s = [getattr(_artist_in_container(sel.artist).axes,
-                                 f"format_{dir}data")(e).rstrip()
-                         for e in err]
+                err = (
+                    next(err_lcs).get_paths()[sel.index].vertices
+                    - data_line.get_xydata()[sel.index]
+                )[:, idx]
+                err_s = [
+                    getattr(
+                        _artist_in_container(sel.artist).axes,
+                        f"format_{dir}data",
+                    )(e).rstrip()
+                    for e in err
+                ]
                 # We'd normally want to check err.sum() == 0, but that can run
                 # into fp inaccuracies.
                 signs = "+-\N{MINUS SIGN}"
@@ -703,9 +775,11 @@ def _(sel):
                     # rendering as the string is mathtext, but allows keeping
                     # the same tests across Matplotlib versions that use
                     # unicode minus and those that don't.
-                    err_s = [("+" if not s.startswith(tuple(signs)) else "")
-                             + s.replace("\N{MINUS SIGN}", "-")
-                             for s in err_s]
+                    err_s = [
+                        ("+" if not s.startswith(tuple(signs)) else "")
+                        + s.replace("\N{MINUS SIGN}", "-")
+                        for s in err_s
+                    ]
                     repl = r"\1=$\2_{%s}^{%s}$\3" % tuple(err_s)
                 ann_text = re.sub(f"({dir})=(.*)(\n?)", repl, ann_text)
     return ann_text
@@ -752,9 +826,13 @@ def _(sel, *, key):
     data_xy = sel.artist.get_xydata()
     return _move_within_points(
         sel,
-        _untransform(data_xy, sel.artist.get_transform().transform(data_xy),
-                     sel.artist.axes),
-        key=key)
+        _untransform(
+            data_xy,
+            sel.artist.get_transform().transform(data_xy),
+            sel.artist.axes,
+        ),
+        key=key,
+    )
 
 
 @move.register(PathCollection)
@@ -765,9 +843,12 @@ def _(sel, *, key):
         return _move_within_points(
             sel,
             _untransform(
-                offsets, sel.artist.get_offset_transform().transform(offsets),
-                sel.artist.axes),
-            key=key)
+                offsets,
+                sel.artist.get_offset_transform().transform(offsets),
+                sel.artist.axes,
+            ),
+            key=key,
+        )
     else:
         return sel
 
@@ -776,25 +857,32 @@ def _(sel, *, key):
 @_call_with_selection
 def _(sel, *, key):
     ns = sel.artist.get_array().shape[:2]
-    delta = (
-        {"left": [0, -1], "right": [0, +1], "down": [-1, 0], "up": [+1, 0]}[
-            key]
-        * np.array([-1 if sel.artist.axes.yaxis.get_inverted() else +1,
-                    -1 if sel.artist.axes.xaxis.get_inverted() else +1]))
+    delta = {
+        "left": [0, -1],
+        "right": [0, +1],
+        "down": [-1, 0],
+        "up": [+1, 0],
+    }[key] * np.array(
+        [
+            -1 if sel.artist.axes.yaxis.get_inverted() else +1,
+            -1 if sel.artist.axes.xaxis.get_inverted() else +1,
+        ]
+    )
     idxs = (sel.index + delta) % ns
     xmin, xmax, ymin, ymax = sel.artist.get_extent()
     if sel.artist.origin == "upper":
         ymin, ymax = ymax, ymin
     low, high = np.array([[xmin, ymin], [xmax, ymax]])
-    target = ((idxs + .5) / ns)[::-1] * (high - low) + low
+    target = ((idxs + 0.5) / ns)[::-1] * (high - low) + low
     return sel._replace(target_=target, index=tuple(idxs))
 
 
 @move.register(ContainerArtist)
 @_call_with_selection
 def _(sel, *, key):
-    return (move(*sel._replace(artist=sel.artist.container), key=key)
-            ._replace(artist=sel.artist))
+    return move(*sel._replace(artist=sel.artist.container), key=key)._replace(
+        artist=sel.artist
+    )
 
 
 @move.register(ErrorbarContainer)
@@ -814,7 +902,8 @@ def make_highlight(sel, *, highlight_kwargs):
     classes follow.
     """
     warnings.warn(
-        f"Highlight support for {type(sel.artist).__name__} is missing.")
+        f"Highlight support for {type(sel.artist).__name__} is missing."
+    )
 
 
 def _set_valid_props(artist, kwargs):
@@ -836,7 +925,10 @@ def _(sel, *, highlight_kwargs):
 def _(sel, *, highlight_kwargs):
     hl = copy.copy(sel.artist)
     offsets = hl.get_offsets()
-    hl.set_offsets(np.where(
-        np.arange(len(offsets))[:, None] == sel.index, offsets, np.nan))
+    hl.set_offsets(
+        np.where(
+            np.arange(len(offsets))[:, None] == sel.index, offsets, np.nan
+        )
+    )
     _set_valid_props(hl, highlight_kwargs)
     return hl

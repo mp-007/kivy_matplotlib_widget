@@ -1,4 +1,4 @@
-""" MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
+"""MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
 and kivy scatter
 """
 
@@ -12,8 +12,14 @@ from matplotlib.transforms import Bbox
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from kivy.vector import Vector
 from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty
+from kivy.properties import (
+    ObjectProperty,
+    ListProperty,
+    BooleanProperty,
+    BoundedNumericProperty,
+    AliasProperty,
+    NumericProperty,
+)
 from kivy.lang import Builder
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
@@ -21,7 +27,8 @@ import math
 import copy
 
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 
 
 class MatplotFigureGeneral(Widget):
@@ -80,7 +87,7 @@ class MatplotFigureGeneral(Widget):
         self.zoompan = None
         self.fast_draw = True
         self.draw_left_spline = False  # available only when fast_draw is True
-        self.touch_mode = 'pan'
+        self.touch_mode = "pan"
         self.hover_on = False
         self.xsorted = True  # to manage x sorted data (if numpy is used)
         self.minzoom = dp(20)  # minimum pixel distance to apply zoom
@@ -103,7 +110,7 @@ class MatplotFigureGeneral(Widget):
         self.bind(size=self._onSize)
 
     def reset_touch(self) -> None:
-        """ reset touch
+        """reset touch
 
         Return:
             None
@@ -112,17 +119,18 @@ class MatplotFigureGeneral(Widget):
         self._last_touch_pos = {}
 
     def _draw_bitmap(self):
-        """ draw bitmap method. based on kivy scatter method"""
+        """draw bitmap method. based on kivy scatter method"""
         if self._bitmap is None:
             print("No bitmap!")
             return
         self._img_texture = Texture.create(size=(self.bt_w, self.bt_h))
         self._img_texture.blit_buffer(
-            bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
+            bytes(self._bitmap), colorfmt="rgba", bufferfmt="ubyte"
+        )
         self._img_texture.flip_vertical()
 
     def on_mouse_move(self, window, mouse_pos):
-        """ Mouse move """
+        """Mouse move"""
         if self._pressed:  # Do not process this event if there's a touch_move
             return
         x, y = mouse_pos
@@ -132,7 +140,7 @@ class MatplotFigureGeneral(Widget):
                 # self.figcanvas.motion_notify_event(x, real_y, guiEvent=None)
 
                 self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
-                s = 'motion_notify_event'
+                s = "motion_notify_event"
                 event = MouseEvent(
                     s,
                     self.figcanvas,
@@ -140,7 +148,8 @@ class MatplotFigureGeneral(Widget):
                     y,
                     self.figcanvas._button,
                     self.figcanvas._key,
-                    guiEvent=None)
+                    guiEvent=None,
+                )
                 self.figcanvas.callbacks.process(s, event)
 
     def on_touch_down(self, event):
@@ -152,7 +161,7 @@ class MatplotFigureGeneral(Widget):
             # self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
 
             self.figcanvas._button = 1
-            s = 'button_press_event'
+            s = "button_press_event"
             mouseevent = MouseEvent(
                 s,
                 self.figcanvas,
@@ -161,18 +170,19 @@ class MatplotFigureGeneral(Widget):
                 1,
                 self.figcanvas._key,
                 dblclick=False,
-                guiEvent=event)
+                guiEvent=event,
+            )
             self.figcanvas.callbacks.process(s, mouseevent)
 
     def on_touch_move(self, event):
-        """ Mouse move while pressed """
+        """Mouse move while pressed"""
         x, y = event.x, event.y
         if self.collide_point(x, y):
             real_x, real_y = x - self.pos[0], y - self.pos[1]
             # self.figcanvas.motion_notify_event(x, real_y, guiEvent=event)
 
             self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
-            s = 'motion_notify_event'
+            s = "motion_notify_event"
             event = MouseEvent(
                 s,
                 self.figcanvas,
@@ -180,7 +190,8 @@ class MatplotFigureGeneral(Widget):
                 y,
                 self.figcanvas._button,
                 self.figcanvas._key,
-                guiEvent=event)
+                guiEvent=event,
+            )
             self.figcanvas.callbacks.process(s, event)
 
     def on_touch_up(self, event):
@@ -192,7 +203,7 @@ class MatplotFigureGeneral(Widget):
             real_x, real_y = x - pos_x, y - pos_y
             # self.figcanvas.button_release_event(x, real_y, 1, guiEvent=event)
 
-            s = 'button_release_event'
+            s = "button_release_event"
             event = MouseEvent(
                 s,
                 self.figcanvas,
@@ -200,14 +211,15 @@ class MatplotFigureGeneral(Widget):
                 real_y,
                 1,
                 self.figcanvas._key,
-                guiEvent=event)
+                guiEvent=event,
+            )
             self.figcanvas.callbacks.process(s, event)
             self.figcanvas._button = None
 
             self._pressed = False
 
     def _onSize(self, o, size):
-        """ _onsize method """
+        """_onsize method"""
         if self.figure is None:
             return
         # Create a new, correctly sized bitmap
@@ -222,7 +234,7 @@ class MatplotFigureGeneral(Widget):
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
 
-        s = 'resize_event'
+        s = "resize_event"
         event = ResizeEvent(s, self.figcanvas)
         self.figcanvas.callbacks.process(s, event)
         self.figcanvas.draw_idle()
@@ -230,22 +242,22 @@ class MatplotFigureGeneral(Widget):
         self.figcanvas.draw()
 
     def update_lim(self):
-        """ update axis lim if zoombox is used"""
+        """update axis lim if zoombox is used"""
         ax = self.axes
 
         self.do_update = False
 
         ax.set_xlim(
-            left=min(
-                self.x0_box, self.x1_box), right=max(
-                self.x0_box, self.x1_box))
+            left=min(self.x0_box, self.x1_box),
+            right=max(self.x0_box, self.x1_box),
+        )
         ax.set_ylim(
-            bottom=min(
-                self.y0_box, self.y1_box), top=max(
-                self.y0_box, self.y1_box))
+            bottom=min(self.y0_box, self.y1_box),
+            top=max(self.y0_box, self.y1_box),
+        )
 
     def reset_box(self):
-        """ reset zoombox and apply zoombox limit if zoombox option if selected"""
+        """reset zoombox and apply zoombox limit if zoombox option if selected"""
         # if min(abs(self._box_size[0]),abs(self._box_size[1]))>self.minzoom:
         #     trans = self.axes.transData.inverted()
         #     self.x0_box, self.y0_box = trans.transform_point((self._box_pos[0]-self.pos[0], self._box_pos[1]-self.pos[1]))
@@ -262,7 +274,7 @@ class MatplotFigureGeneral(Widget):
         self.invert_rect_ver = False
 
     def draw_box(self, event, x0, y0, x1, y1) -> None:
-        """ Draw zoombox method
+        """Draw zoombox method
 
         Args:
             event: touch kivy event
@@ -329,9 +341,10 @@ class _FigureCanvas(FigureCanvasAgg):
         self.widget._draw_bitmap()
 
 
-Factory.register('MatplotFigureGeneral', MatplotFigureGeneral)
+Factory.register("MatplotFigureGeneral", MatplotFigureGeneral)
 
-Builder.load_string('''
+Builder.load_string(
+    """
 <MatplotFigureGeneral>
     canvas:
         Color:
@@ -351,4 +364,5 @@ Builder.load_string('''
                 dp(1) if root.invert_rect_ver else -dp(1), \
                 dp(1) if root.invert_rect_hor else -dp(1), \
                 dp(1) if root.invert_rect_ver else -dp(1)
-        ''')
+        """
+)

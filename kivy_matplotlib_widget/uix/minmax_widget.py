@@ -7,7 +7,7 @@ from kivy.properties import (
     StringProperty,
     BooleanProperty,
     ColorProperty,
-    DictProperty
+    DictProperty,
 )
 
 from kivy.lang import Builder
@@ -16,13 +16,15 @@ from kivy.clock import Clock
 from kivy.core import text as coretext
 
 
-def add_minmax(figure_wgt,
-               xaxis_formatter=None,
-               invert_xaxis_formatter=None,
-               yaxis_formatter=None,
-               invert_yaxis_formatter=None):
+def add_minmax(
+    figure_wgt,
+    xaxis_formatter=None,
+    invert_xaxis_formatter=None,
+    yaxis_formatter=None,
+    invert_yaxis_formatter=None,
+):
 
-    if hasattr(figure_wgt, 'text_instance'):
+    if hasattr(figure_wgt, "text_instance"):
         if figure_wgt.text_instance is None:
             text_widget = TextBox()
         else:
@@ -43,26 +45,28 @@ def add_minmax(figure_wgt,
 
 
 class BaseTextFloatLayout(FloatLayout):
-    """ Touch egend kivy class"""
+    """Touch egend kivy class"""
+
     figure_wgt = ObjectProperty(None)
     current_axis = ObjectProperty(None)
-    kind = DictProperty({'axis': 'x', 'anchor': 'right'})
+    kind = DictProperty({"axis": "x", "anchor": "right"})
     x_text_pos = NumericProperty(10)
     y_text_pos = NumericProperty(10)
     show_text = BooleanProperty(False)
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
     def reset_text(self):
-        """ reset text attribute """
+        """reset text attribute"""
         self.x_text_pos = 1
         self.y_text_pos = 1
 
 
 class TextBox(BaseTextFloatLayout):
-    """ text box widget """
+    """text box widget"""
+
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
@@ -77,7 +81,7 @@ class TextBox(BaseTextFloatLayout):
     current_text = ""
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
     def on_axis_validation(self, instance) -> bool:
@@ -94,9 +98,9 @@ class TextBox(BaseTextFloatLayout):
             return False
 
         try:
-            if self.kind.get('axis') == 'x' and self.invert_xaxis_formatter:
+            if self.kind.get("axis") == "x" and self.invert_xaxis_formatter:
                 number = float(self.invert_xaxis_formatter(instance.text))
-            elif self.kind.get('axis') == 'y' and self.invert_yaxis_formatter:
+            elif self.kind.get("axis") == "y" and self.invert_yaxis_formatter:
                 number = float(self.invert_yaxis_formatter(instance.text))
             else:
                 number = float(instance.text)
@@ -111,29 +115,31 @@ class TextBox(BaseTextFloatLayout):
             instance (widget) : kivy widget object
 
         """
-        if not instance.focused and \
-            self.on_axis_validation(instance) and \
-                self.current_text != instance.text:
+        if (
+            not instance.focused
+            and self.on_axis_validation(instance)
+            and self.current_text != instance.text
+        ):
 
             kind = self.kind
-            if self.kind.get('axis') == 'x' and self.invert_xaxis_formatter:
+            if self.kind.get("axis") == "x" and self.invert_xaxis_formatter:
                 number = float(self.invert_xaxis_formatter(instance.text))
-            elif self.kind.get('axis') == 'y' and self.invert_yaxis_formatter:
+            elif self.kind.get("axis") == "y" and self.invert_yaxis_formatter:
                 number = float(self.invert_yaxis_formatter(instance.text))
             else:
                 number = float(instance.text)
 
-            if kind.get('axis') == 'x':
-                if kind.get('anchor') == 'left':
+            if kind.get("axis") == "x":
+                if kind.get("anchor") == "left":
                     self.current_axis.set_xlim((number, None))
 
-                elif kind.get('anchor') == 'right':
+                elif kind.get("anchor") == "right":
                     self.current_axis.set_xlim((None, number))
-            elif kind.get('axis') == 'y':
-                if kind.get('anchor') == 'bottom':
+            elif kind.get("axis") == "y":
+                if kind.get("anchor") == "bottom":
                     self.current_axis.set_ylim((number, None))
 
-                elif kind.get('anchor') == 'top':
+                elif kind.get("anchor") == "top":
                     self.current_axis.set_ylim((None, number))
             self.current_axis.figure.canvas.draw_idle()
             self.current_axis.figure.canvas.flush_events()
@@ -141,7 +147,7 @@ class TextBox(BaseTextFloatLayout):
             self.show_text = False
 
     def autofocus_text(self, *args) -> None:
-        """ auto focus text input
+        """auto focus text input
 
         Returns:
             None
@@ -159,67 +165,70 @@ class TextBox(BaseTextFloatLayout):
         if val:
             kind = self.kind
 
-            if kind.get('axis') == 'x':
+            if kind.get("axis") == "x":
                 xlim = self.current_axis.get_xlim()
                 if self.xaxis_formatter is None:
                     axis_formatter = (
                         self.current_axis.fmt_xdata
-                        if self.current_axis.fmt_xdata is
-                        not None else
-                        self.current_axis.xaxis.get_major_formatter().format_data_short)
+                        if self.current_axis.fmt_xdata is not None
+                        else self.current_axis.xaxis.get_major_formatter().format_data_short
+                    )
                 else:
                     axis_formatter = self.xaxis_formatter
 
-                if kind.get('anchor') == 'left':
+                if kind.get("anchor") == "left":
                     # u"\u2212" is to manage unicode minus
                     self.ids.text_input.text = f"{
                         axis_formatter(
                             xlim[0])}".replace(
-                        u"\u2212", "-")
+                        "\u2212", "-"
+                    )
 
-                elif kind.get('anchor') == 'right':
+                elif kind.get("anchor") == "right":
                     # u"\u2212" is to manage unicode minus
                     self.ids.text_input.text = f"{
                         axis_formatter(
                             xlim[1])}".replace(
-                        u"\u2212", "-")
+                        "\u2212", "-"
+                    )
                 self.current_value = self.ids.text_input.text
 
-            elif kind.get('axis') == 'y':
+            elif kind.get("axis") == "y":
                 ylim = self.current_axis.get_ylim()
                 if self.yaxis_formatter is None:
                     axis_formatter = (
                         self.current_axis.fmt_ydata
-                        if self.current_axis.fmt_ydata is
-                        not None else
-                        self.current_axis.yaxis.get_major_formatter().format_data_short)
+                        if self.current_axis.fmt_ydata is not None
+                        else self.current_axis.yaxis.get_major_formatter().format_data_short
+                    )
                 else:
                     axis_formatter = self.xaxis_formatter
-                if kind.get('anchor') == 'bottom':
+                if kind.get("anchor") == "bottom":
                     # u"\u2212" is to manage unicode minus
                     self.ids.text_input.text = f"{
                         axis_formatter(
                             ylim[0])}".replace(
-                        u"\u2212", "-")
+                        "\u2212", "-"
+                    )
 
-                elif kind.get('anchor') == 'top':
+                elif kind.get("anchor") == "top":
                     # u"\u2212" is to manage unicode minus
                     self.ids.text_input.text = f"{
                         axis_formatter(
                             ylim[1])}".replace(
-                        u"\u2212", "-")
+                        "\u2212", "-"
+                    )
                 self.current_value = self.ids.text_input.text
             self.autofocus_text()
 
 
 class CustomTextInput(TextInput):
-    """ Variation of kivy TextInput
+    """Variation of kivy TextInput"""
 
-    """
     text_width = NumericProperty(100)
 
-    '''The text width
-    '''
+    """The text width
+    """
 
     text_box_instance = figure_wgt = ObjectProperty(None)
     textcenter = BooleanProperty(True)
@@ -229,30 +238,35 @@ class CustomTextInput(TextInput):
         self.bind(focus=self.on_focus_text)
 
     def update_textbox(self, *args):
-        '''
+        """
         Update the text box from text width
-        '''
+        """
 
         if self.text:
 
             try:
                 string = self.text
                 text_texture_width = coretext.Label(
-                    font_size=self.font_size).get_extents(string)[0]
+                    font_size=self.font_size
+                ).get_extents(string)[0]
 
             except BaseException:
-                print('get text width failed')
+                print("get text width failed")
             else:
                 if self.text_box_instance:
                     if text_texture_width > dp(20):
-                        self.text_box_instance.text_width = text_texture_width + \
-                            self.padding[0] + self.padding[2]
+                        self.text_box_instance.text_width = (
+                            text_texture_width
+                            + self.padding[0]
+                            + self.padding[2]
+                        )
                     else:
-                        self.text_box_instance.text_width = dp(
-                            20) + self.padding[0] + self.padding[2]
+                        self.text_box_instance.text_width = (
+                            dp(20) + self.padding[0] + self.padding[2]
+                        )
 
     def on_focus_text(self, instance, value):
-        """ on focus operation"""
+        """on focus operation"""
         if value:
             # User focused
             pass
@@ -261,7 +275,8 @@ class CustomTextInput(TextInput):
             self.text_box_instance.show_text = False
 
 
-Builder.load_string('''
+Builder.load_string(
+    """
 
 <BaseTextFloatLayout>
     size_hint: None,None
@@ -305,4 +320,5 @@ Builder.load_string('''
     font_size:dp(14)
     on_text: root.update_textbox()
     multiline:False
-        ''')
+        """
+)

@@ -1,4 +1,4 @@
-""" MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
+"""MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
 and kivy scatter
 """
 
@@ -16,8 +16,16 @@ from matplotlib.colors import to_hex
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from kivy.vector import Vector
 from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty, OptionProperty, DictProperty
+from kivy.properties import (
+    ObjectProperty,
+    ListProperty,
+    BooleanProperty,
+    BoundedNumericProperty,
+    AliasProperty,
+    NumericProperty,
+    OptionProperty,
+    DictProperty,
+)
 from kivy.lang import Builder
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
@@ -25,13 +33,19 @@ import math
 import copy
 
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 selector_widgets_available = False
 try:
     selector_widgets_available = True
-    from kivy_matplotlib_widget.uix.selector_widget import ResizeRelativeLayout, LassoRelativeLayout, EllipseRelativeLayout, SpanRelativeLayout
+    from kivy_matplotlib_widget.uix.selector_widget import (
+        ResizeRelativeLayout,
+        LassoRelativeLayout,
+        EllipseRelativeLayout,
+        SpanRelativeLayout,
+    )
 except ImportError:
-    print('Selector widgets are not available')
+    print("Selector widgets are not available")
 
 
 class MatplotlibEvent:
@@ -41,7 +55,7 @@ class MatplotlibEvent:
     inaxes = None
     projection = False
     compare_xdata = False
-    pick_radius_axis = 'both'
+    pick_radius_axis = "both"
 
 
 class MatplotFigureTwinx(Widget):
@@ -101,13 +115,8 @@ class MatplotFigureTwinx(Widget):
     desktop_mode = BooleanProperty(True)
     current_selector = OptionProperty(
         "None",
-        options=[
-            "None",
-            'rectangle',
-            'lasso',
-            'ellipse',
-            'span',
-            'custom'])
+        options=["None", "rectangle", "lasso", "ellipse", "span", "custom"],
+    )
     highlight_hover = BooleanProperty(False)
     highlight_prop = DictProperty({})
     highlight_alpha = NumericProperty(0.2)
@@ -130,7 +139,7 @@ class MatplotFigureTwinx(Widget):
             self.axes = ax
             patch_cpy = copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            for pos in ['right', 'top', 'bottom', 'left']:
+            for pos in ["right", "top", "bottom", "left"]:
                 ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy = ax.add_patch(patch_cpy)
@@ -144,7 +153,7 @@ class MatplotFigureTwinx(Widget):
                 ax2 = self.figure.axes[1]
                 patch_cpy_ax2 = copy.copy(ax2.patch)
                 patch_cpy_ax2.set_visible(False)
-                for pos in ['right', 'top', 'bottom', 'left']:
+                for pos in ["right", "top", "bottom", "left"]:
                     ax2.spines[pos].set_zorder(10)
                 patch_cpy_ax2.set_zorder(9)
                 self.background_ax2_patch_copy = ax2.add_patch(patch_cpy_ax2)
@@ -164,9 +173,8 @@ class MatplotFigureTwinx(Widget):
         if self.auto_cursor:
             if len(self.figure.axes) == 2:
                 self.register_lines(
-                    list(
-                        self.figure.axes[0].lines +
-                        self.figure.axes[1].lines))
+                    list(self.figure.axes[0].lines + self.figure.axes[1].lines)
+                )
             elif len(self.figure.axes) > 0:
                 self.register_lines(list(self.figure.axes[0].lines))
 
@@ -194,7 +202,7 @@ class MatplotFigureTwinx(Widget):
         self.lines = []
 
         # option
-        self.touch_mode = 'pan'
+        self.touch_mode = "pan"
         self.hover_on = False
         # used matplotlib formatter to display x cursor value
         self.cursor_xaxis_formatter = None
@@ -247,7 +255,7 @@ class MatplotFigureTwinx(Widget):
         self.show_compare_cursor = False
 
         # manage back and next event
-        if hasattr(cbook, '_Stack'):
+        if hasattr(cbook, "_Stack"):
             # manage matplotlib version with no Stack (replace by _Stack)
             self._nav_stack = cbook._Stack()
         else:
@@ -271,13 +279,13 @@ class MatplotFigureTwinx(Widget):
     def on_kv_post(self, _):
         # if not self.selector:
         if self.current_selector != "None" and selector_widgets_available:
-            if self.current_selector == 'rectangle':
+            if self.current_selector == "rectangle":
                 self.set_selector(ResizeRelativeLayout)
-            elif self.current_selector == 'lasso':
+            elif self.current_selector == "lasso":
                 self.set_selector(LassoRelativeLayout)
-            elif self.current_selector == 'ellipse':
+            elif self.current_selector == "ellipse":
                 self.set_selector(EllipseRelativeLayout)
-            elif self.current_selector == 'span':
+            elif self.current_selector == "span":
                 self.set_selector(SpanRelativeLayout)
         self.kv_post_done = True
 
@@ -293,18 +301,19 @@ class MatplotFigureTwinx(Widget):
 
         if self.kv_post_done and selector_widgets_available:
 
-            if value == 'rectangle':
+            if value == "rectangle":
                 self.set_selector(ResizeRelativeLayout)
-            elif value == 'lasso':
+            elif value == "lasso":
                 self.set_selector(LassoRelativeLayout)
-            elif value == 'ellipse':
+            elif value == "ellipse":
                 self.set_selector(EllipseRelativeLayout)
-            elif self.current_selector == 'span':
+            elif self.current_selector == "span":
                 self.set_selector(SpanRelativeLayout)
             elif value == "None":
                 if self.selector:
                     Window.unbind(
-                        mouse_pos=self.selector.resize_wgt.on_mouse_pos)
+                        mouse_pos=self.selector.resize_wgt.on_mouse_pos
+                    )
                     self.parent.remove_widget(self.selector)
                 self.selector = None
 
@@ -322,8 +331,8 @@ class MatplotFigureTwinx(Widget):
             self.parent.remove_widget(self.selector)
 
         self.selector = selector(
-            figure_wgt=self,
-            desktop_mode=self.desktop_mode)
+            figure_wgt=self, desktop_mode=self.desktop_mode
+        )
         self.selector.resize_wgt.ax = self.axes
         if selector_collection:
             self.set_collection()
@@ -354,7 +363,7 @@ class MatplotFigureTwinx(Widget):
         self.selector.resize_wgt.set_callback_clear(callback)
 
     def register_lines(self, lines: list) -> None:
-        """ register lines method
+        """register lines method
 
         Args:
             lines (list): list of matplolib line class
@@ -369,20 +378,20 @@ class MatplotFigureTwinx(Widget):
 
         # create cross hair cursor
         self.horizontal_line = ax.axhline(
-            y=self.ymin, color='k', lw=0.8, ls='--', visible=False)
+            y=self.ymin, color="k", lw=0.8, ls="--", visible=False
+        )
         self.vertical_line = ax.axvline(
-            x=self.xmin, color='k', lw=0.8, ls='--', visible=False)
+            x=self.xmin, color="k", lw=0.8, ls="--", visible=False
+        )
 
         # register lines
         self.lines = lines
 
         # cursor text
-        self.text = ax.text(1.0, 1.01, '',
-                            transform=ax.transAxes,
-                            ha='right')
+        self.text = ax.text(1.0, 1.01, "", transform=ax.transAxes, ha="right")
 
     def set_cross_hair_visible(self, visible: bool) -> None:
-        """ set curcor visibility
+        """set curcor visibility
 
         Args:
             visible (bool): make cursor visble or not
@@ -404,25 +413,37 @@ class MatplotFigureTwinx(Widget):
 
                     if self.hover_instance:
 
-                        if self.hover_instance.show_cursor and self.x_hover_data is not None and self.y_hover_data is not None:
+                        if (
+                            self.hover_instance.show_cursor
+                            and self.x_hover_data is not None
+                            and self.y_hover_data is not None
+                        ):
                             self.y_hover_data = self.cursor_last_y
                             xy_pos = self.figure.axes[1].transData.transform(
-                                [(self.x_hover_data, self.y_hover_data)])
-                            self.hover_instance.y_hover_pos = float(
-                                xy_pos[0][1]) + self.y
+                                [(self.x_hover_data, self.y_hover_data)]
+                            )
+                            self.hover_instance.y_hover_pos = (
+                                float(xy_pos[0][1]) + self.y
+                            )
 
                     else:
                         new_y = self.cursor_last_y
                         x = self.vertical_line.get_xdata()
                         trans = self.figure.axes[0].transData.inverted()
                         xy_pos = self.figure.axes[1].transData.transform(
-                            [(x, new_y)])
+                            [(x, new_y)]
+                        )
                         xdata, ydata = trans.transform_point(
-                            (xy_pos[0][0], xy_pos[0][1]))
-                        self.horizontal_line.set_ydata([ydata,])
+                            (xy_pos[0][0], xy_pos[0][1])
+                        )
+                        self.horizontal_line.set_ydata(
+                            [
+                                ydata,
+                            ]
+                        )
 
     def clear_line_prop(self) -> None:
-        """ clear attribute line_prop method
+        """clear attribute line_prop method
 
         Args:
             None
@@ -433,13 +454,13 @@ class MatplotFigureTwinx(Widget):
         """
         if self.last_line_prop:
             for key in self.last_line_prop:
-                set_line_attr = getattr(self.last_line, 'set_' + key)
+                set_line_attr = getattr(self.last_line, "set_" + key)
                 set_line_attr(self.last_line_prop[key])
             self.last_line_prop = {}
         self.last_line = None
 
     def hover(self, event) -> None:
-        """ hover cursor method (cursor to nearest value)
+        """hover cursor method (cursor to nearest value)
 
         Args:
             event: touch kivy event
@@ -455,7 +476,8 @@ class MatplotFigureTwinx(Widget):
             # transform kivy x,y touch event to x,y data
             trans = self.figure.axes[0].transData.inverted()
             xdata, ydata = trans.transform_point(
-                (event.x - self.pos[0], event.y - self.pos[1]))
+                (event.x - self.pos[0], event.y - self.pos[1])
+            )
 
             # loop all register lines and find closest x,y data for each valid
             # line
@@ -475,9 +497,9 @@ class MatplotFigureTwinx(Widget):
                         # find closest data index from touch (x axis)
                         if self.xsorted:
                             index = min(
-                                np.searchsorted(
-                                    self.x_cursor, xdata), len(
-                                    self.y_cursor) - 1)
+                                np.searchsorted(self.x_cursor, xdata),
+                                len(self.y_cursor) - 1,
+                            )
 
                         else:
                             index = np.argsort(abs(self.x_cursor - xdata))[0]
@@ -494,27 +516,40 @@ class MatplotFigureTwinx(Widget):
                             if self.twinx:
                                 if ax == self.figure.axes[1]:
                                     # right axis
-                                    trans = self.figure.axes[1].transData.inverted(
-                                    )
+                                    trans = self.figure.axes[
+                                        1
+                                    ].transData.inverted()
                                     xdata2, ydata2 = trans.transform_point(
-                                        (event.x - self.pos[0], event.y - self.pos[1]))
+                                        (
+                                            event.x - self.pos[0],
+                                            event.y - self.pos[1],
+                                        )
+                                    )
                                     xy_pixels_mouse = ax.transData.transform(
-                                        np.vstack([xdata2, ydata2]).T)
+                                        np.vstack([xdata2, ydata2]).T
+                                    )
                                 else:
                                     # left axis
                                     xy_pixels_mouse = ax.transData.transform(
-                                        [(xdata, ydata)])
+                                        [(xdata, ydata)]
+                                    )
                             else:
                                 # left axis
                                 xy_pixels_mouse = ax.transData.transform(
-                                    [(xdata, ydata)])
-                            if np.ma.is_masked(x) or np.ma.is_masked(
-                                    y) or np.isnan(x) or np.isnan(y):
+                                    [(xdata, ydata)]
+                                )
+                            if (
+                                np.ma.is_masked(x)
+                                or np.ma.is_masked(y)
+                                or np.isnan(x)
+                                or np.isnan(y)
+                            ):
                                 distance.append(np.nan)
                             else:
                                 xy_pixels = ax.transData.transform(
-                                    [(x, ydata)])
-                                dx2 = (xy_pixels_mouse[0][0] - xy_pixels[0][0])
+                                    [(x, ydata)]
+                                )
+                                dx2 = xy_pixels_mouse[0][0] - xy_pixels[0][0]
                                 distance.append(abs(dx2))
                         else:
                             # find ydata corresponding to xdata
@@ -525,35 +560,45 @@ class MatplotFigureTwinx(Widget):
                             if self.twinx:
                                 if ax == self.figure.axes[1]:
                                     # right axis
-                                    trans = self.figure.axes[1].transData.inverted(
-                                    )
+                                    trans = self.figure.axes[
+                                        1
+                                    ].transData.inverted()
                                     xdata2, ydata2 = trans.transform_point(
-                                        (event.x - self.pos[0], event.y - self.pos[1]))
+                                        (
+                                            event.x - self.pos[0],
+                                            event.y - self.pos[1],
+                                        )
+                                    )
                                     xy_pixels_mouse = ax.transData.transform(
-                                        np.vstack([xdata2, ydata2]).T)
+                                        np.vstack([xdata2, ydata2]).T
+                                    )
                                 else:
                                     # left axis
                                     xy_pixels_mouse = ax.transData.transform(
-                                        [(xdata, ydata)])
+                                        [(xdata, ydata)]
+                                    )
                             else:
                                 # left axis
                                 xy_pixels_mouse = ax.transData.transform(
-                                    [(xdata, ydata)])
+                                    [(xdata, ydata)]
+                                )
                             if np.ma.is_masked(x) or np.ma.is_masked(y):
                                 distance.append(np.nan)
                             else:
                                 xy_pixels = ax.transData.transform([(x, y)])
                                 dx2 = (
-                                    xy_pixels_mouse[0][0] - xy_pixels[0][0])**2
+                                    xy_pixels_mouse[0][0] - xy_pixels[0][0]
+                                ) ** 2
                                 dy2 = (
-                                    xy_pixels_mouse[0][1] - xy_pixels[0][1])**2
+                                    xy_pixels_mouse[0][1] - xy_pixels[0][1]
+                                ) ** 2
 
                                 # store distance
-                                if self.pick_radius_axis == 'both':
-                                    distance.append((dx2 + dy2)**0.5)
-                                if self.pick_radius_axis == 'x':
+                                if self.pick_radius_axis == "both":
+                                    distance.append((dx2 + dy2) ** 0.5)
+                                if self.pick_radius_axis == "x":
                                     distance.append(abs(dx2))
-                                if self.pick_radius_axis == 'y':
+                                if self.pick_radius_axis == "y":
                                     distance.append(abs(dy2))
 
                         # store all best lines and index
@@ -570,11 +615,13 @@ class MatplotFigureTwinx(Widget):
                 # index of minimum distance
                 if self.compare_xdata:
                     if not self.hover_instance or not hasattr(
-                            self.hover_instance, 'children_list'):
+                        self.hover_instance, "children_list"
+                    ):
                         return
 
                     idx_best_list = np.flatnonzero(
-                        np.array(distance) == np.nanmin(distance))
+                        np.array(distance) == np.nanmin(distance)
+                    )
                     # get datas from closest line
                     line = good_line[idx_best_list[0]]
                     self.x_cursor, self.y_cursor = line.get_xydata().T
@@ -585,12 +632,15 @@ class MatplotFigureTwinx(Widget):
                     xy_pos = ax.transData.transform([(x, y)])
                     self.x_hover_data = x
                     self.y_hover_data = y
-                    self.hover_instance.x_hover_pos = float(
-                        xy_pos[0][0]) + self.x
-                    self.hover_instance.y_hover_pos = float(
-                        xy_pos[0][1]) + self.y
-                    self.hover_instance.y_touch_pos = float(
-                        xy_pixels[0][1]) + self.y
+                    self.hover_instance.x_hover_pos = (
+                        float(xy_pos[0][0]) + self.x
+                    )
+                    self.hover_instance.y_hover_pos = (
+                        float(xy_pos[0][1]) + self.y
+                    )
+                    self.hover_instance.y_touch_pos = (
+                        float(xy_pixels[0][1]) + self.y
+                    )
 
                     if self.first_call_compare_hover:
                         self.hover_instance.show_cursor = True
@@ -607,9 +657,13 @@ class MatplotFigureTwinx(Widget):
                             else:
                                 line = good_line[idx_best_list[i]]
                                 line_label = line.get_label()
-                                if line_label in self.hover_instance.children_names:
+                                if (
+                                    line_label
+                                    in self.hover_instance.children_names
+                                ):
                                     index = self.hover_instance.children_names.index(
-                                        line_label)
+                                        line_label
+                                    )
                                     y_cursor = line.get_ydata()
                                     y = y_cursor[good_index[idx_best_list[i]]]
                                     ax = line.axes
@@ -617,36 +671,59 @@ class MatplotFigureTwinx(Widget):
                                     xy_pos = ax.transData.transform([(x, y)])
                                     pos_y = float(xy_pos[0][1]) + self.y
 
-                                    if pos_y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                                            pos_y > self.y + ax.bbox.bounds[1]:
+                                    if (
+                                        pos_y
+                                        < self.y
+                                        + ax.bbox.bounds[1]
+                                        + ax.bbox.bounds[3]
+                                        and pos_y > self.y + ax.bbox.bounds[1]
+                                    ):
 
-                                        available_widget[index].x_hover_pos = float(
-                                            xy_pos[0][0]) + self.x
-                                        available_widget[index].y_hover_pos = float(
-                                            xy_pos[0][1]) + self.y
-                                        available_widget[index].custom_color = get_color_from_hex(
-                                            to_hex(line.get_color()))
+                                        available_widget[index].x_hover_pos = (
+                                            float(xy_pos[0][0]) + self.x
+                                        )
+                                        available_widget[index].y_hover_pos = (
+                                            float(xy_pos[0][1]) + self.y
+                                        )
+                                        available_widget[
+                                            index
+                                        ].custom_color = get_color_from_hex(
+                                            to_hex(line.get_color())
+                                        )
 
                                         if self.twinx:
                                             if ax == self.figure.axes[1]:
-                                                if self.cursor_yaxis2_formatter:
+                                                if (
+                                                    self.cursor_yaxis2_formatter
+                                                ):
                                                     y = self.cursor_yaxis2_formatter.format_data(
-                                                        y)
+                                                        y
+                                                    )
                                                 else:
-                                                    y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                                    y = ax.yaxis.get_major_formatter().format_data_short(
+                                                        y
+                                                    )
                                             else:
                                                 if self.cursor_yaxis_formatter:
                                                     y = self.cursor_yaxis_formatter.format_data(
-                                                        y)
+                                                        y
+                                                    )
 
                                         else:
                                             if self.cursor_yaxis_formatter:
                                                 y = self.cursor_yaxis_formatter.format_data(
-                                                    y)
+                                                    y
+                                                )
                                             else:
-                                                y = ax.yaxis.get_major_formatter().format_data_short(y)
-                                        available_widget[index].label_y_value = f"{y}"
-                                        available_widget[index].show_widget = True
+                                                y = ax.yaxis.get_major_formatter().format_data_short(
+                                                    y
+                                                )
+                                        available_widget[
+                                            index
+                                        ].label_y_value = f"{y}"
+                                        available_widget[index].show_widget = (
+                                            True
+                                        )
                                         index_list.remove(index)
 
                         for ii in index_list:
@@ -655,24 +732,37 @@ class MatplotFigureTwinx(Widget):
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x)
                         else:
-                            x = ax.xaxis.get_major_formatter().format_data_short(x)
+                            x = ax.xaxis.get_major_formatter().format_data_short(
+                                x
+                            )
 
                         self.hover_instance.label_x_value = f"{x}"
 
-                        if hasattr(self.hover_instance, 'overlap_check'):
+                        if hasattr(self.hover_instance, "overlap_check"):
                             self.hover_instance.overlap_check()
 
-                        self.hover_instance.xmin_line = float(
-                            ax.bbox.bounds[0]) + self.x
-                        self.hover_instance.xmax_line = float(
-                            ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x
-                        self.hover_instance.ymin_line = float(
-                            ax.bbox.bounds[1]) + self.y
-                        self.hover_instance.ymax_line = float(
-                            ax.bbox.bounds[1] + ax.bbox.bounds[3]) + self.y
+                        self.hover_instance.xmin_line = (
+                            float(ax.bbox.bounds[0]) + self.x
+                        )
+                        self.hover_instance.xmax_line = (
+                            float(ax.bbox.bounds[0] + ax.bbox.bounds[2])
+                            + self.x
+                        )
+                        self.hover_instance.ymin_line = (
+                            float(ax.bbox.bounds[1]) + self.y
+                        )
+                        self.hover_instance.ymax_line = (
+                            float(ax.bbox.bounds[1] + ax.bbox.bounds[3])
+                            + self.y
+                        )
 
-                        if self.hover_instance.x_hover_pos > self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] or \
-                                self.hover_instance.x_hover_pos < self.x + ax.bbox.bounds[0] or len(index_list) == nb_widget:
+                        if (
+                            self.hover_instance.x_hover_pos
+                            > self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+                            or self.hover_instance.x_hover_pos
+                            < self.x + ax.bbox.bounds[0]
+                            or len(index_list) == nb_widget
+                        ):
                             self.hover_instance.hover_outside_bound = True
                         else:
                             self.hover_instance.hover_outside_bound = False
@@ -699,29 +789,61 @@ class MatplotFigureTwinx(Widget):
                             cur_ylim = self.figure.axes[0].get_ylim()
                             cur_ylim2 = self.figure.axes[1].get_ylim()
 
-                            ratio = (cur_ylim2[1] - cur_ylim2[0]
-                                     ) / (cur_ylim[1] - cur_ylim[0])
+                            ratio = (cur_ylim2[1] - cur_ylim2[0]) / (
+                                cur_ylim[1] - cur_ylim[0]
+                            )
                             new_y = (y - cur_ylim2[0]) / ratio + cur_ylim[0]
-                            self.horizontal_line.set_ydata([new_y,])
+                            self.horizontal_line.set_ydata(
+                                [
+                                    new_y,
+                                ]
+                            )
 
                             self.cursor_last_y = new_y
-                            if self.cursor_yaxis2_formatter and not self.hover_instance:
+                            if (
+                                self.cursor_yaxis2_formatter
+                                and not self.hover_instance
+                            ):
                                 y = self.cursor_yaxis2_formatter.format_data(y)
                             elif not self.hover_instance:
-                                y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                y = ax.yaxis.get_major_formatter().format_data_short(
+                                    y
+                                )
                         else:
-                            self.horizontal_line.set_ydata([y,])
-                            if self.cursor_yaxis_formatter and not self.hover_instance:
+                            self.horizontal_line.set_ydata(
+                                [
+                                    y,
+                                ]
+                            )
+                            if (
+                                self.cursor_yaxis_formatter
+                                and not self.hover_instance
+                            ):
                                 y = self.cursor_yaxis_formatter.format_data(y)
                             elif not self.hover_instance:
-                                y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                y = ax.yaxis.get_major_formatter().format_data_short(
+                                    y
+                                )
                     else:
-                        self.horizontal_line.set_ydata([y,])
-                        if self.cursor_yaxis_formatter and not self.hover_instance:
+                        self.horizontal_line.set_ydata(
+                            [
+                                y,
+                            ]
+                        )
+                        if (
+                            self.cursor_yaxis_formatter
+                            and not self.hover_instance
+                        ):
                             y = self.cursor_yaxis_formatter.format_data(y)
                         elif not self.hover_instance:
-                            y = ax.yaxis.get_major_formatter().format_data_short(y)
-                    self.vertical_line.set_xdata([x,])
+                            y = ax.yaxis.get_major_formatter().format_data_short(
+                                y
+                            )
+                    self.vertical_line.set_xdata(
+                        [
+                            x,
+                        ]
+                    )
                     if self.cursor_xaxis_formatter and not self.hover_instance:
                         x = self.cursor_xaxis_formatter.format_data(x)
                     elif not self.hover_instance:
@@ -732,57 +854,86 @@ class MatplotFigureTwinx(Widget):
                         xy_pos = ax.transData.transform([(x, y)])
                         self.x_hover_data = x
                         self.y_hover_data = y
-                        self.hover_instance.x_hover_pos = float(
-                            xy_pos[0][0]) + self.x
-                        self.hover_instance.y_hover_pos = float(
-                            xy_pos[0][1]) + self.y
+                        self.hover_instance.x_hover_pos = (
+                            float(xy_pos[0][0]) + self.x
+                        )
+                        self.hover_instance.y_hover_pos = (
+                            float(xy_pos[0][1]) + self.y
+                        )
                         self.hover_instance.show_cursor = True
 
                         if self.twinx:
                             if ax == self.figure.axes[1]:
                                 if self.cursor_yaxis2_formatter:
                                     y = self.cursor_yaxis2_formatter.format_data(
-                                        y)
+                                        y
+                                    )
                                 else:
-                                    y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                    y = ax.yaxis.get_major_formatter().format_data_short(
+                                        y
+                                    )
                             else:
                                 if self.cursor_yaxis_formatter:
                                     y = self.cursor_yaxis_formatter.format_data(
-                                        y)
+                                        y
+                                    )
                                 else:
-                                    y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                    y = ax.yaxis.get_major_formatter().format_data_short(
+                                        y
+                                    )
 
                         else:
                             if self.cursor_yaxis_formatter:
                                 y = self.cursor_yaxis_formatter.format_data(y)
                             else:
-                                y = ax.yaxis.get_major_formatter().format_data_short(y)
+                                y = ax.yaxis.get_major_formatter().format_data_short(
+                                    y
+                                )
 
                         if self.cursor_xaxis_formatter:
                             x = self.cursor_xaxis_formatter.format_data(x)
                         else:
-                            x = ax.xaxis.get_major_formatter().format_data_short(x)
+                            x = ax.xaxis.get_major_formatter().format_data_short(
+                                x
+                            )
 
                         self.hover_instance.label_x_value = f"{x}"
                         self.hover_instance.label_y_value = f"{y}"
 
-                        self.hover_instance.xmin_line = float(
-                            ax.bbox.bounds[0]) + self.x
-                        self.hover_instance.xmax_line = float(
-                            ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x
-                        self.hover_instance.ymin_line = float(
-                            ax.bbox.bounds[1]) + self.y
-                        self.hover_instance.ymax_line = float(
-                            ax.bbox.bounds[1] + ax.bbox.bounds[3]) + self.y
+                        self.hover_instance.xmin_line = (
+                            float(ax.bbox.bounds[0]) + self.x
+                        )
+                        self.hover_instance.xmax_line = (
+                            float(ax.bbox.bounds[0] + ax.bbox.bounds[2])
+                            + self.x
+                        )
+                        self.hover_instance.ymin_line = (
+                            float(ax.bbox.bounds[1]) + self.y
+                        )
+                        self.hover_instance.ymax_line = (
+                            float(ax.bbox.bounds[1] + ax.bbox.bounds[3])
+                            + self.y
+                        )
 
                         self.hover_instance.custom_label = line.get_label()
                         self.hover_instance.custom_color = get_color_from_hex(
-                            to_hex(line.get_color()))
+                            to_hex(line.get_color())
+                        )
 
-                        if self.hover_instance.x_hover_pos > self.x + self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
-                                self.hover_instance.x_hover_pos < self.x + self.figure.axes[0].bbox.bounds[0] or \
-                                self.hover_instance.y_hover_pos > self.y + self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
-                                self.hover_instance.y_hover_pos < self.y + self.figure.axes[0].bbox.bounds[1]:
+                        if (
+                            self.hover_instance.x_hover_pos
+                            > self.x
+                            + self.figure.axes[0].bbox.bounds[2]
+                            + self.figure.axes[0].bbox.bounds[0]
+                            or self.hover_instance.x_hover_pos
+                            < self.x + self.figure.axes[0].bbox.bounds[0]
+                            or self.hover_instance.y_hover_pos
+                            > self.y
+                            + self.figure.axes[0].bbox.bounds[1]
+                            + self.figure.axes[0].bbox.bounds[3]
+                            or self.hover_instance.y_hover_pos
+                            < self.y + self.figure.axes[0].bbox.bounds[1]
+                        ):
                             self.hover_instance.hover_outside_bound = True
                         else:
                             self.hover_instance.hover_outside_bound = False
@@ -791,12 +942,14 @@ class MatplotFigureTwinx(Widget):
                             self.myevent.x = event.x - self.pos[0]
                             self.myevent.y = event.y - self.pos[1]
                             self.myevent.inaxes = self.figure.canvas.inaxes(
-                                (event.x - self.pos[0], event.y - self.pos[1]))
+                                (event.x - self.pos[0], event.y - self.pos[1])
+                            )
 
-                            axes = [a
-                                    for a in
-                                    self.figure.canvas.figure.get_axes()
-                                    if a.in_axes(self.myevent)]
+                            axes = [
+                                a
+                                for a in self.figure.canvas.figure.get_axes()
+                                if a.in_axes(self.myevent)
+                            ]
 
                             if not axes or not isinstance(line, mlines.Line2D):
 
@@ -804,7 +957,8 @@ class MatplotFigureTwinx(Widget):
                                     self.clear_line_prop()
                                     if self.background:
                                         ax.figure.canvas.restore_region(
-                                            self.background)
+                                            self.background
+                                        )
                                         # draw (blit method)
                                         ax.figure.canvas.blit(ax.bbox)
                                         ax.figure.canvas.flush_events()
@@ -815,21 +969,31 @@ class MatplotFigureTwinx(Widget):
                             # blit method (always use because same visual
                             # effect as draw)
                             if self.background is None:
-                                self.background = ax.figure.canvas.copy_from_bbox(
-                                    ax.figure.bbox)
+                                self.background = (
+                                    ax.figure.canvas.copy_from_bbox(
+                                        ax.figure.bbox
+                                    )
+                                )
                             if self.last_line is None:
                                 default_alpha = []
-                                lines_list = self.lines  # get all register lines
+                                lines_list = (
+                                    self.lines
+                                )  # get all register lines
                                 for current_line in lines_list:
                                     default_alpha.append(
-                                        current_line.get_alpha())
+                                        current_line.get_alpha()
+                                    )
                                     current_line.set_alpha(
-                                        self.highlight_alpha)
+                                        self.highlight_alpha
+                                    )
 
                                 ax.figure.canvas.draw_idle()
                                 ax.figure.canvas.flush_events()
-                                self.background_highlight = ax.figure.canvas.copy_from_bbox(
-                                    ax.figure.bbox)
+                                self.background_highlight = (
+                                    ax.figure.canvas.copy_from_bbox(
+                                        ax.figure.bbox
+                                    )
+                                )
                                 self.last_line = line
                                 for i, current_line in enumerate(lines_list):
                                     current_line.set_alpha(default_alpha[i])
@@ -839,30 +1003,38 @@ class MatplotFigureTwinx(Widget):
                                     self.last_line_prop = {}
                                     for key in self.highlight_prop:
                                         # if hasattr(line,key):
-                                        line_attr = getattr(line, 'get_' + key)
+                                        line_attr = getattr(line, "get_" + key)
                                         self.last_line_prop.update(
-                                            {key: line_attr()})
+                                            {key: line_attr()}
+                                        )
                                         set_line_attr = getattr(
-                                            line, 'set_' + key)
+                                            line, "set_" + key
+                                        )
                                         set_line_attr(self.highlight_prop[key])
                             elif self.last_line_prop:
                                 for key in self.last_line_prop:
                                     set_line_attr = getattr(
-                                        self.last_line, 'set_' + key)
+                                        self.last_line, "set_" + key
+                                    )
                                     set_line_attr(self.last_line_prop[key])
-                                self.hover_instance.custom_color = get_color_from_hex(
-                                    to_hex(line.get_color()))
+                                self.hover_instance.custom_color = (
+                                    get_color_from_hex(
+                                        to_hex(line.get_color())
+                                    )
+                                )
                                 self.last_line_prop = {}
                                 for key in self.highlight_prop:
-                                    line_attr = getattr(line, 'get_' + key)
+                                    line_attr = getattr(line, "get_" + key)
                                     self.last_line_prop.update(
-                                        {key: line_attr()})
-                                    set_line_attr = getattr(line, 'set_' + key)
+                                        {key: line_attr()}
+                                    )
+                                    set_line_attr = getattr(line, "set_" + key)
                                     set_line_attr(self.highlight_prop[key])
                                 self.last_line = line
 
                             ax.figure.canvas.restore_region(
-                                self.background_highlight)
+                                self.background_highlight
+                            )
                             ax.draw_artist(line)
 
                             # draw (blit method)
@@ -880,7 +1052,8 @@ class MatplotFigureTwinx(Widget):
                         self.figure.canvas.draw_idle()
                         self.figure.canvas.flush_events()
                         self.background = self.figure.canvas.copy_from_bbox(
-                            self.figure.bbox)
+                            self.figure.bbox
+                        )
                         self.set_cross_hair_visible(True)
                         if self.last_line is not None:
                             self.clear_line_prop()
@@ -909,10 +1082,14 @@ class MatplotFigureTwinx(Widget):
                         self.myevent.x = event.x - self.pos[0]
                         self.myevent.y = event.y - self.pos[1]
                         self.myevent.inaxes = self.figure.canvas.inaxes(
-                            (event.x - self.pos[0], event.y - self.pos[1]))
+                            (event.x - self.pos[0], event.y - self.pos[1])
+                        )
 
-                        axes = [a for a in self.figure.canvas.figure.get_axes()
-                                if a.in_axes(self.myevent)]
+                        axes = [
+                            a
+                            for a in self.figure.canvas.figure.get_axes()
+                            if a.in_axes(self.myevent)
+                        ]
 
                         if not axes:
 
@@ -920,10 +1097,12 @@ class MatplotFigureTwinx(Widget):
                                 self.clear_line_prop()
                                 if self.background:
                                     self.figure.canvas.restore_region(
-                                        self.background)
+                                        self.background
+                                    )
                                     # draw (blit method)
                                     self.figure.canvas.blit(
-                                        self.figure.axes[0].bbox)
+                                        self.figure.axes[0].bbox
+                                    )
                                     self.figure.canvas.flush_events()
                                     self.background = None
                             return
@@ -933,17 +1112,19 @@ class MatplotFigureTwinx(Widget):
             return
         ax = self.figure.axes[0]
         ax.relim(visible_only=self.autoscale_visible_only)
-        ax.autoscale_view(tight=self.autoscale_tight,
-                          scalex=True if self.autoscale_axis != "y" else False,
-                          scaley=True if self.autoscale_axis != "x" else False)
+        ax.autoscale_view(
+            tight=self.autoscale_tight,
+            scalex=True if self.autoscale_axis != "y" else False,
+            scaley=True if self.autoscale_axis != "x" else False,
+        )
         ax.autoscale(axis=self.autoscale_axis, tight=self.autoscale_tight)
         if self.twinx:
             ax2 = self.figure.axes[1]
             if self.autoscale_axis != "x":
                 ax2.relim(visible_only=self.autoscale_visible_only)
-                ax2.autoscale_view(tight=self.autoscale_tight,
-                                   scalex=False,
-                                   scaley=True)
+                ax2.autoscale_view(
+                    tight=self.autoscale_tight, scalex=False, scaley=True
+                )
                 ax2.autoscale(axis="y", tight=self.autoscale_tight)
 
                 self.ymin2, self.ymax2 = ax2.get_ylim()
@@ -955,7 +1136,7 @@ class MatplotFigureTwinx(Widget):
         self.ymin, self.ymax = ax.get_ylim()
 
     def home(self) -> None:
-        """ reset data axis
+        """reset data axis
 
         Return:
             None
@@ -1026,11 +1207,19 @@ class MatplotFigureTwinx(Widget):
         """Push the current view limits and position onto the stack."""
         self._nav_stack.push(
             WeakKeyDictionary(
-                {ax: (ax._get_view(),
-                      # Store both the original and modified positions.
-                      (ax.get_position(True).frozen(),
-                       ax.get_position().frozen()))
-                 for ax in self.figure.axes}))
+                {
+                    ax: (
+                        ax._get_view(),
+                        # Store both the original and modified positions.
+                        (
+                            ax.get_position(True).frozen(),
+                            ax.get_position().frozen(),
+                        ),
+                    )
+                    for ax in self.figure.axes
+                }
+            )
+        )
         self.set_history_buttons()
 
     def update(self):
@@ -1052,8 +1241,8 @@ class MatplotFigureTwinx(Widget):
         for ax, (view, (pos_orig, pos_active)) in items:
             ax._set_view(view)
             # Restore both the original and modified positions
-            ax._set_position(pos_orig, 'original')
-            ax._set_position(pos_active, 'active')
+            ax._set_position(pos_orig, "original")
+            ax._set_position(pos_active, "active")
         self.figure.canvas.draw_idle()
         self.figure.canvas.flush_events()
 
@@ -1061,7 +1250,7 @@ class MatplotFigureTwinx(Widget):
         """Enable or disable the back/forward button."""
 
     def reset_touch(self) -> None:
-        """ reset touch
+        """reset touch
 
         Return:
             None
@@ -1070,7 +1259,7 @@ class MatplotFigureTwinx(Widget):
         self._last_touch_pos = {}
 
     def _get_scale(self):
-        """ kivy scatter _get_scale method """
+        """kivy scatter _get_scale method"""
         p1 = Vector(*self.to_parent(0, 0))
         p2 = Vector(*self.to_parent(1, 0))
         scale = p1.distance(p2)
@@ -1080,7 +1269,7 @@ class MatplotFigureTwinx(Widget):
         # prevent anything wrong with scale, just avoid to dispatch it
         # if the scale "visually" didn't change. #947
         # Remove this ugly hack when we'll be Python 3 only.
-        if hasattr(self, '_scale_p'):
+        if hasattr(self, "_scale_p"):
             if str(scale) == str(self._scale_p):
                 return self._scale_p
 
@@ -1088,49 +1277,57 @@ class MatplotFigureTwinx(Widget):
         return scale
 
     def _set_scale(self, scale):
-        """ kivy scatter _set_scale method """
+        """kivy scatter _set_scale method"""
         rescale = scale * 1.0 / self.scale
-        self.apply_transform(Matrix().scale(rescale, rescale, rescale),
-                             post_multiply=True,
-                             anchor=self.to_local(*self.center))
+        self.apply_transform(
+            Matrix().scale(rescale, rescale, rescale),
+            post_multiply=True,
+            anchor=self.to_local(*self.center),
+        )
 
-    scale = AliasProperty(_get_scale, _set_scale, bind=('x', 'y', 'transform'))
-    '''Scale value of the scatter.
+    scale = AliasProperty(_get_scale, _set_scale, bind=("x", "y", "transform"))
+    """Scale value of the scatter.
 
     :attr:`scale` is an :class:`~kivy.properties.AliasProperty` and defaults to
     1.0.
-    '''
+    """
 
     def _draw_bitmap(self):
-        """ draw bitmap method. based on kivy scatter method"""
+        """draw bitmap method. based on kivy scatter method"""
         if self._bitmap is None:
             print("No bitmap!")
             return
         self._img_texture = Texture.create(size=(self.bt_w, self.bt_h))
         self._img_texture.blit_buffer(
-            bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
+            bytes(self._bitmap), colorfmt="rgba", bufferfmt="ubyte"
+        )
         self._img_texture.flip_vertical()
 
         self.update_hover()
         self.update_selector()
 
     def transform_with_touch(self, event):
-        """ manage touch behaviour. based on kivy scatter method"""
+        """manage touch behaviour. based on kivy scatter method"""
         # just do a simple one finger drag
         changed = False
 
         if len(self._touches) == self.translation_touches:
-            if self.touch_mode == 'pan':
+            if self.touch_mode == "pan":
                 if self._nav_stack() is None:
                     self.push_current()
                 if self.twinx:
                     self.apply_pan_twinx(
-                        self.figure.axes[0], self.figure.axes[1], event)
+                        self.figure.axes[0], self.figure.axes[1], event
+                    )
                 else:
                     self.apply_pan(self.figure.axes[0], event)
 
-            if self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' \
-                    or self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y':
+            if (
+                self.touch_mode == "pan_x"
+                or self.touch_mode == "pan_y"
+                or self.touch_mode == "adjust_x"
+                or self.touch_mode == "adjust_y"
+            ):
                 if self._nav_stack() is None:
                     self.push_current()
                 if self.twinx:
@@ -1138,27 +1335,29 @@ class MatplotFigureTwinx(Widget):
                         self.figure.axes[0],
                         self.figure.axes[1],
                         event,
-                        mode=self.touch_mode)
+                        mode=self.touch_mode,
+                    )
                 else:
                     self.apply_pan(
-                        self.figure.axes[0], event, mode=self.touch_mode)
+                        self.figure.axes[0], event, mode=self.touch_mode
+                    )
 
-            elif self.touch_mode == 'drag_legend':
+            elif self.touch_mode == "drag_legend":
                 if self.legend_instance:
                     self.apply_drag_legend(self.figure.axes[0], event)
 
-            elif self.touch_mode == 'zoombox':
+            elif self.touch_mode == "zoombox":
                 if self._nav_stack() is None:
                     self.push_current()
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 # in case x_init is not create
-                if not hasattr(self, 'x_init'):
+                if not hasattr(self, "x_init"):
                     self.x_init = event.x
                     self.y_init = real_y
                 self.draw_box(event, self.x_init, self.y_init, event.x, real_y)
 
             # mode cursor
-            elif self.touch_mode == 'cursor':
+            elif self.touch_mode == "cursor":
                 self.hover_on = True
                 self.hover(event)
 
@@ -1169,8 +1368,11 @@ class MatplotFigureTwinx(Widget):
             return changed
 
         # we have more than one touch... list of last known pos
-        points = [Vector(self._last_touch_pos[t]) for t in self._touches
-                  if t is not event]
+        points = [
+            Vector(self._last_touch_pos[t])
+            for t in self._touches
+            if t is not event
+        ]
         # add current touch last
         points.append(Vector(event.pos))
 
@@ -1195,16 +1397,28 @@ class MatplotFigureTwinx(Widget):
         if self.auto_zoom:
             v1 = Vector(0, 10)
             angle = v1.angle(new_line) + 180
-            if angle < 0 + self.zoom_angle_detection or angle > 360 - self.zoom_angle_detection:
+            if (
+                angle < 0 + self.zoom_angle_detection
+                or angle > 360 - self.zoom_angle_detection
+            ):
                 self.do_zoom_x = False
                 self.do_zoom_y = True
-            elif angle > 90 - self.zoom_angle_detection and angle < 90 + self.zoom_angle_detection:
+            elif (
+                angle > 90 - self.zoom_angle_detection
+                and angle < 90 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = True
                 self.do_zoom_y = False
-            elif angle > 180 - self.zoom_angle_detection and angle < 180 + self.zoom_angle_detection:
+            elif (
+                angle > 180 - self.zoom_angle_detection
+                and angle < 180 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = False
                 self.do_zoom_y = True
-            elif angle > 270 - self.zoom_angle_detection and angle < 270 + self.zoom_angle_detection:
+            elif (
+                angle > 270 - self.zoom_angle_detection
+                and angle < 270 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = True
                 self.do_zoom_y = False
             else:
@@ -1226,22 +1440,26 @@ class MatplotFigureTwinx(Widget):
                     self.figure.axes[0],
                     self.figure.axes[1],
                     anchor=anchor,
-                    new_line=new_line)
+                    new_line=new_line,
+                )
             else:
                 self.apply_zoom(
                     scale,
                     self.figure.axes[0],
                     anchor=anchor,
-                    new_line=new_line)
+                    new_line=new_line,
+                )
 
             changed = True
         return changed
 
     def on_motion(self, *args):
-        '''Kivy Event to trigger mouse event on motion
-           `enter_notify_event`.
-        '''
-        if self._pressed or self.disabled:  # Do not process this event if there's a touch_move
+        """Kivy Event to trigger mouse event on motion
+        `enter_notify_event`.
+        """
+        if (
+            self._pressed or self.disabled
+        ):  # Do not process this event if there's a touch_move
             return
         pos = args[1]
         newcoord = self.to_widget(pos[0], pos[1])
@@ -1260,11 +1478,11 @@ class MatplotFigureTwinx(Widget):
                 self.hover(FakeEventTwinx)
 
     def get_data_xy(self, x, y):
-        """ manage x y data in navigation bar TODO"""
+        """manage x y data in navigation bar TODO"""
         return None, None
 
     def on_touch_down(self, event):
-        """ Manage Mouse/touch press """
+        """Manage Mouse/touch press"""
         if self.disabled:
             return
 
@@ -1281,7 +1499,7 @@ class MatplotFigureTwinx(Widget):
                         self.current_legend = current_legend
                         break
                 if select_legend:
-                    if self.touch_mode != 'drag_legend':
+                    if self.touch_mode != "drag_legend":
                         return False
                     else:
                         event.grab(self)
@@ -1307,23 +1525,23 @@ class MatplotFigureTwinx(Widget):
 
             elif event.is_double_tap:
                 if not self.disable_double_tap:
-                    if self.touch_mode != 'selector':
+                    if self.touch_mode != "selector":
                         self.home()
                 return True
 
             else:
-                if self.touch_mode == 'cursor':
+                if self.touch_mode == "cursor":
                     self.hover_on = True
                     self.hover(event)
-                elif self.touch_mode == 'zoombox':
+                elif self.touch_mode == "zoombox":
                     real_x, real_y = x - self.pos[0], y - self.pos[1]
                     self.x_init = x
                     self.y_init = real_y
                     self.draw_box(event, x, real_y, x, real_y)
 
-                elif self.touch_mode == 'minmax':
+                elif self.touch_mode == "minmax":
                     self.min_max(event)
-                elif self.touch_mode == 'selector':
+                elif self.touch_mode == "selector":
                     pass
 
                 event.grab(self)
@@ -1339,7 +1557,7 @@ class MatplotFigureTwinx(Widget):
             return False
 
     def on_touch_move(self, event):
-        """ Manage Mouse/touch move while pressed """
+        """Manage Mouse/touch move while pressed"""
         if self.disabled:
             return
 
@@ -1347,7 +1565,7 @@ class MatplotFigureTwinx(Widget):
 
         if event.is_double_tap:
             if not self.disable_double_tap:
-                if self.touch_mode != 'selector':
+                if self.touch_mode != "selector":
                     self.home()
             return True
 
@@ -1361,7 +1579,7 @@ class MatplotFigureTwinx(Widget):
             return True
 
     def on_touch_up(self, event):
-        """ Manage Mouse/touch release """
+        """Manage Mouse/touch release"""
         if self.disabled:
             return
 
@@ -1370,24 +1588,35 @@ class MatplotFigureTwinx(Widget):
             event.ungrab(self)
             del self._last_touch_pos[event]
             self._touches.remove(event)
-            if (self.touch_mode == 'pan' or self.touch_mode == 'zoombox' or
-                    self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' or
-                    self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y' or
-                    self.touch_mode == 'minmax'):
+            if (
+                self.touch_mode == "pan"
+                or self.touch_mode == "zoombox"
+                or self.touch_mode == "pan_x"
+                or self.touch_mode == "pan_y"
+                or self.touch_mode == "adjust_x"
+                or self.touch_mode == "adjust_y"
+                or self.touch_mode == "minmax"
+            ):
                 self.push_current()
                 if self.interactive_axis:
-                    if self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' \
-                            or self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y':
-                        self.touch_mode = 'pan'
+                    if (
+                        self.touch_mode == "pan_x"
+                        or self.touch_mode == "pan_y"
+                        or self.touch_mode == "adjust_x"
+                        or self.touch_mode == "adjust_y"
+                    ):
+                        self.touch_mode = "pan"
                     self.first_touch_pan = None
 
                 if self.last_line is not None:
                     self.clear_line_prop()
 
         x, y = event.x, event.y
-        if abs(
-                self._box_size[0]) > 1 or abs(
-                self._box_size[1]) > 1 or self.touch_mode == 'zoombox':
+        if (
+            abs(self._box_size[0]) > 1
+            or abs(self._box_size[1]) > 1
+            or self.touch_mode == "zoombox"
+        ):
             self.reset_box()
             if not self.collide_point(x, y) and self.do_update:
                 # update axis lim if zoombox is used and touch outside widget
@@ -1410,15 +1639,15 @@ class MatplotFigureTwinx(Widget):
             self.show_compare_cursor = True
             self.figure.canvas.draw_idle()
             self.figure.canvas.flush_events()
-            if self.last_line is None or self.touch_mode != 'cursor':
+            if self.last_line is None or self.touch_mode != "cursor":
                 self.figure.canvas.draw_idle()
                 self.figure.canvas.flush_events()
 
             return True
 
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0), new_line=None):
-        """ zoom touch method """
-        if self.touch_mode == 'selector':
+        """zoom touch method"""
+        if self.touch_mode == "selector":
             return
 
         x = anchor[0] - self.pos[0]
@@ -1433,7 +1662,7 @@ class MatplotFigureTwinx(Widget):
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -1444,7 +1673,7 @@ class MatplotFigureTwinx(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -1462,36 +1691,44 @@ class MatplotFigureTwinx(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
@@ -1502,7 +1739,8 @@ class MatplotFigureTwinx(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
                 if self.last_line is not None:
                     self.clear_line_prop()
@@ -1519,16 +1757,10 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.flush_events()
 
     def apply_zoom_twinx(
-            self,
-            scale_factor,
-            ax,
-            ax2,
-            anchor=(
-                0,
-                0),
-            new_line=None):
+        self, scale_factor, ax, ax2, anchor=(0, 0), new_line=None
+    ):
         """twin axis zoom method"""
-        if self.touch_mode == 'selector':
+        if self.touch_mode == "selector":
             return
         x = anchor[0] - self.pos[0]
         y = anchor[1] - self.pos[1]
@@ -1537,7 +1769,8 @@ class MatplotFigureTwinx(Widget):
         xdata, ydata = trans.transform_point((x + new_line.x, y + new_line.y))
         trans2 = ax2.transData.inverted()
         xdata2, ydata2 = trans2.transform_point(
-            (x + new_line.x, y + new_line.y))
+            (x + new_line.x, y + new_line.y)
+        )
 
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
@@ -1547,7 +1780,7 @@ class MatplotFigureTwinx(Widget):
         yscale = ax.get_yscale()
         yscale2 = ax2.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -1558,7 +1791,7 @@ class MatplotFigureTwinx(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -1576,40 +1809,48 @@ class MatplotFigureTwinx(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
-        if yscale2 == 'linear':
+        if yscale2 == "linear":
             yold2_min = cur_ylim2[0]
             yold2_max = cur_ylim2[1]
 
@@ -1624,22 +1865,30 @@ class MatplotFigureTwinx(Widget):
 
         rely2 = (yold2_max - ydata2) / (yold2_max - yold2_min)
         if self.do_zoom_y:
-            ax2.set_ylim([ydata2 - new_height2 * (1 - rely2),
-                         ydata2 + new_height2 * (rely2)])
+            ax2.set_ylim(
+                [
+                    ydata2 - new_height2 * (1 - rely2),
+                    ydata2 + new_height2 * (rely2),
+                ]
+            )
 
-            if yscale2 == 'linear':
-                ax2.set_ylim([ydata2 - new_height2 * (1 - rely2),
-                             ydata2 + new_height2 * (rely2)])
+            if yscale2 == "linear":
+                ax2.set_ylim(
+                    [
+                        ydata2 - new_height2 * (1 - rely2),
+                        ydata2 + new_height2 * (rely2),
+                    ]
+                )
             else:
                 new_ymin2 = ydata2 - new_height2 * (1 - rely2)
                 new_ymax2 = ydata2 + new_height2 * (rely2)
                 try:
                     new_ymin2, new_ymax2 = self.inv_transform_eval(
-                        new_ymin2, ax2.yaxis), self.inv_transform_eval(
-                        new_ymax2, ax2.yaxis)
+                        new_ymin2, ax2.yaxis
+                    ), self.inv_transform_eval(new_ymax2, ax2.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin2, new_ymax2 = ymin2_, ymax2_
-                    if new_ymin2 <= 0. or new_ymax2 <= 0.:  # Limit case
+                    if new_ymin2 <= 0.0 or new_ymax2 <= 0.0:  # Limit case
                         new_ymin2, new_ymax2 = ymin2_, ymax2_
                 ax2.set_ylim([new_ymin2, new_ymax2])
 
@@ -1651,7 +1900,8 @@ class MatplotFigureTwinx(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
                 self.background_ax2_patch_copy.set_visible(False)
                 if self.last_line is not None:
@@ -1674,30 +1924,36 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
 
-    def apply_pan(self, ax, event, mode='pan'):
-        """ pan method """
+    def apply_pan(self, ax, event, mode="pan"):
+        """pan method"""
 
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point(
-            (event.x - self.pos[0], event.y - self.pos[1]))
+            (event.x - self.pos[0], event.y - self.pos[1])
+        )
         xpress, ypress = trans.transform_point(
-            (self._last_touch_pos[event][0] - self.pos[0],
-             self._last_touch_pos[event][1] - self.pos[1]))
+            (
+                self._last_touch_pos[event][0] - self.pos[0],
+                self._last_touch_pos[event][1] - self.pos[1],
+            )
+        )
 
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             dx = xdata - xpress
         else:
-            dx = self.transform_eval(xdata, ax.xaxis) - \
-                self.transform_eval(xpress, ax.xaxis)
+            dx = self.transform_eval(xdata, ax.xaxis) - self.transform_eval(
+                xpress, ax.xaxis
+            )
 
-        if yscale == 'linear':
+        if yscale == "linear":
             dy = ydata - ypress
         else:
-            dy = self.transform_eval(ydata, ax.yaxis) - \
-                self.transform_eval(ypress, ax.yaxis)
+            dy = self.transform_eval(ydata, ax.yaxis) - self.transform_eval(
+                ypress, ax.yaxis
+            )
 
         xleft, xright = self.figure.axes[0].get_xlim()
         ybottom, ytop = self.figure.axes[0].get_ylim()
@@ -1716,56 +1972,76 @@ class MatplotFigureTwinx(Widget):
         else:
             cur_ylim = (ybottom, ytop)
 
-        if self.interactive_axis and self.touch_mode == 'pan' and not self.first_touch_pan == 'pan':
+        if (
+            self.interactive_axis
+            and self.touch_mode == "pan"
+            and not self.first_touch_pan == "pan"
+        ):
             if (ydata < cur_ylim[0] and not inverted_y) or (
-                    ydata > cur_ylim[1] and inverted_y):
+                ydata > cur_ylim[1] and inverted_y
+            ):
                 left_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .2 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.2 + cur_xlim[0]
                 right_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .8 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
-                    mode = 'adjust_x'
+                    mode = "adjust_x"
                 else:
-                    mode = 'pan_x'
+                    mode = "pan_x"
                 self.touch_mode = mode
-            elif (xdata < cur_xlim[0] and not inverted_x) or (xdata > cur_xlim[1] and inverted_x):
+            elif (xdata < cur_xlim[0] and not inverted_x) or (
+                xdata > cur_xlim[1] and inverted_x
+            ):
                 bottom_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .2 + cur_ylim[0]
-                top_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .8 + cur_ylim[0]
+                    cur_ylim[1] - cur_ylim[0]
+                ) * 0.2 + cur_ylim[0]
+                top_anchor_zone = (cur_ylim[1] - cur_ylim[0]) * 0.8 + cur_ylim[
+                    0
+                ]
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
-                    mode = 'adjust_y'
+                    mode = "adjust_y"
                 else:
-                    mode = 'pan_y'
+                    mode = "pan_y"
                 self.touch_mode = mode
             else:
-                self.touch_mode = 'pan'
+                self.touch_mode = "pan"
 
-        if not mode == 'pan_y' and not mode == 'adjust_y':
-            if mode == 'adjust_x':
+        if not mode == "pan_y" and not mode == "adjust_y":
+            if mode == "adjust_x":
                 if self.anchor_x is None:
                     midpoint = (cur_xlim[1] + cur_xlim[0]) / 2
                     if xdata > midpoint:
-                        self.anchor_x = 'left'
+                        self.anchor_x = "left"
                     else:
-                        self.anchor_x = 'right'
-                if self.anchor_x == 'left':
+                        self.anchor_x = "right"
+                if self.anchor_x == "left":
                     if xdata > cur_xlim[0]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -1774,21 +2050,30 @@ class MatplotFigureTwinx(Widget):
                             ax.set_xlim(None, cur_xlim[1])
                 else:
                     if xdata < cur_xlim[1]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -1796,21 +2081,26 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax.set_xlim(cur_xlim[0], None)
             else:
-                if scale == 'linear':
+                if scale == "linear":
                     cur_xlim -= dx
                 else:
                     try:
                         cur_xlim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[0],
-                                    ax.xaxis) - dx),
-                                ax.xaxis),
+                                (
+                                    self.transform_eval(cur_xlim[0], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[1],
-                                    ax.xaxis) - dx),
-                                ax.xaxis)]
+                                (
+                                    self.transform_eval(cur_xlim[1], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits
                 if inverted_x:
@@ -1818,33 +2108,42 @@ class MatplotFigureTwinx(Widget):
                 else:
                     ax.set_xlim(cur_xlim)
 
-        if not mode == 'pan_x' and not mode == 'adjust_x':
-            if mode == 'adjust_y':
+        if not mode == "pan_x" and not mode == "adjust_x":
+            if mode == "adjust_y":
                 if self.anchor_y is None:
                     midpoint = (cur_ylim[1] + cur_ylim[0]) / 2
                     if ydata > midpoint:
-                        self.anchor_y = 'top'
+                        self.anchor_y = "top"
                     else:
-                        self.anchor_y = 'bottom'
+                        self.anchor_y = "bottom"
 
-                if self.anchor_y == 'top':
+                if self.anchor_y == "top":
                     if ydata > cur_ylim[0]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
 
@@ -1854,22 +2153,31 @@ class MatplotFigureTwinx(Widget):
                             ax.set_ylim(None, cur_ylim[1])
                 else:
                     if ydata < cur_ylim[1]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
@@ -1877,22 +2185,27 @@ class MatplotFigureTwinx(Widget):
                         else:
                             ax.set_ylim(cur_ylim[0], None)
             else:
-                if yscale == 'linear':
+                if yscale == "linear":
                     cur_ylim -= dy
 
                 else:
                     try:
                         cur_ylim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[0],
-                                    ax.yaxis) - dy),
-                                ax.yaxis),
+                                (
+                                    self.transform_eval(cur_ylim[0], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[1],
-                                    ax.yaxis) - dy),
-                                ax.yaxis)]
+                                (
+                                    self.transform_eval(cur_ylim[1], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits
                 if inverted_y:
@@ -1910,7 +2223,8 @@ class MatplotFigureTwinx(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
                 if self.last_line is not None:
                     self.clear_line_prop()
@@ -1928,14 +2242,18 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
 
-    def apply_pan_twinx(self, ax, ax2, event, mode='pan'):
+    def apply_pan_twinx(self, ax, ax2, event, mode="pan"):
         """twin axis pan method"""
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point(
-            (event.x - self.pos[0], event.y - self.pos[1]))
+            (event.x - self.pos[0], event.y - self.pos[1])
+        )
         xpress, ypress = trans.transform_point(
-            (self._last_touch_pos[event][0] - self.pos[0],
-             self._last_touch_pos[event][1] - self.pos[1]))
+            (
+                self._last_touch_pos[event][0] - self.pos[0],
+                self._last_touch_pos[event][1] - self.pos[1],
+            )
+        )
 
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
@@ -1943,17 +2261,19 @@ class MatplotFigureTwinx(Widget):
 
         update_cursor = False
 
-        if scale == 'linear':
+        if scale == "linear":
             dx = xdata - xpress
         else:
-            dx = self.transform_eval(xdata, ax.xaxis) - \
-                self.transform_eval(xpress, ax.xaxis)
+            dx = self.transform_eval(xdata, ax.xaxis) - self.transform_eval(
+                xpress, ax.xaxis
+            )
 
-        if yscale == 'linear':
+        if yscale == "linear":
             dy = ydata - ypress
         else:
-            dy = self.transform_eval(ydata, ax.yaxis) - \
-                self.transform_eval(ypress, ax.yaxis)
+            dy = self.transform_eval(ydata, ax.yaxis) - self.transform_eval(
+                ypress, ax.yaxis
+            )
 
         xleft, xright = ax.get_xlim()
         ybottom, ytop = ax.get_ylim()
@@ -1983,64 +2303,87 @@ class MatplotFigureTwinx(Widget):
         ydata2 = ydata * ratio + cur_ylim2[0]
         ypress2 = ypress * ratio + cur_ylim2[0]
 
-        if yscale2 == 'linear':
+        if yscale2 == "linear":
             dy2 = ydata2 - ypress2
         else:
-            dy2 = self.transform_eval(ydata2, ax2.yaxis) - \
-                self.transform_eval(ypress2, ax2.yaxis)
+            dy2 = self.transform_eval(ydata2, ax2.yaxis) - self.transform_eval(
+                ypress2, ax2.yaxis
+            )
 
-        if self.interactive_axis and self.touch_mode == 'pan' and not self.first_touch_pan == 'pan':
+        if (
+            self.interactive_axis
+            and self.touch_mode == "pan"
+            and not self.first_touch_pan == "pan"
+        ):
             if (ydata < cur_ylim[0] and not inverted_y) or (
-                    ydata > cur_ylim[1] and inverted_y):
+                ydata > cur_ylim[1] and inverted_y
+            ):
                 left_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .2 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.2 + cur_xlim[0]
                 right_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .8 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
-                    mode = 'adjust_x'
+                    mode = "adjust_x"
                 else:
-                    mode = 'pan_x'
+                    mode = "pan_x"
                 self.touch_mode = mode
-            elif (xdata < cur_xlim[0] and not inverted_y) or (xdata > cur_xlim[1] and inverted_y) \
-                    or (xdata > cur_xlim[1] and not inverted_y) or (xdata < cur_xlim[0] and inverted_y):
+            elif (
+                (xdata < cur_xlim[0] and not inverted_y)
+                or (xdata > cur_xlim[1] and inverted_y)
+                or (xdata > cur_xlim[1] and not inverted_y)
+                or (xdata < cur_xlim[0] and inverted_y)
+            ):
                 bottom_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .2 + cur_ylim[0]
-                top_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .8 + cur_ylim[0]
+                    cur_ylim[1] - cur_ylim[0]
+                ) * 0.2 + cur_ylim[0]
+                top_anchor_zone = (cur_ylim[1] - cur_ylim[0]) * 0.8 + cur_ylim[
+                    0
+                ]
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
-                    mode = 'adjust_y'
+                    mode = "adjust_y"
                 else:
-                    mode = 'pan_y'
+                    mode = "pan_y"
                 self.touch_mode = mode
 
             else:
-                self.touch_mode = 'pan'
+                self.touch_mode = "pan"
 
-        if not mode == 'pan_y' and not mode == 'adjust_y':
-            if mode == 'adjust_x':
+        if not mode == "pan_y" and not mode == "adjust_y":
+            if mode == "adjust_x":
                 if self.anchor_x is None:
                     midpoint = (cur_xlim[1] + cur_xlim[0]) / 2
                     if xdata > midpoint:
-                        self.anchor_x = 'left'
+                        self.anchor_x = "left"
                     else:
-                        self.anchor_x = 'right'
-                if self.anchor_x == 'left':
+                        self.anchor_x = "right"
+                if self.anchor_x == "left":
                     if xdata > cur_xlim[0]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -2050,21 +2393,30 @@ class MatplotFigureTwinx(Widget):
 
                 else:
                     if xdata < cur_xlim[1]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -2073,21 +2425,26 @@ class MatplotFigureTwinx(Widget):
                             ax.set_xlim(cur_xlim[0], None)
 
             else:
-                if scale == 'linear':
+                if scale == "linear":
                     cur_xlim -= dx
                 else:
                     try:
                         cur_xlim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[0],
-                                    ax.xaxis) - dx),
-                                ax.xaxis),
+                                (
+                                    self.transform_eval(cur_xlim[0], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[1],
-                                    ax.xaxis) - dx),
-                                ax.xaxis)]
+                                (
+                                    self.transform_eval(cur_xlim[1], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits
                 if inverted_x:
@@ -2095,51 +2452,62 @@ class MatplotFigureTwinx(Widget):
                 else:
                     ax.set_xlim(cur_xlim)
 
-        if not mode == 'pan_x' and not mode == 'adjust_x':
-            if mode == 'adjust_y':
+        if not mode == "pan_x" and not mode == "adjust_x":
+            if mode == "adjust_y":
                 trans_ax2 = ax2.transData.inverted()
                 xdata_ax2, ydata_ax2 = trans_ax2.transform_point(
-                    (event.x - self.pos[0], event.y - self.pos[1]))
+                    (event.x - self.pos[0], event.y - self.pos[1])
+                )
                 if self.anchor_y is None:
                     midpoint_x = (cur_xlim[1] + cur_xlim[0]) / 2
                     midpoint_ax1 = (cur_ylim[1] + cur_ylim[0]) / 2
                     midpoint_ax2 = (cur_ylim2[1] + cur_ylim2[0]) / 2
                     if (xdata > midpoint_x and not inverted_x) or (
-                            xdata < midpoint_x and inverted_x):
-                        ax_anchor = 'right'
+                        xdata < midpoint_x and inverted_x
+                    ):
+                        ax_anchor = "right"
                     else:
-                        ax_anchor = 'left'
+                        ax_anchor = "left"
 
-                    if ax_anchor == 'left':
+                    if ax_anchor == "left":
                         if ydata > midpoint_ax1:
-                            self.anchor_y = 'top_left'
+                            self.anchor_y = "top_left"
                         else:
-                            self.anchor_y = 'bottom_left'
+                            self.anchor_y = "bottom_left"
                     else:
 
                         if ydata_ax2 > midpoint_ax2:
-                            self.anchor_y = 'top_right'
+                            self.anchor_y = "top_right"
                         else:
-                            self.anchor_y = 'bottom_right'
+                            self.anchor_y = "bottom_right"
                 # print(self.anchor_y)
-                if self.anchor_y == 'top_left':
+                if self.anchor_y == "top_left":
                     if ydata > cur_ylim[0]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
@@ -2149,24 +2517,33 @@ class MatplotFigureTwinx(Widget):
 
                         update_cursor = True
 
-                elif self.anchor_y == 'top_right':
+                elif self.anchor_y == "top_right":
                     if ydata_ax2 > cur_ylim2[0]:
-                        if yscale2 == 'linear':
+                        if yscale2 == "linear":
                             cur_ylim2 -= dy2
 
                         else:
                             try:
                                 cur_ylim2 = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim2[0],
-                                            ax2.yaxis) - dy2),
-                                        ax2.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim2[0], ax2.yaxis
+                                            )
+                                            - dy2
+                                        ),
+                                        ax2.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim2[1],
-                                            ax2.yaxis) - dy2),
-                                        ax2.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim2[1], ax2.yaxis
+                                            )
+                                            - dy2
+                                        ),
+                                        ax2.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim2 = cur_ylim2  # Keep previous limits
 
@@ -2177,24 +2554,33 @@ class MatplotFigureTwinx(Widget):
 
                         update_cursor = True
 
-                elif self.anchor_y == 'bottom_left':
+                elif self.anchor_y == "bottom_left":
                     if ydata < cur_ylim[1]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
@@ -2205,22 +2591,31 @@ class MatplotFigureTwinx(Widget):
                         update_cursor = True
                 else:
                     if ydata_ax2 < cur_ylim2[1]:
-                        if yscale2 == 'linear':
+                        if yscale2 == "linear":
                             cur_ylim2 -= dy2
 
                         else:
                             try:
                                 cur_ylim2 = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim2[0],
-                                            ax2.yaxis) - dy2),
-                                        ax2.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim2[0], ax2.yaxis
+                                            )
+                                            - dy2
+                                        ),
+                                        ax2.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim2[1],
-                                            ax2.yaxis) - dy2),
-                                        ax2.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim2[1], ax2.yaxis
+                                            )
+                                            - dy2
+                                        ),
+                                        ax2.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim2 = cur_ylim2  # Keep previous limits
                         # ax2.set_ylim(cur_ylim2[0],None)
@@ -2231,41 +2626,55 @@ class MatplotFigureTwinx(Widget):
 
                         update_cursor = True
             else:
-                if yscale == 'linear':
+                if yscale == "linear":
                     cur_ylim -= dy
 
                 else:
                     try:
                         cur_ylim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[0],
-                                    ax.yaxis) - dy),
-                                ax.yaxis),
+                                (
+                                    self.transform_eval(cur_ylim[0], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[1],
-                                    ax.yaxis) - dy),
-                                ax.yaxis)]
+                                (
+                                    self.transform_eval(cur_ylim[1], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits
 
-                if yscale2 == 'linear':
+                if yscale2 == "linear":
                     cur_ylim2 -= dy2
 
                 else:
                     try:
                         cur_ylim2 = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim2[0],
-                                    ax2.yaxis) - dy2),
-                                ax2.yaxis),
+                                (
+                                    self.transform_eval(
+                                        cur_ylim2[0], ax2.yaxis
+                                    )
+                                    - dy2
+                                ),
+                                ax2.yaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim2[1],
-                                    ax2.yaxis) - dy2),
-                                ax2.yaxis)]
+                                (
+                                    self.transform_eval(
+                                        cur_ylim2[1], ax2.yaxis
+                                    )
+                                    - dy2
+                                ),
+                                ax2.yaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_ylim2 = cur_ylim2  # Keep previous limits
                 # ax.set_ylim(cur_ylim)
@@ -2293,7 +2702,8 @@ class MatplotFigureTwinx(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
                 self.background_ax2_patch_copy.set_visible(False)
                 if self.last_line is not None:
@@ -2317,76 +2727,122 @@ class MatplotFigureTwinx(Widget):
             ax.figure.canvas.flush_events()
 
     def update_hover(self):
-        """ update hover on fast draw (if exist)"""
+        """update hover on fast draw (if exist)"""
         if self.hover_instance:
             if self.compare_xdata and self.hover_instance:
-                if (self.touch_mode != 'cursor' or len(self._touches)
-                        > 1) and not self.show_compare_cursor:
+                if (
+                    self.touch_mode != "cursor" or len(self._touches) > 1
+                ) and not self.show_compare_cursor:
                     self.hover_instance.hover_outside_bound = True
 
-                elif self.show_compare_cursor and self.touch_mode == 'cursor':
+                elif self.show_compare_cursor and self.touch_mode == "cursor":
                     self.show_compare_cursor = False
                 else:
                     self.hover_instance.hover_outside_bound = True
 
             # update hover pos if needed
-            elif self.hover_instance.show_cursor and self.x_hover_data is not None and self.y_hover_data is not None:
+            elif (
+                self.hover_instance.show_cursor
+                and self.x_hover_data is not None
+                and self.y_hover_data is not None
+            ):
                 if self.cursor_last_axis:
                     xy_pos = self.cursor_last_axis.transData.transform(
-                        [(self.x_hover_data, self.y_hover_data)])
+                        [(self.x_hover_data, self.y_hover_data)]
+                    )
                 else:
                     xy_pos = self.figure.axes[0].transData.transform(
-                        [(self.x_hover_data, self.y_hover_data)])
+                        [(self.x_hover_data, self.y_hover_data)]
+                    )
                 self.hover_instance.x_hover_pos = float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos = float(xy_pos[0][1]) + self.y
 
-                self.hover_instance.xmin_line = float(
-                    self.figure.axes[0].bbox.bounds[0]) + self.x
-                self.hover_instance.xmax_line = float(
-                    self.figure.axes[0].bbox.bounds[0] + self.figure.axes[0].bbox.bounds[2]) + self.x
-                self.hover_instance.ymin_line = float(
-                    self.figure.axes[0].bbox.bounds[1]) + self.y
-                self.hover_instance.ymax_line = float(
-                    self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3]) + self.y
+                self.hover_instance.xmin_line = (
+                    float(self.figure.axes[0].bbox.bounds[0]) + self.x
+                )
+                self.hover_instance.xmax_line = (
+                    float(
+                        self.figure.axes[0].bbox.bounds[0]
+                        + self.figure.axes[0].bbox.bounds[2]
+                    )
+                    + self.x
+                )
+                self.hover_instance.ymin_line = (
+                    float(self.figure.axes[0].bbox.bounds[1]) + self.y
+                )
+                self.hover_instance.ymax_line = (
+                    float(
+                        self.figure.axes[0].bbox.bounds[1]
+                        + self.figure.axes[0].bbox.bounds[3]
+                    )
+                    + self.y
+                )
 
-                if self.hover_instance.x_hover_pos > self.x + self.figure.axes[0].bbox.bounds[2] + self.figure.axes[0].bbox.bounds[0] or \
-                        self.hover_instance.x_hover_pos < self.x + self.figure.axes[0].bbox.bounds[0] or \
-                        self.hover_instance.y_hover_pos > self.y + self.figure.axes[0].bbox.bounds[1] + self.figure.axes[0].bbox.bounds[3] or \
-                        self.hover_instance.y_hover_pos < self.y + self.figure.axes[0].bbox.bounds[1]:
+                if (
+                    self.hover_instance.x_hover_pos
+                    > self.x
+                    + self.figure.axes[0].bbox.bounds[2]
+                    + self.figure.axes[0].bbox.bounds[0]
+                    or self.hover_instance.x_hover_pos
+                    < self.x + self.figure.axes[0].bbox.bounds[0]
+                    or self.hover_instance.y_hover_pos
+                    > self.y
+                    + self.figure.axes[0].bbox.bounds[1]
+                    + self.figure.axes[0].bbox.bounds[3]
+                    or self.hover_instance.y_hover_pos
+                    < self.y + self.figure.axes[0].bbox.bounds[1]
+                ):
                     self.hover_instance.hover_outside_bound = True
                 else:
                     self.hover_instance.hover_outside_bound = False
 
     def update_selector(self, *args):
-        """ update selector on fast draw (if exist)"""
+        """update selector on fast draw (if exist)"""
         if self.selector:
             # update selector pos if needed
             if self.selector.resize_wgt.verts and (
-                    len(args) != 0 or self.touch_mode != 'selector'):
+                len(args) != 0 or self.touch_mode != "selector"
+            ):
                 resize_wgt = self.selector.resize_wgt
 
-                if hasattr(resize_wgt, 'shapes'):
+                if hasattr(resize_wgt, "shapes"):
                     # lasso widget or ellipse
                     if resize_wgt.shapes:
-                        if hasattr(resize_wgt.shapes[0], 'radius_x'):
+                        if hasattr(resize_wgt.shapes[0], "radius_x"):
                             # ellipse widget
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[1][0], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[1][0],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             pos0 = new_pos[0] + self.x
                             pos1 = new_pos[1] + self.y
 
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[2][0],
+                                        resize_wgt.verts[2][1],
+                                    )
+                                ]
+                            )
                             new_pos2 = resize_wgt.to_widget(
-                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1])))
+                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1]))
+                            )
                             pos0_2 = new_pos2[0] + self.x
                             pos1_2 = new_pos2[1] + self.y
 
                             current_shape = resize_wgt.shapes[0]
                             dataxy1 = current_shape.selection_point_inst.points
-                            dataxy2 = current_shape.selection_point_inst2.points
+                            dataxy2 = (
+                                current_shape.selection_point_inst2.points
+                            )
 
                             # note: the 2 first points are the same in
                             # current_shape.points
@@ -2397,17 +2853,26 @@ class MatplotFigureTwinx(Widget):
                             pos1_2_old = dataxy2[1]
 
                             old_length = np.sqrt(
-                                (pos0_2_old - pos0_old) ** 2 +
-                                (pos1_2_old - pos1_old) ** 2)
+                                (pos0_2_old - pos0_old) ** 2
+                                + (pos1_2_old - pos1_old) ** 2
+                            )
                             new_length = np.sqrt(
-                                (pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                                (pos0_2 - pos0) ** 2 + (pos1_2 - pos1) ** 2
+                            )
 
                             scale = float(new_length / old_length)
 
                             xy_pos3 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos3 = resize_wgt.to_widget(
-                                *(float(xy_pos3[0][0]), float(xy_pos3[0][1])))
+                                *(float(xy_pos3[0][0]), float(xy_pos3[0][1]))
+                            )
                             pos0_c = new_pos3[0] + self.x
                             pos1_c = new_pos3[1] + self.y
 
@@ -2417,27 +2882,43 @@ class MatplotFigureTwinx(Widget):
                             for s in resize_wgt.shapes:
                                 s.translate(pos=(pos0_c, pos1_c))
 
-                            xmin, xmax, ymin, ymax = resize_wgt.shapes[0].get_min_max(
-                            )
+                            xmin, xmax, ymin, ymax = resize_wgt.shapes[
+                                0
+                            ].get_min_max()
                         else:
                             # lasso widget
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             pos0 = new_pos[0] + self.x
                             pos1 = new_pos[1] + self.y
 
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[1][0], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[1][0],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             new_pos2 = resize_wgt.to_widget(
-                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1])))
+                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1]))
+                            )
                             pos0_2 = new_pos2[0] + self.x
                             pos1_2 = new_pos2[1] + self.y
 
                             current_shape = resize_wgt.shapes[0]
-                            dataxy = np.array(
-                                current_shape.points).reshape(-1, 2)
+                            dataxy = np.array(current_shape.points).reshape(
+                                -1, 2
+                            )
 
                             # note: the 2 first points are the same in
                             # current_shape.points
@@ -2448,10 +2929,12 @@ class MatplotFigureTwinx(Widget):
                             pos1_2_old = dataxy[2][1]
 
                             old_length = np.sqrt(
-                                (pos0_2_old - pos0_old) ** 2 +
-                                (pos1_2_old - pos1_old) ** 2)
+                                (pos0_2_old - pos0_old) ** 2
+                                + (pos1_2_old - pos1_old) ** 2
+                            )
                             new_length = np.sqrt(
-                                (pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                                (pos0_2 - pos0) ** 2 + (pos1_2 - pos1) ** 2
+                            )
 
                             scale = new_length / old_length
 
@@ -2465,73 +2948,105 @@ class MatplotFigureTwinx(Widget):
                             xmin, ymin = dataxy.min(axis=0)
 
                         if self.collide_point(
-                            *
-                            resize_wgt.to_window(
-                                xmin,
-                                ymin)) and self.collide_point(
-                            *
-                            resize_wgt.to_window(
-                                xmax,
-                                ymax)):
+                            *resize_wgt.to_window(xmin, ymin)
+                        ) and self.collide_point(
+                            *resize_wgt.to_window(xmax, ymax)
+                        ):
                             resize_wgt.opacity = 1
                         else:
                             resize_wgt.opacity = 0
 
-                elif self.selector.resize_wgt.verts and (len(args) != 0 or self.touch_mode != 'selector'):
+                elif self.selector.resize_wgt.verts and (
+                    len(args) != 0 or self.touch_mode != "selector"
+                ):
                     resize_wgt = self.selector.resize_wgt
                     if not (resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1):
                         return
 
                     # rectangle or spann selector
-                    if hasattr(resize_wgt, 'span_orientation'):
+                    if hasattr(resize_wgt, "span_orientation"):
                         # span selector
-                        if resize_wgt.span_orientation == 'vertical':
+                        if resize_wgt.span_orientation == "vertical":
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             resize_wgt.pos[0] = new_pos[0] + self.x
 
                             top_bound = float(
-                                self.y +
-                                resize_wgt.ax.bbox.bounds[3] +
-                                resize_wgt.ax.bbox.bounds[1])
+                                self.y
+                                + resize_wgt.ax.bbox.bounds[3]
+                                + resize_wgt.ax.bbox.bounds[1]
+                            )
                             bottom_bound = float(
-                                self.y + resize_wgt.ax.bbox.bounds[1])
+                                self.y + resize_wgt.ax.bbox.bounds[1]
+                            )
                             resize_wgt.pos[1] = bottom_bound - self.y
 
                             # recalcul size
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[3][0], resize_wgt.verts[3][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[3][0],
+                                        resize_wgt.verts[3][1],
+                                    )
+                                ]
+                            )
                             resize_wgt.size[0] = float(
-                                xy_pos2[0][0] - xy_pos[0][0])
+                                xy_pos2[0][0] - xy_pos[0][0]
+                            )
                             resize_wgt.size[1] = top_bound - bottom_bound
 
-                        elif resize_wgt.span_orientation == 'horizontal':
+                        elif resize_wgt.span_orientation == "horizontal":
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             left_bound = float(
-                                self.x + resize_wgt.ax.bbox.bounds[0])
+                                self.x + resize_wgt.ax.bbox.bounds[0]
+                            )
                             right_bound = float(
-                                self.x + resize_wgt.ax.bbox.bounds[2] +
-                                resize_wgt.ax.bbox.bounds[0])
+                                self.x
+                                + resize_wgt.ax.bbox.bounds[2]
+                                + resize_wgt.ax.bbox.bounds[0]
+                            )
 
                             width = right_bound - left_bound
 
                             left_bound, right_bound = resize_wgt.to_widget(
-                                left_bound, right_bound)
+                                left_bound, right_bound
+                            )
 
                             resize_wgt.pos[0] = left_bound
                             resize_wgt.pos[1] = new_pos[1] + self.y
 
                             # recalcul size
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][1], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][1],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             resize_wgt.size[0] = width
                             resize_wgt.size[1] = float(
-                                xy_pos2[0][1] - xy_pos[0][1])
+                                xy_pos2[0][1] - xy_pos[0][1]
+                            )
 
                     else:
                         # rectangle selector
@@ -2539,156 +3054,202 @@ class MatplotFigureTwinx(Widget):
                         # update all selector pts
                         # recalcul pos
                         xy_pos = resize_wgt.ax.transData.transform(
-                            [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                            [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])]
+                        )
                         new_pos = resize_wgt.to_widget(
-                            *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                            *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                        )
                         resize_wgt.pos[0] = new_pos[0] + self.x
                         resize_wgt.pos[1] = new_pos[1] + self.y
 
                         # recalcul size
                         xy_pos2 = resize_wgt.ax.transData.transform(
-                            [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])])
+                            [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])]
+                        )
                         resize_wgt.size[0] = float(
-                            xy_pos2[0][0] - xy_pos[0][0])
+                            xy_pos2[0][0] - xy_pos[0][0]
+                        )
                         resize_wgt.size[1] = float(
-                            xy_pos2[0][1] - xy_pos[0][1])
+                            xy_pos2[0][1] - xy_pos[0][1]
+                        )
 
                     if self.collide_point(
-                        *
-                        resize_wgt.to_window(
-                            resize_wgt.pos[0],
-                            resize_wgt.pos[1])) and self.collide_point(
-                        *
-                        resize_wgt.to_window(
-                            resize_wgt.pos[0] +
-                            resize_wgt.size[0],
-                            resize_wgt.pos[1] +
-                            resize_wgt.size[1])):
+                        *resize_wgt.to_window(
+                            resize_wgt.pos[0], resize_wgt.pos[1]
+                        )
+                    ) and self.collide_point(
+                        *resize_wgt.to_window(
+                            resize_wgt.pos[0] + resize_wgt.size[0],
+                            resize_wgt.pos[1] + resize_wgt.size[1],
+                        )
+                    ):
                         resize_wgt.opacity = 1
                     else:
                         resize_wgt.opacity = 0
 
     def min_max(self, event):
-        """ manage min/max touch mode """
+        """manage min/max touch mode"""
         ax = self.figure.axes[0]  # left axis
-        xlabelbottom = ax.xaxis._major_tick_kw.get('tick1On')
-        ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
-        ylabelright = ax.yaxis._major_tick_kw.get('tick2On')
+        xlabelbottom = ax.xaxis._major_tick_kw.get("tick1On")
+        ylabelleft = ax.yaxis._major_tick_kw.get("tick1On")
+        ylabelright = ax.yaxis._major_tick_kw.get("tick2On")
 
-        if xlabelbottom and event.x > self.x + ax.bbox.bounds[0] and \
-                event.x < self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                event.y < self.y + ax.bbox.bounds[1]:
+        if (
+            xlabelbottom
+            and event.x > self.x + ax.bbox.bounds[0]
+            and event.x < self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+            and event.y < self.y + ax.bbox.bounds[1]
+        ):
 
             right_lim = self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
             left_lim = self.x + ax.bbox.bounds[0]
-            left_anchor_zone = (right_lim - left_lim) * .2 + left_lim
-            right_anchor_zone = (right_lim - left_lim) * .8 + left_lim
+            left_anchor_zone = (right_lim - left_lim) * 0.2 + left_lim
+            right_anchor_zone = (right_lim - left_lim) * 0.8 + left_lim
 
             if event.x < left_anchor_zone or event.x > right_anchor_zone:
 
                 if self.text_instance:
                     if not self.text_instance.show_text:
                         midpoint = (
-                            (self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]) +
-                            (self.x + ax.bbox.bounds[0])) / 2
+                            (self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0])
+                            + (self.x + ax.bbox.bounds[0])
+                        ) / 2
                         if event.x < midpoint:
-                            anchor = 'left'
+                            anchor = "left"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0])
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[0]
+                            )
+                            self.text_instance.y_text_pos = (
+                                float(self.y + ax.bbox.bounds[1])
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = False
                         else:
-                            anchor = 'right'
+                            anchor = "right"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0])
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+                            )
+                            self.text_instance.y_text_pos = (
+                                float(self.y + ax.bbox.bounds[1])
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = True
 
                         self.text_instance.current_axis = ax
                         self.text_instance.kind = {
-                            'axis': 'x', 'anchor': anchor}
+                            "axis": "x",
+                            "anchor": anchor,
+                        }
 
                         self.text_instance.show_text = True
                         return
 
-        elif ylabelleft and event.x < self.x + ax.bbox.bounds[0] and \
-                event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                event.y > self.y + ax.bbox.bounds[1]:
+        elif (
+            ylabelleft
+            and event.x < self.x + ax.bbox.bounds[0]
+            and event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]
+            and event.y > self.y + ax.bbox.bounds[1]
+        ):
 
             top_lim = self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]
             bottom_lim = self.y + ax.bbox.bounds[1]
-            bottom_anchor_zone = (top_lim - bottom_lim) * .2 + bottom_lim
-            top_anchor_zone = (top_lim - bottom_lim) * .8 + bottom_lim
+            bottom_anchor_zone = (top_lim - bottom_lim) * 0.2 + bottom_lim
+            top_anchor_zone = (top_lim - bottom_lim) * 0.8 + bottom_lim
 
             if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
                 if self.text_instance:
                     if not self.text_instance.show_text:
                         midpoint = (
-                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]) +
-                            (self.y + ax.bbox.bounds[1])) / 2
+                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1])
+                            + (self.y + ax.bbox.bounds[1])
+                        ) / 2
                         if event.y > midpoint:
-                            anchor = 'top'
+                            anchor = "top"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0]) - dp(40)
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[0]
+                            ) - dp(40)
+                            self.text_instance.y_text_pos = (
+                                float(
+                                    self.y
+                                    + ax.bbox.bounds[1]
+                                    + ax.bbox.bounds[3]
+                                )
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = False
                         else:
-                            anchor = 'bottom'
+                            anchor = "bottom"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0]) - dp(40)
+                                self.x + ax.bbox.bounds[0]
+                            ) - dp(40)
                             self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - dp(6)
+                                self.y + ax.bbox.bounds[1]
+                            ) - dp(6)
                             self.text_instance.offset_text = False
                         self.text_instance.current_axis = ax
                         self.text_instance.kind = {
-                            'axis': 'y', 'anchor': anchor}
+                            "axis": "y",
+                            "anchor": anchor,
+                        }
 
                         self.text_instance.show_text = True
                         return
 
-        elif ylabelright and event.x > self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                event.y > self.y + ax.bbox.bounds[1]:
+        elif (
+            ylabelright
+            and event.x > self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+            and event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]
+            and event.y > self.y + ax.bbox.bounds[1]
+        ):
 
             top_lim = self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]
             bottom_lim = self.y + ax.bbox.bounds[1]
-            bottom_anchor_zone = (top_lim - bottom_lim) * .2 + bottom_lim
-            top_anchor_zone = (top_lim - bottom_lim) * .8 + bottom_lim
+            bottom_anchor_zone = (top_lim - bottom_lim) * 0.2 + bottom_lim
+            top_anchor_zone = (top_lim - bottom_lim) * 0.8 + bottom_lim
 
             if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
                 if self.text_instance:
                     if not self.text_instance.show_text:
                         midpoint = (
-                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]) +
-                            (self.y + ax.bbox.bounds[1])) / 2
+                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1])
+                            + (self.y + ax.bbox.bounds[1])
+                        ) / 2
                         if event.y > midpoint:
-                            anchor = 'top'
+                            anchor = "top"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0] + ax.bbox.bounds[2]) + dp(40)
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[0] + ax.bbox.bounds[2]
+                            ) + dp(40)
+                            self.text_instance.y_text_pos = (
+                                float(
+                                    self.y
+                                    + ax.bbox.bounds[1]
+                                    + ax.bbox.bounds[3]
+                                )
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = True
                         else:
 
-                            anchor = 'bottom'
+                            anchor = "bottom"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0] + ax.bbox.bounds[2]) + dp(40)
+                                self.x + ax.bbox.bounds[0] + ax.bbox.bounds[2]
+                            ) + dp(40)
                             self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - dp(6)
+                                self.y + ax.bbox.bounds[1]
+                            ) - dp(6)
                             self.text_instance.offset_text = True
                         # left axis
                         self.text_instance.current_axis = self.figure.axes[1]
                         self.text_instance.kind = {
-                            'axis': 'y', 'anchor': anchor}
+                            "axis": "y",
+                            "anchor": anchor,
+                        }
 
                         self.text_instance.show_text = True
                         return
 
     def apply_drag_legend(self, ax, event):
-        """ drag legend method """
+        """drag legend method"""
 
         dx = event.x - self._last_touch_pos[event][0]
         if not self.legend_do_scroll_x:
@@ -2709,7 +3270,11 @@ class MatplotFigureTwinx(Widget):
             legend_y = bbox.ymin
 
             loc_in_canvas = legend_x + dx, legend_y + dy
-            loc_in_norm_axes = legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
+            loc_in_norm_axes = (
+                legend.parent.transAxes.inverted().transform_point(
+                    loc_in_canvas
+                )
+            )
             legend._loc = tuple(loc_in_norm_axes)
 
             # use blit method
@@ -2718,7 +3283,8 @@ class MatplotFigureTwinx(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 legend.set_visible(True)
                 if self.last_line is not None:
                     self.clear_line_prop()
@@ -2732,7 +3298,7 @@ class MatplotFigureTwinx(Widget):
             self.current_legend.update_size()
 
     def zoom_factory(self, event, ax, base_scale=1.1):
-        """ zoom with scrolling mouse method """
+        """zoom with scrolling mouse method"""
 
         newcoord = self.to_widget(event.x, event.y, relative=True)
         x = newcoord[0]
@@ -2747,7 +3313,7 @@ class MatplotFigureTwinx(Widget):
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -2758,7 +3324,7 @@ class MatplotFigureTwinx(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -2769,10 +3335,10 @@ class MatplotFigureTwinx(Widget):
             ydata = self.transform_eval(ydata, ax.yaxis)
             yold_max = self.transform_eval(ymax_, ax.yaxis)
 
-        if event.button == 'scrolldown':
+        if event.button == "scrolldown":
             # deal with zoom in
             scale_factor = 1 / base_scale
-        elif event.button == 'scrollup':
+        elif event.button == "scrollup":
             # deal with zoom out
             scale_factor = base_scale
         else:
@@ -2787,36 +3353,44 @@ class MatplotFigureTwinx(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
@@ -2826,7 +3400,7 @@ class MatplotFigureTwinx(Widget):
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()
 
-    def zoom_factory_twin(self, event, ax, ax2, base_scale=2.):
+    def zoom_factory_twin(self, event, ax, ax2, base_scale=2.0):
         """twin axis zoom method from scroll mouse"""
         x, y = event.x, event.y
         cur_xlim = ax.get_xlim()
@@ -2843,7 +3417,7 @@ class MatplotFigureTwinx(Widget):
         yscale = ax.get_yscale()
         yscale2 = ax2.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -2854,7 +3428,7 @@ class MatplotFigureTwinx(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -2865,10 +3439,10 @@ class MatplotFigureTwinx(Widget):
             ydata = self.transform_eval(ydata, ax.yaxis)
             yold_max = self.transform_eval(ymax_, ax.yaxis)
 
-        if event.button == 'scrolldown':
+        if event.button == "scrolldown":
             # deal with zoom in
             scale_factor = 1 / base_scale
-        elif event.button == 'scrollup':
+        elif event.button == "scrollup":
             # deal with zoom out
             scale_factor = base_scale
         else:
@@ -2883,40 +3457,48 @@ class MatplotFigureTwinx(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
-        if yscale2 == 'linear':
+        if yscale2 == "linear":
             yold2_min = cur_ylim2[0]
             yold2_max = cur_ylim2[1]
 
@@ -2931,22 +3513,30 @@ class MatplotFigureTwinx(Widget):
 
         rely2 = (yold2_max - ydata2) / (yold2_max - yold2_min)
         if self.do_zoom_y:
-            ax2.set_ylim([ydata2 - new_height2 * (1 - rely2),
-                         ydata2 + new_height2 * (rely2)])
+            ax2.set_ylim(
+                [
+                    ydata2 - new_height2 * (1 - rely2),
+                    ydata2 + new_height2 * (rely2),
+                ]
+            )
 
-            if yscale2 == 'linear':
-                ax2.set_ylim([ydata2 - new_height2 * (1 - rely2),
-                             ydata2 + new_height2 * (rely2)])
+            if yscale2 == "linear":
+                ax2.set_ylim(
+                    [
+                        ydata2 - new_height2 * (1 - rely2),
+                        ydata2 + new_height2 * (rely2),
+                    ]
+                )
             else:
                 new_ymin2 = ydata2 - new_height2 * (1 - rely2)
                 new_ymax2 = ydata2 + new_height2 * (rely2)
                 try:
                     new_ymin2, new_ymax2 = self.inv_transform_eval(
-                        new_ymin2, ax2.yaxis), self.inv_transform_eval(
-                        new_ymax2, ax2.yaxis)
+                        new_ymin2, ax2.yaxis
+                    ), self.inv_transform_eval(new_ymax2, ax2.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin2, new_ymax2 = ymin2_, ymax2_
-                    if new_ymin2 <= 0. or new_ymax2 <= 0.:  # Limit case
+                    if new_ymin2 <= 0.0 or new_ymax2 <= 0.0:  # Limit case
                         new_ymin2, new_ymax2 = ymin2_, ymax2_
                 ax2.set_ylim([new_ymin2, new_ymax2])
 
@@ -2957,7 +3547,7 @@ class MatplotFigureTwinx(Widget):
         ax.figure.canvas.flush_events()
 
     def _onSize(self, o, size):
-        """ _onsize method """
+        """_onsize method"""
         if self.figure is None:
             return
         # Create a new, correctly sized bitmap
@@ -2972,7 +3562,7 @@ class MatplotFigureTwinx(Widget):
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
 
-        s = 'resize_event'
+        s = "resize_event"
         event = ResizeEvent(s, self.figcanvas)
         self.figcanvas.callbacks.process(s, event)
         self.figcanvas.draw_idle()
@@ -2991,7 +3581,7 @@ class MatplotFigureTwinx(Widget):
             Clock.schedule_once(self.update_selector)
 
     def update_lim(self):
-        """ update axis lim if zoombox is used"""
+        """update axis lim if zoombox is used"""
         ax = self.figure.axes[0]
         ax2 = self.figure.axes[1]
         self.do_update = False
@@ -3024,45 +3614,54 @@ class MatplotFigureTwinx(Widget):
         range_old = cur_ylim[1] - cur_ylim[0]
         range_old2 = cur_ylim2[1] - cur_ylim2[0]
 
-        ymin2 = (min(self.y0_box, self.y1_box) -
-                 cur_ylim[0]) / range_old * range_old2 + cur_ylim2[0]
-        ymax2 = (max(self.y0_box, self.y1_box) -
-                 cur_ylim[0]) / range_old * range_old2 + cur_ylim2[0]
+        ymin2 = (
+            min(self.y0_box, self.y1_box) - cur_ylim[0]
+        ) / range_old * range_old2 + cur_ylim2[0]
+        ymax2 = (
+            max(self.y0_box, self.y1_box) - cur_ylim[0]
+        ) / range_old * range_old2 + cur_ylim2[0]
 
         if inverted_x:
             ax.set_xlim(
-                right=min(
-                    self.x0_box, self.x1_box), left=max(
-                    self.x0_box, self.x1_box))
+                right=min(self.x0_box, self.x1_box),
+                left=max(self.x0_box, self.x1_box),
+            )
         else:
             ax.set_xlim(
-                left=min(
-                    self.x0_box, self.x1_box), right=max(
-                    self.x0_box, self.x1_box))
+                left=min(self.x0_box, self.x1_box),
+                right=max(self.x0_box, self.x1_box),
+            )
         if inverted_y:
             ax.set_ylim(
-                top=min(
-                    self.y0_box, self.y1_box), bottom=max(
-                    self.y0_box, self.y1_box))
+                top=min(self.y0_box, self.y1_box),
+                bottom=max(self.y0_box, self.y1_box),
+            )
         else:
             ax.set_ylim(
-                bottom=min(
-                    self.y0_box, self.y1_box), top=max(
-                    self.y0_box, self.y1_box))
+                bottom=min(self.y0_box, self.y1_box),
+                top=max(self.y0_box, self.y1_box),
+            )
         if inverted_y2:
             ax2.set_ylim(top=ymin2, bottom=ymax2)
         else:
             ax2.set_ylim(bottom=ymin2, top=ymax2)
 
     def reset_box(self):
-        """ reset zoombox and apply zoombox limit if zoombox option if selected"""
+        """reset zoombox and apply zoombox limit if zoombox option if selected"""
         if min(abs(self._box_size[0]), abs(self._box_size[1])) > self.minzoom:
             trans = self.figure.axes[0].transData.inverted()
             self.x0_box, self.y0_box = trans.transform_point(
-                (self._box_pos[0] - self.pos[0], self._box_pos[1] - self.pos[1]))
+                (
+                    self._box_pos[0] - self.pos[0],
+                    self._box_pos[1] - self.pos[1],
+                )
+            )
             self.x1_box, self.y1_box = trans.transform_point(
-                (self._box_size[0] + self._box_pos[0] - self.pos[0],
-                 self._box_size[1] + self._box_pos[1] - self.pos[1]))
+                (
+                    self._box_size[0] + self._box_pos[0] - self.pos[0],
+                    self._box_size[1] + self._box_pos[1] - self.pos[1],
+                )
+            )
             self.do_update = True
 
         self._box_size = 0, 0
@@ -3079,7 +3678,7 @@ class MatplotFigureTwinx(Widget):
         self.invert_rect_ver = False
 
     def draw_box(self, event, x0, y0, x1, y1) -> None:
-        """ Draw zoombox method
+        """Draw zoombox method
 
         Args:
             event: touch kivy event
@@ -3102,7 +3701,8 @@ class MatplotFigureTwinx(Widget):
 
         trans = self.figure.axes[0].transData.inverted()
         xdata, ydata = trans.transform_point(
-            (event.x - pos_x, event.y - pos_y))
+            (event.x - pos_x, event.y - pos_y)
+        )
 
         # xmin,xmax=self.figure.axes[0].get_xlim()
         # ymin,ymax=self.figure.axes[0].get_ylim()
@@ -3236,9 +3836,10 @@ class FakeEventTwinx:
     y: None
 
 
-Factory.register('MatplotFigureTwinx', MatplotFigureTwinx)
+Factory.register("MatplotFigureTwinx", MatplotFigureTwinx)
 
-Builder.load_string('''
+Builder.load_string(
+    """
 <MatplotFigureTwinx>
     canvas:
         Color:
@@ -3296,4 +3897,5 @@ Builder.load_string('''
                 (self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver-dp(4)+self._box_size[1] \
                  if root.invert_rect_hor else self.pos_y_rect_ver+dp(1)+self._box_size[1], \
                  dp(40),dp(4))
-        ''')
+        """
+)

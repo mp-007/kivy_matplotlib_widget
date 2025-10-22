@@ -1,4 +1,4 @@
-""" MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
+"""MatplotFigure is based on https://github.com/jeysonmc/kivy_matplotlib
 and kivy scatter
 """
 
@@ -19,8 +19,15 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import to_hex
 from kivy.vector import Vector
 from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty, OptionProperty
+from kivy.properties import (
+    ObjectProperty,
+    ListProperty,
+    BooleanProperty,
+    BoundedNumericProperty,
+    AliasProperty,
+    NumericProperty,
+    OptionProperty,
+)
 from kivy.lang import Builder
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
@@ -28,13 +35,19 @@ import math
 import copy
 
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 selector_widgets_available = False
 try:
     selector_widgets_available = True
-    from kivy_matplotlib_widget.uix.selector_widget import ResizeRelativeLayout, LassoRelativeLayout, EllipseRelativeLayout, SpanRelativeLayout
+    from kivy_matplotlib_widget.uix.selector_widget import (
+        ResizeRelativeLayout,
+        LassoRelativeLayout,
+        EllipseRelativeLayout,
+        SpanRelativeLayout,
+    )
 except ImportError:
-    print('Selector widgets are not available')
+    print("Selector widgets are not available")
 
 
 class MatplotFigureScatter(Widget):
@@ -95,13 +108,8 @@ class MatplotFigureScatter(Widget):
     desktop_mode = BooleanProperty(True)
     current_selector = OptionProperty(
         "None",
-        options=[
-            "None",
-            'rectangle',
-            'lasso',
-            'ellipse',
-            'span',
-            'custom'])
+        options=["None", "rectangle", "lasso", "ellipse", "span", "custom"],
+    )
     pick_minimum_radius = NumericProperty(dp(50))
     pick_radius_axis = OptionProperty("both", options=["both", "x", "y"])
 
@@ -119,7 +127,7 @@ class MatplotFigureScatter(Widget):
             ax = self.figure.axes[0]
             patch_cpy = copy.copy(ax.patch)
             patch_cpy.set_visible(False)
-            for pos in ['right', 'top', 'bottom', 'left']:
+            for pos in ["right", "top", "bottom", "left"]:
                 ax.spines[pos].set_zorder(10)
             patch_cpy.set_zorder(9)
             self.background_patch_copy = ax.add_patch(patch_cpy)
@@ -164,7 +172,7 @@ class MatplotFigureScatter(Widget):
         self.scatters = []
 
         # option
-        self.touch_mode = 'pan'
+        self.touch_mode = "pan"
         self.hover_on = False
         # used matplotlib formatter to display x cursor value
         self.cursor_xaxis_formatter = None
@@ -201,7 +209,7 @@ class MatplotFigureScatter(Widget):
         self.first_touch_pan = None
 
         # manage back and next event
-        if hasattr(cbook, '_Stack'):
+        if hasattr(cbook, "_Stack"):
             # manage matplotlib version with no Stack (replace by _Stack)
             self._nav_stack = cbook._Stack()
         else:
@@ -221,13 +229,13 @@ class MatplotFigureScatter(Widget):
     def on_kv_post(self, _):
         # if not self.selector:
         if self.current_selector != "None" and selector_widgets_available:
-            if self.current_selector == 'rectangle':
+            if self.current_selector == "rectangle":
                 self.set_selector(ResizeRelativeLayout)
-            elif self.current_selector == 'lasso':
+            elif self.current_selector == "lasso":
                 self.set_selector(LassoRelativeLayout)
-            elif self.current_selector == 'ellipse':
+            elif self.current_selector == "ellipse":
                 self.set_selector(EllipseRelativeLayout)
-            elif self.current_selector == 'span':
+            elif self.current_selector == "span":
                 self.set_selector(SpanRelativeLayout)
         self.kv_post_done = True
 
@@ -243,18 +251,19 @@ class MatplotFigureScatter(Widget):
 
         if self.kv_post_done and selector_widgets_available:
 
-            if value == 'rectangle':
+            if value == "rectangle":
                 self.set_selector(ResizeRelativeLayout)
-            elif value == 'lasso':
+            elif value == "lasso":
                 self.set_selector(LassoRelativeLayout)
-            elif value == 'ellipse':
+            elif value == "ellipse":
                 self.set_selector(EllipseRelativeLayout)
-            elif self.current_selector == 'span':
+            elif self.current_selector == "span":
                 self.set_selector(SpanRelativeLayout)
             elif value == "None":
                 if self.selector:
                     Window.unbind(
-                        mouse_pos=self.selector.resize_wgt.on_mouse_pos)
+                        mouse_pos=self.selector.resize_wgt.on_mouse_pos
+                    )
                     self.parent.remove_widget(self.selector)
                 self.selector = None
 
@@ -272,8 +281,8 @@ class MatplotFigureScatter(Widget):
             self.parent.remove_widget(self.selector)
 
         self.selector = selector(
-            figure_wgt=self,
-            desktop_mode=self.desktop_mode)
+            figure_wgt=self, desktop_mode=self.desktop_mode
+        )
         self.selector.resize_wgt.ax = self.axes
         if selector_collection:
             self.set_collection()
@@ -304,7 +313,7 @@ class MatplotFigureScatter(Widget):
         self.selector.resize_wgt.set_callback_clear(callback)
 
     def register_lines(self, lines: list) -> None:
-        """ register lines method
+        """register lines method
 
         Args:
             lines (list): list of matplolib line class
@@ -317,20 +326,22 @@ class MatplotFigureScatter(Widget):
         ymin, ymax = self.axes.get_ylim()
         # create cross hair cusor
         self.horizontal_line = self.axes.axhline(
-            y=self.ymin, color='k', lw=0.8, ls='--', visible=False)
+            y=self.ymin, color="k", lw=0.8, ls="--", visible=False
+        )
         self.vertical_line = self.axes.axvline(
-            x=self.xmin, color='k', lw=0.8, ls='--', visible=False)
+            x=self.xmin, color="k", lw=0.8, ls="--", visible=False
+        )
 
         # register lines
         self.lines = lines
 
         # cursor text
-        self.text = self.axes.text(1.0, 1.01, '',
-                                   transform=self.axes.transAxes,
-                                   ha='right')
+        self.text = self.axes.text(
+            1.0, 1.01, "", transform=self.axes.transAxes, ha="right"
+        )
 
     def register_scatters(self, scatters: list) -> None:
-        """ register scatters method
+        """register scatters method
 
         Args:
             scatters (list): list of matplolib scatters class
@@ -342,7 +353,7 @@ class MatplotFigureScatter(Widget):
         self.scatters = scatters
 
     def set_cross_hair_visible(self, visible: bool) -> None:
-        """ set curcor visibility
+        """set curcor visibility
 
         Args:
             visible (bool): make cursor visble or not
@@ -356,7 +367,7 @@ class MatplotFigureScatter(Widget):
         self.text.set_visible(visible)
 
     def hover(self, event) -> None:
-        """ hover cursor method (cursor to nearest value)
+        """hover cursor method (cursor to nearest value)
 
         Args:
             event: touch kivy event
@@ -372,7 +383,8 @@ class MatplotFigureScatter(Widget):
             # transform kivy x,y touch event to x,y data
             trans = self.axes.transData.inverted()
             xdata, ydata = trans.transform_point(
-                (event.x - self.pos[0], event.y - self.pos[1]))
+                (event.x - self.pos[0], event.y - self.pos[1])
+            )
 
             # loop all register lines and find closest x,y data for each valid
             # line
@@ -385,7 +397,11 @@ class MatplotFigureScatter(Widget):
             good_index_scatter = []
             if self.multi_xdata:
                 xdata_res, ydata_dump = trans.transform_point(
-                    (event.x - self.pos[0] + self.multi_xdata_res, event.y - self.pos[1]))
+                    (
+                        event.x - self.pos[0] + self.multi_xdata_res,
+                        event.y - self.pos[1],
+                    )
+                )
                 delta = abs(xdata_res - xdata)
 
             for line in self.lines:
@@ -400,9 +416,9 @@ class MatplotFigureScatter(Widget):
                         # find closest data index from touch (x axis)
                         if self.xsorted:
                             index = min(
-                                np.searchsorted(
-                                    self.x_cursor, xdata), len(
-                                    self.y_cursor) - 1)
+                                np.searchsorted(self.x_cursor, xdata),
+                                len(self.y_cursor) - 1,
+                            )
                         else:
                             index = np.argsort(abs(self.x_cursor - xdata))[0]
 
@@ -414,9 +430,16 @@ class MatplotFigureScatter(Widget):
 
                             # find closest ydata from lines
                             idx_good_y = np.where(
-                                abs(np.array(self.x_cursor) - x) < delta)[0]
-                            index2_best = idx_good_y[np.argsort(
-                                abs(np.array(self.y_cursor)[idx_good_y] - ydata))[0]]
+                                abs(np.array(self.x_cursor) - x) < delta
+                            )[0]
+                            index2_best = idx_good_y[
+                                np.argsort(
+                                    abs(
+                                        np.array(self.y_cursor)[idx_good_y]
+                                        - ydata
+                                    )
+                                )[0]
+                            ]
                             y = self.y_cursor[index2_best]
                             x = self.x_cursor[index2_best]
                             good_index2.append(index2_best)
@@ -428,18 +451,19 @@ class MatplotFigureScatter(Widget):
                         # left axis
                         # xy_pixels_mouse = ax.transData.transform(np.vstack([xdata,ydata]).T)
                         xy_pixels_mouse = ax.transData.transform(
-                            [(xdata, ydata)])
+                            [(xdata, ydata)]
+                        )
                         # xy_pixels = ax.transData.transform(np.vstack([x,y]).T)
                         xy_pixels = ax.transData.transform([(x, y)])
-                        dx2 = (xy_pixels_mouse[0][0] - xy_pixels[0][0])**2
-                        dy2 = (xy_pixels_mouse[0][1] - xy_pixels[0][1])**2
+                        dx2 = (xy_pixels_mouse[0][0] - xy_pixels[0][0]) ** 2
+                        dy2 = (xy_pixels_mouse[0][1] - xy_pixels[0][1]) ** 2
 
                         # store distance
-                        if self.pick_radius_axis == 'both':
-                            distance.append((dx2 + dy2)**0.5)
-                        if self.pick_radius_axis == 'x':
+                        if self.pick_radius_axis == "both":
+                            distance.append((dx2 + dy2) ** 0.5)
+                        if self.pick_radius_axis == "x":
                             distance.append(abs(dx2))
-                        if self.pick_radius_axis == 'y':
+                        if self.pick_radius_axis == "y":
                             distance.append(abs(dy2))
 
                         # store all best lines and index
@@ -458,9 +482,9 @@ class MatplotFigureScatter(Widget):
                         # find closest data index from touch (x axis)
                         if self.xsorted:
                             index = min(
-                                np.searchsorted(
-                                    self.x_cursor, xdata), len(
-                                    self.y_cursor) - 1)
+                                np.searchsorted(self.x_cursor, xdata),
+                                len(self.y_cursor) - 1,
+                            )
                         else:
                             index = np.argsort(abs(self.x_cursor - xdata))[0]
 
@@ -472,9 +496,16 @@ class MatplotFigureScatter(Widget):
                         if self.multi_xdata:
                             # find closest ydata from lines
                             idx_good_y = np.where(
-                                abs(np.array(self.x_cursor) - x) < delta)[0]
-                            index2_best = idx_good_y[np.argsort(
-                                abs(np.array(self.y_cursor)[idx_good_y] - ydata))[0]]
+                                abs(np.array(self.x_cursor) - x) < delta
+                            )[0]
+                            index2_best = idx_good_y[
+                                np.argsort(
+                                    abs(
+                                        np.array(self.y_cursor)[idx_good_y]
+                                        - ydata
+                                    )
+                                )[0]
+                            ]
                             y = self.y_cursor[index2_best]
                             x = self.x_cursor[index2_best]
                             good_index2_scatter.append(index2_best)
@@ -485,16 +516,21 @@ class MatplotFigureScatter(Widget):
                         ax = scatter.axes
                         # left axis
                         xy_pixels_mouse = ax.transData.transform(
-                            [(xdata, ydata)])
+                            [(xdata, ydata)]
+                        )
                         if np.ma.is_masked(x) or np.ma.is_masked(y):
                             distance.append(np.nan)
                         else:
                             xy_pixels = ax.transData.transform([(x, y)])
-                            dx2 = (xy_pixels_mouse[0][0] - xy_pixels[0][0])**2
-                            dy2 = (xy_pixels_mouse[0][1] - xy_pixels[0][1])**2
+                            dx2 = (
+                                xy_pixels_mouse[0][0] - xy_pixels[0][0]
+                            ) ** 2
+                            dy2 = (
+                                xy_pixels_mouse[0][1] - xy_pixels[0][1]
+                            ) ** 2
 
                             # store distance
-                            distance.append((dx2 + dy2)**0.5)
+                            distance.append((dx2 + dy2) ** 0.5)
 
                         # store all best scatters and index
                         good_scatter.append(scatter)
@@ -546,18 +582,28 @@ class MatplotFigureScatter(Widget):
                     self.set_cross_hair_visible(True)
 
                 # update the cursor x,y data
-                self.horizontal_line.set_ydata([y,])
-                self.vertical_line.set_xdata([x,])
+                self.horizontal_line.set_ydata(
+                    [
+                        y,
+                    ]
+                )
+                self.vertical_line.set_xdata(
+                    [
+                        x,
+                    ]
+                )
 
                 # x y label
                 if self.hover_instance:
                     xy_pos = ax.transData.transform([(x, y)])
                     self.x_hover_data = x
                     self.y_hover_data = y
-                    self.hover_instance.x_hover_pos = float(
-                        xy_pos[0][0]) + self.x
-                    self.hover_instance.y_hover_pos = float(
-                        xy_pos[0][1]) + self.y
+                    self.hover_instance.x_hover_pos = (
+                        float(xy_pos[0][0]) + self.x
+                    )
+                    self.hover_instance.y_hover_pos = (
+                        float(xy_pos[0][1]) + self.y
+                    )
                     self.hover_instance.show_cursor = True
 
                     if self.cursor_xaxis_formatter:
@@ -571,51 +617,76 @@ class MatplotFigureScatter(Widget):
                     self.hover_instance.label_x_value = f"{x}"
                     self.hover_instance.label_y_value = f"{y}"
 
-                    self.hover_instance.xmin_line = float(
-                        ax.bbox.bounds[0]) + self.x
-                    self.hover_instance.xmax_line = float(
-                        ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x
-                    self.hover_instance.ymin_line = float(
-                        ax.bbox.bounds[1]) + self.y
-                    self.hover_instance.ymax_line = float(
-                        ax.bbox.bounds[1] + ax.bbox.bounds[3]) + self.y
+                    self.hover_instance.xmin_line = (
+                        float(ax.bbox.bounds[0]) + self.x
+                    )
+                    self.hover_instance.xmax_line = (
+                        float(ax.bbox.bounds[0] + ax.bbox.bounds[2]) + self.x
+                    )
+                    self.hover_instance.ymin_line = (
+                        float(ax.bbox.bounds[1]) + self.y
+                    )
+                    self.hover_instance.ymax_line = (
+                        float(ax.bbox.bounds[1] + ax.bbox.bounds[3]) + self.y
+                    )
 
                     if self.scatter_label and idx_best > len(good_line) - 1:
                         if self.multi_xdata:
-                            self.hover_instance.custom_label = self.scatter_label[
-                                good_index2_scatter[idx_best]]
+                            self.hover_instance.custom_label = (
+                                self.scatter_label[
+                                    good_index2_scatter[idx_best]
+                                ]
+                            )
                         else:
-                            self.hover_instance.custom_label = self.scatter_label[
-                                good_index_scatter[idx_best]]
+                            self.hover_instance.custom_label = (
+                                self.scatter_label[
+                                    good_index_scatter[idx_best]
+                                ]
+                            )
                     if line:
                         self.hover_instance.custom_color = get_color_from_hex(
-                            to_hex(line.get_color()))
+                            to_hex(line.get_color())
+                        )
                     elif scatter:
                         if self.multi_xdata:
-                            if len(
-                                    self.x_cursor) == len(
-                                    scatter.get_facecolors()):
-                                color = scatter.get_facecolors(
-                                )[good_index2_scatter[idx_best]]
+                            if len(self.x_cursor) == len(
+                                scatter.get_facecolors()
+                            ):
+                                color = scatter.get_facecolors()[
+                                    good_index2_scatter[idx_best]
+                                ]
                             else:
                                 color = scatter.get_facecolors()
-                            self.hover_instance.custom_color = get_color_from_hex(
-                                to_hex(color))
+                            self.hover_instance.custom_color = (
+                                get_color_from_hex(to_hex(color))
+                            )
                         else:
-                            if len(
-                                    self.x_cursor) == len(
-                                    scatter.get_facecolors()):
-                                color = scatter.get_facecolors(
-                                )[good_index_scatter[idx_best]]
+                            if len(self.x_cursor) == len(
+                                scatter.get_facecolors()
+                            ):
+                                color = scatter.get_facecolors()[
+                                    good_index_scatter[idx_best]
+                                ]
                             else:
                                 color = scatter.get_facecolors()
-                            self.hover_instance.custom_color = get_color_from_hex(
-                                to_hex(color))
+                            self.hover_instance.custom_color = (
+                                get_color_from_hex(to_hex(color))
+                            )
 
-                    if self.hover_instance.x_hover_pos > self.x + self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
-                            self.hover_instance.x_hover_pos < self.x + self.axes.bbox.bounds[0] or \
-                            self.hover_instance.y_hover_pos > self.y + self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
-                            self.hover_instance.y_hover_pos < self.y + self.axes.bbox.bounds[1]:
+                    if (
+                        self.hover_instance.x_hover_pos
+                        > self.x
+                        + self.axes.bbox.bounds[2]
+                        + self.axes.bbox.bounds[0]
+                        or self.hover_instance.x_hover_pos
+                        < self.x + self.axes.bbox.bounds[0]
+                        or self.hover_instance.y_hover_pos
+                        > self.y
+                        + self.axes.bbox.bounds[1]
+                        + self.axes.bbox.bounds[3]
+                        or self.hover_instance.y_hover_pos
+                        < self.y + self.axes.bbox.bounds[1]
+                    ):
                         self.hover_instance.hover_outside_bound = True
                     else:
                         self.hover_instance.hover_outside_bound = False
@@ -635,10 +706,12 @@ class MatplotFigureScatter(Widget):
                     if self.scatter_label and idx_best > len(good_line) - 1:
                         if self.multi_xdata:
                             self.text.set_text(
-                                f"{self.scatter_label[good_index2_scatter[idx_best]]} x={x}, y={y}")
+                                f"{self.scatter_label[good_index2_scatter[idx_best]]} x={x}, y={y}"
+                            )
                         else:
                             self.text.set_text(
-                                f"{self.scatter_label[good_index_scatter[idx_best]]} x={x}, y={y}")
+                                f"{self.scatter_label[good_index_scatter[idx_best]]} x={x}, y={y}"
+                            )
                     else:
                         self.text.set_text(f"x={x}, y={y}")
 
@@ -648,7 +721,8 @@ class MatplotFigureScatter(Widget):
                     self.axes.figure.canvas.draw_idle()
                     self.axes.figure.canvas.flush_events()
                     self.background = self.axes.figure.canvas.copy_from_bbox(
-                        self.axes.figure.bbox)
+                        self.axes.figure.bbox
+                    )
                     self.set_cross_hair_visible(True)
 
                 self.axes.figure.canvas.restore_region(self.background)
@@ -676,15 +750,20 @@ class MatplotFigureScatter(Widget):
             return
         ax = self.axes
         no_visible = self.myrelim(ax, visible_only=self.autoscale_visible_only)
-        ax.autoscale_view(tight=self.autoscale_tight,
-                          scalex=True if self.autoscale_axis != "y" else False,
-                          scaley=True if self.autoscale_axis != "x" else False)
+        ax.autoscale_view(
+            tight=self.autoscale_tight,
+            scalex=True if self.autoscale_axis != "y" else False,
+            scaley=True if self.autoscale_axis != "x" else False,
+        )
         ax.autoscale(axis=self.autoscale_axis, tight=self.autoscale_tight)
 
         current_xlim = ax.get_xlim()
         current_ylim = ax.get_ylim()
-        lim_collection, invert_xaxis, invert_yaxis = self.data_limit_collection(
-            ax, visible_only=self.autoscale_visible_only)
+        lim_collection, invert_xaxis, invert_yaxis = (
+            self.data_limit_collection(
+                ax, visible_only=self.autoscale_visible_only
+            )
+        )
         if lim_collection:
             xchanged = False
             if self.autoscale_tight:
@@ -711,10 +790,12 @@ class MatplotFigureScatter(Widget):
             # recalculed margin
             if xchanged:
                 xlim = ax.get_xlim()
-                ax.set_xlim(left=xlim[0] -
-                            current_margins[0] * (xlim[1] - xlim[0]))
                 ax.set_xlim(
-                    right=xlim[1] + current_margins[0] * (xlim[1] - xlim[0]))
+                    left=xlim[0] - current_margins[0] * (xlim[1] - xlim[0])
+                )
+                ax.set_xlim(
+                    right=xlim[1] + current_margins[0] * (xlim[1] - xlim[0])
+                )
 
             ychanged = False
 
@@ -737,9 +818,11 @@ class MatplotFigureScatter(Widget):
             if ychanged:
                 ylim = ax.get_ylim()
                 ax.set_ylim(
-                    bottom=ylim[0] - current_margins[1] * (ylim[1] - ylim[0]))
-                ax.set_ylim(top=ylim[1] + current_margins[1]
-                            * (ylim[1] - ylim[0]))
+                    bottom=ylim[0] - current_margins[1] * (ylim[1] - ylim[0])
+                )
+                ax.set_ylim(
+                    top=ylim[1] + current_margins[1] * (ylim[1] - ylim[0])
+                )
 
         ax.figure.canvas.draw_idle()
         ax.figure.canvas.flush_events()
@@ -840,16 +923,18 @@ class MatplotFigureScatter(Widget):
         return datalim, invert_xaxis, invert_yaxis
 
     def home(self) -> None:
-        """ reset data axis
+        """reset data axis
 
         Return:
             None
         """
         # do nothing is all min/max are not set
-        if self.xmin is not None and \
-                self.xmax is not None and \
-                self.ymin is not None and \
-                self.ymax is not None:
+        if (
+            self.xmin is not None
+            and self.xmax is not None
+            and self.ymin is not None
+            and self.ymax is not None
+        ):
 
             ax = self.axes
             xleft, xright = ax.get_xlim()
@@ -901,11 +986,19 @@ class MatplotFigureScatter(Widget):
         """Push the current view limits and position onto the stack."""
         self._nav_stack.push(
             WeakKeyDictionary(
-                {ax: (ax._get_view(),
-                      # Store both the original and modified positions.
-                      (ax.get_position(True).frozen(),
-                       ax.get_position().frozen()))
-                 for ax in self.figure.axes}))
+                {
+                    ax: (
+                        ax._get_view(),
+                        # Store both the original and modified positions.
+                        (
+                            ax.get_position(True).frozen(),
+                            ax.get_position().frozen(),
+                        ),
+                    )
+                    for ax in self.figure.axes
+                }
+            )
+        )
         self.set_history_buttons()
 
     def update(self):
@@ -927,8 +1020,8 @@ class MatplotFigureScatter(Widget):
         for ax, (view, (pos_orig, pos_active)) in items:
             ax._set_view(view)
             # Restore both the original and modified positions
-            ax._set_position(pos_orig, 'original')
-            ax._set_position(pos_active, 'active')
+            ax._set_position(pos_orig, "original")
+            ax._set_position(pos_active, "active")
         self.figure.canvas.draw_idle()
         self.figure.canvas.flush_events()
 
@@ -936,7 +1029,7 @@ class MatplotFigureScatter(Widget):
         """Enable or disable the back/forward button."""
 
     def reset_touch(self) -> None:
-        """ reset touch
+        """reset touch
 
         Return:
             None
@@ -945,7 +1038,7 @@ class MatplotFigureScatter(Widget):
         self._last_touch_pos = {}
 
     def _get_scale(self):
-        """ kivy scatter _get_scale method """
+        """kivy scatter _get_scale method"""
         p1 = Vector(*self.to_parent(0, 0))
         p2 = Vector(*self.to_parent(1, 0))
         scale = p1.distance(p2)
@@ -955,7 +1048,7 @@ class MatplotFigureScatter(Widget):
         # prevent anything wrong with scale, just avoid to dispatch it
         # if the scale "visually" didn't change. #947
         # Remove this ugly hack when we'll be Python 3 only.
-        if hasattr(self, '_scale_p'):
+        if hasattr(self, "_scale_p"):
             if str(scale) == str(self._scale_p):
                 return self._scale_p
 
@@ -963,65 +1056,72 @@ class MatplotFigureScatter(Widget):
         return scale
 
     def _set_scale(self, scale):
-        """ kivy scatter _set_scale method """
+        """kivy scatter _set_scale method"""
         rescale = scale * 1.0 / self.scale
-        self.apply_transform(Matrix().scale(rescale, rescale, rescale),
-                             post_multiply=True,
-                             anchor=self.to_local(*self.center))
+        self.apply_transform(
+            Matrix().scale(rescale, rescale, rescale),
+            post_multiply=True,
+            anchor=self.to_local(*self.center),
+        )
 
-    scale = AliasProperty(_get_scale, _set_scale, bind=('x', 'y', 'transform'))
-    '''Scale value of the scatter.
+    scale = AliasProperty(_get_scale, _set_scale, bind=("x", "y", "transform"))
+    """Scale value of the scatter.
 
     :attr:`scale` is an :class:`~kivy.properties.AliasProperty` and defaults to
     1.0.
-    '''
+    """
 
     def _draw_bitmap(self):
-        """ draw bitmap method. based on kivy scatter method"""
+        """draw bitmap method. based on kivy scatter method"""
         if self._bitmap is None:
             print("No bitmap!")
             return
         self._img_texture = Texture.create(size=(self.bt_w, self.bt_h))
         self._img_texture.blit_buffer(
-            bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
+            bytes(self._bitmap), colorfmt="rgba", bufferfmt="ubyte"
+        )
         self._img_texture.flip_vertical()
 
         self.update_hover()
         self.update_selector()
 
     def transform_with_touch(self, event):
-        """ manage touch behaviour. based on kivy scatter method"""
+        """manage touch behaviour. based on kivy scatter method"""
         # just do a simple one finger drag
         changed = False
 
         if len(self._touches) == self.translation_touches:
-            if self.touch_mode == 'pan':
+            if self.touch_mode == "pan":
                 if self._nav_stack() is None:
                     self.push_current()
                 self.apply_pan(self.axes, event)
 
-            if self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' \
-                    or self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y':
+            if (
+                self.touch_mode == "pan_x"
+                or self.touch_mode == "pan_y"
+                or self.touch_mode == "adjust_x"
+                or self.touch_mode == "adjust_y"
+            ):
                 if self._nav_stack() is None:
                     self.push_current()
                 self.apply_pan(self.axes, event, mode=self.touch_mode)
 
-            elif self.touch_mode == 'drag_legend':
+            elif self.touch_mode == "drag_legend":
                 if self.legend_instance:
                     self.apply_drag_legend(self.axes, event)
 
-            elif self.touch_mode == 'zoombox':
+            elif self.touch_mode == "zoombox":
                 if self._nav_stack() is None:
                     self.push_current()
                 real_x, real_y = event.x - self.pos[0], event.y - self.pos[1]
                 # in case x_init is not create
-                if not hasattr(self, 'x_init'):
+                if not hasattr(self, "x_init"):
                     self.x_init = event.x
                     self.y_init = real_y
                 self.draw_box(event, self.x_init, self.y_init, event.x, real_y)
 
             # mode cursor
-            elif self.touch_mode == 'cursor':
+            elif self.touch_mode == "cursor":
                 self.hover_on = True
                 self.hover(event)
 
@@ -1032,8 +1132,11 @@ class MatplotFigureScatter(Widget):
             return changed
 
         # we have more than one touch... list of last known pos
-        points = [Vector(self._last_touch_pos[t]) for t in self._touches
-                  if t is not event]
+        points = [
+            Vector(self._last_touch_pos[t])
+            for t in self._touches
+            if t is not event
+        ]
         # add current touch last
         points.append(Vector(event.pos))
 
@@ -1058,16 +1161,28 @@ class MatplotFigureScatter(Widget):
         if self.auto_zoom:
             v1 = Vector(0, 10)
             angle = v1.angle(new_line) + 180
-            if angle < 0 + self.zoom_angle_detection or angle > 360 - self.zoom_angle_detection:
+            if (
+                angle < 0 + self.zoom_angle_detection
+                or angle > 360 - self.zoom_angle_detection
+            ):
                 self.do_zoom_x = False
                 self.do_zoom_y = True
-            elif angle > 90 - self.zoom_angle_detection and angle < 90 + self.zoom_angle_detection:
+            elif (
+                angle > 90 - self.zoom_angle_detection
+                and angle < 90 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = True
                 self.do_zoom_y = False
-            elif angle > 180 - self.zoom_angle_detection and angle < 180 + self.zoom_angle_detection:
+            elif (
+                angle > 180 - self.zoom_angle_detection
+                and angle < 180 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = False
                 self.do_zoom_y = True
-            elif angle > 270 - self.zoom_angle_detection and angle < 270 + self.zoom_angle_detection:
+            elif (
+                angle > 270 - self.zoom_angle_detection
+                and angle < 270 + self.zoom_angle_detection
+            ):
                 self.do_zoom_x = True
                 self.do_zoom_y = False
             else:
@@ -1089,10 +1204,12 @@ class MatplotFigureScatter(Widget):
         return changed
 
     def on_motion(self, *args):
-        '''Kivy Event to trigger mouse event on motion
-           `enter_notify_event`.
-        '''
-        if self._pressed or self.disabled:  # Do not process this event if there's a touch_move
+        """Kivy Event to trigger mouse event on motion
+        `enter_notify_event`.
+        """
+        if (
+            self._pressed or self.disabled
+        ):  # Do not process this event if there's a touch_move
             return
 
         pos = args[1]
@@ -1112,11 +1229,11 @@ class MatplotFigureScatter(Widget):
                 self.hover(FakeEventScatter)
 
     def get_data_xy(self, x, y):
-        """ manage x y data in navigation bar TODO"""
+        """manage x y data in navigation bar TODO"""
         return None, None
 
     def on_touch_down(self, event):
-        """ Manage Mouse/touch press """
+        """Manage Mouse/touch press"""
         if self.disabled:
             return
 
@@ -1132,7 +1249,7 @@ class MatplotFigureScatter(Widget):
                         self.current_legend = current_legend
                         break
                 if select_legend:
-                    if self.touch_mode != 'drag_legend':
+                    if self.touch_mode != "drag_legend":
                         return False
                     else:
                         event.grab(self)
@@ -1154,23 +1271,23 @@ class MatplotFigureScatter(Widget):
 
             elif event.is_double_tap:
                 if not self.disable_double_tap:
-                    if self.touch_mode != 'selector':
+                    if self.touch_mode != "selector":
                         self.home()
                 return True
 
             else:
-                if self.touch_mode == 'cursor':
+                if self.touch_mode == "cursor":
                     self.hover_on = True
                     self.hover(event)
-                elif self.touch_mode == 'zoombox':
+                elif self.touch_mode == "zoombox":
                     real_x, real_y = x - self.pos[0], y - self.pos[1]
                     self.x_init = x
                     self.y_init = real_y
                     self.draw_box(event, x, real_y, x, real_y)
 
-                elif self.touch_mode == 'minmax':
+                elif self.touch_mode == "minmax":
                     self.min_max(event)
-                elif self.touch_mode == 'selector':
+                elif self.touch_mode == "selector":
                     pass
 
                 event.grab(self)
@@ -1186,7 +1303,7 @@ class MatplotFigureScatter(Widget):
             return False
 
     def on_touch_move(self, event):
-        """ Manage Mouse/touch move while pressed """
+        """Manage Mouse/touch move while pressed"""
         if self.disabled:
             return
 
@@ -1194,7 +1311,7 @@ class MatplotFigureScatter(Widget):
 
         if event.is_double_tap:
             if not self.disable_double_tap:
-                if self.touch_mode != 'selector':
+                if self.touch_mode != "selector":
                     self.home()
             return True
 
@@ -1208,7 +1325,7 @@ class MatplotFigureScatter(Widget):
             return True
 
     def on_touch_up(self, event):
-        """ Manage Mouse/touch release """
+        """Manage Mouse/touch release"""
         if self.disabled:
             return
 
@@ -1217,21 +1334,32 @@ class MatplotFigureScatter(Widget):
             event.ungrab(self)
             del self._last_touch_pos[event]
             self._touches.remove(event)
-            if (self.touch_mode == 'pan' or self.touch_mode == 'zoombox' or
-                    self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' or
-                    self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y' or
-                    self.touch_mode == 'minmax'):
+            if (
+                self.touch_mode == "pan"
+                or self.touch_mode == "zoombox"
+                or self.touch_mode == "pan_x"
+                or self.touch_mode == "pan_y"
+                or self.touch_mode == "adjust_x"
+                or self.touch_mode == "adjust_y"
+                or self.touch_mode == "minmax"
+            ):
                 self.push_current()
                 if self.interactive_axis:
-                    if self.touch_mode == 'pan_x' or self.touch_mode == 'pan_y' \
-                            or self.touch_mode == 'adjust_x' or self.touch_mode == 'adjust_y':
-                        self.touch_mode = 'pan'
+                    if (
+                        self.touch_mode == "pan_x"
+                        or self.touch_mode == "pan_y"
+                        or self.touch_mode == "adjust_x"
+                        or self.touch_mode == "adjust_y"
+                    ):
+                        self.touch_mode = "pan"
                     self.first_touch_pan = None
 
         x, y = event.x, event.y
-        if abs(
-                self._box_size[0]) > 1 or abs(
-                self._box_size[1]) > 1 or self.touch_mode == 'zoombox':
+        if (
+            abs(self._box_size[0]) > 1
+            or abs(self._box_size[1]) > 1
+            or self.touch_mode == "zoombox"
+        ):
             self.reset_box()
             if not self.collide_point(x, y) and self.do_update:
                 # update axis lim if zoombox is used and touch outside widget
@@ -1259,8 +1387,8 @@ class MatplotFigureScatter(Widget):
             return True
 
     def apply_zoom(self, scale_factor, ax, anchor=(0, 0), new_line=None):
-        """ zoom touch method """
-        if self.touch_mode == 'selector':
+        """zoom touch method"""
+        if self.touch_mode == "selector":
             return
 
         x = anchor[0]
@@ -1275,7 +1403,7 @@ class MatplotFigureScatter(Widget):
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -1286,7 +1414,7 @@ class MatplotFigureScatter(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -1304,36 +1432,44 @@ class MatplotFigureScatter(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
@@ -1344,7 +1480,8 @@ class MatplotFigureScatter(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
             ax.figure.canvas.restore_region(self.background)
 
@@ -1368,30 +1505,36 @@ class MatplotFigureScatter(Widget):
             ax.figure.canvas.draw_idle()
             ax.figure.canvas.flush_events()
 
-    def apply_pan(self, ax, event, mode='pan'):
-        """ pan method """
+    def apply_pan(self, ax, event, mode="pan"):
+        """pan method"""
 
         trans = ax.transData.inverted()
         xdata, ydata = trans.transform_point(
-            (event.x - self.pos[0], event.y - self.pos[1]))
+            (event.x - self.pos[0], event.y - self.pos[1])
+        )
         xpress, ypress = trans.transform_point(
-            (self._last_touch_pos[event][0] - self.pos[0],
-             self._last_touch_pos[event][1] - self.pos[1]))
+            (
+                self._last_touch_pos[event][0] - self.pos[0],
+                self._last_touch_pos[event][1] - self.pos[1],
+            )
+        )
 
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             dx = xdata - xpress
         else:
-            dx = self.transform_eval(xdata, ax.xaxis) - \
-                self.transform_eval(xpress, ax.xaxis)
+            dx = self.transform_eval(xdata, ax.xaxis) - self.transform_eval(
+                xpress, ax.xaxis
+            )
 
-        if yscale == 'linear':
+        if yscale == "linear":
             dy = ydata - ypress
         else:
-            dy = self.transform_eval(ydata, ax.yaxis) - \
-                self.transform_eval(ypress, ax.yaxis)
+            dy = self.transform_eval(ydata, ax.yaxis) - self.transform_eval(
+                ypress, ax.yaxis
+            )
 
         xleft, xright = self.axes.get_xlim()
         ybottom, ytop = self.axes.get_ylim()
@@ -1410,56 +1553,76 @@ class MatplotFigureScatter(Widget):
         else:
             cur_ylim = (ybottom, ytop)
 
-        if self.interactive_axis and self.touch_mode == 'pan' and not self.first_touch_pan == 'pan':
+        if (
+            self.interactive_axis
+            and self.touch_mode == "pan"
+            and not self.first_touch_pan == "pan"
+        ):
             if (ydata < cur_ylim[0] and not inverted_y) or (
-                    ydata > cur_ylim[1] and inverted_y):
+                ydata > cur_ylim[1] and inverted_y
+            ):
                 left_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .2 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.2 + cur_xlim[0]
                 right_anchor_zone = (
-                    cur_xlim[1] - cur_xlim[0]) * .8 + cur_xlim[0]
+                    cur_xlim[1] - cur_xlim[0]
+                ) * 0.8 + cur_xlim[0]
                 if xdata < left_anchor_zone or xdata > right_anchor_zone:
-                    mode = 'adjust_x'
+                    mode = "adjust_x"
                 else:
-                    mode = 'pan_x'
+                    mode = "pan_x"
                 self.touch_mode = mode
-            elif (xdata < cur_xlim[0] and not inverted_x) or (xdata > cur_xlim[1] and inverted_x):
+            elif (xdata < cur_xlim[0] and not inverted_x) or (
+                xdata > cur_xlim[1] and inverted_x
+            ):
                 bottom_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .2 + cur_ylim[0]
-                top_anchor_zone = (
-                    cur_ylim[1] - cur_ylim[0]) * .8 + cur_ylim[0]
+                    cur_ylim[1] - cur_ylim[0]
+                ) * 0.2 + cur_ylim[0]
+                top_anchor_zone = (cur_ylim[1] - cur_ylim[0]) * 0.8 + cur_ylim[
+                    0
+                ]
                 if ydata < bottom_anchor_zone or ydata > top_anchor_zone:
-                    mode = 'adjust_y'
+                    mode = "adjust_y"
                 else:
-                    mode = 'pan_y'
+                    mode = "pan_y"
                 self.touch_mode = mode
             else:
-                self.touch_mode = 'pan'
+                self.touch_mode = "pan"
 
-        if not mode == 'pan_y' and not mode == 'adjust_y':
-            if mode == 'adjust_x':
+        if not mode == "pan_y" and not mode == "adjust_y":
+            if mode == "adjust_x":
                 if self.anchor_x is None:
                     midpoint = (cur_xlim[1] + cur_xlim[0]) / 2
                     if xdata > midpoint:
-                        self.anchor_x = 'left'
+                        self.anchor_x = "left"
                     else:
-                        self.anchor_x = 'right'
-                if self.anchor_x == 'left':
+                        self.anchor_x = "right"
+                if self.anchor_x == "left":
                     if xdata > cur_xlim[0]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -1468,21 +1631,30 @@ class MatplotFigureScatter(Widget):
                             ax.set_xlim(None, cur_xlim[1])
                 else:
                     if xdata < cur_xlim[1]:
-                        if scale == 'linear':
+                        if scale == "linear":
                             cur_xlim -= dx
                         else:
                             try:
                                 cur_xlim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[0],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[0], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_xlim[1],
-                                            ax.xaxis) - dx),
-                                        ax.xaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_xlim[1], ax.xaxis
+                                            )
+                                            - dx
+                                        ),
+                                        ax.xaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_xlim = cur_xlim  # Keep previous limits
                         if inverted_x:
@@ -1490,21 +1662,26 @@ class MatplotFigureScatter(Widget):
                         else:
                             ax.set_xlim(cur_xlim[0], None)
             else:
-                if scale == 'linear':
+                if scale == "linear":
                     cur_xlim -= dx
                 else:
                     try:
                         cur_xlim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[0],
-                                    ax.xaxis) - dx),
-                                ax.xaxis),
+                                (
+                                    self.transform_eval(cur_xlim[0], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_xlim[1],
-                                    ax.xaxis) - dx),
-                                ax.xaxis)]
+                                (
+                                    self.transform_eval(cur_xlim[1], ax.xaxis)
+                                    - dx
+                                ),
+                                ax.xaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_xlim = cur_xlim  # Keep previous limits
                 if inverted_x:
@@ -1512,33 +1689,42 @@ class MatplotFigureScatter(Widget):
                 else:
                     ax.set_xlim(cur_xlim)
 
-        if not mode == 'pan_x' and not mode == 'adjust_x':
-            if mode == 'adjust_y':
+        if not mode == "pan_x" and not mode == "adjust_x":
+            if mode == "adjust_y":
                 if self.anchor_y is None:
                     midpoint = (cur_ylim[1] + cur_ylim[0]) / 2
                     if ydata > midpoint:
-                        self.anchor_y = 'top'
+                        self.anchor_y = "top"
                     else:
-                        self.anchor_y = 'bottom'
+                        self.anchor_y = "bottom"
 
-                if self.anchor_y == 'top':
+                if self.anchor_y == "top":
                     if ydata > cur_ylim[0]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
@@ -1547,22 +1733,31 @@ class MatplotFigureScatter(Widget):
                             ax.set_ylim(None, cur_ylim[1])
                 else:
                     if ydata < cur_ylim[1]:
-                        if yscale == 'linear':
+                        if yscale == "linear":
                             cur_ylim -= dy
 
                         else:
                             try:
                                 cur_ylim = [
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[0],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis),
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[0], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
                                     self.inv_transform_eval(
-                                        (self.transform_eval(
-                                            cur_ylim[1],
-                                            ax.yaxis) - dy),
-                                        ax.yaxis)]
+                                        (
+                                            self.transform_eval(
+                                                cur_ylim[1], ax.yaxis
+                                            )
+                                            - dy
+                                        ),
+                                        ax.yaxis,
+                                    ),
+                                ]
                             except (ValueError, OverflowError):
                                 cur_ylim = cur_ylim  # Keep previous limits
                         if inverted_y:
@@ -1570,22 +1765,27 @@ class MatplotFigureScatter(Widget):
                         else:
                             ax.set_ylim(cur_ylim[0], None)
             else:
-                if yscale == 'linear':
+                if yscale == "linear":
                     cur_ylim -= dy
 
                 else:
                     try:
                         cur_ylim = [
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[0],
-                                    ax.yaxis) - dy),
-                                ax.yaxis),
+                                (
+                                    self.transform_eval(cur_ylim[0], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
                             self.inv_transform_eval(
-                                (self.transform_eval(
-                                    cur_ylim[1],
-                                    ax.yaxis) - dy),
-                                ax.yaxis)]
+                                (
+                                    self.transform_eval(cur_ylim[1], ax.yaxis)
+                                    - dy
+                                ),
+                                ax.yaxis,
+                            ),
+                        ]
                     except (ValueError, OverflowError):
                         cur_ylim = cur_ylim  # Keep previous limits
                 if inverted_y:
@@ -1603,7 +1803,8 @@ class MatplotFigureScatter(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 self.background_patch_copy.set_visible(False)
             ax.figure.canvas.restore_region(self.background)
 
@@ -1629,62 +1830,100 @@ class MatplotFigureScatter(Widget):
             ax.figure.canvas.flush_events()
 
     def update_hover(self):
-        """ update hover on fast draw (if exist)"""
+        """update hover on fast draw (if exist)"""
         if self.hover_instance:
             # update hover pos if needed
-            if self.hover_instance.show_cursor and self.x_hover_data is not None and self.y_hover_data is not None:
+            if (
+                self.hover_instance.show_cursor
+                and self.x_hover_data is not None
+                and self.y_hover_data is not None
+            ):
                 xy_pos = self.axes.transData.transform(
-                    [(self.x_hover_data, self.y_hover_data)])
+                    [(self.x_hover_data, self.y_hover_data)]
+                )
                 self.hover_instance.x_hover_pos = float(xy_pos[0][0]) + self.x
                 self.hover_instance.y_hover_pos = float(xy_pos[0][1]) + self.y
 
-                self.hover_instance.xmin_line = float(
-                    self.axes.bbox.bounds[0]) + self.x
-                self.hover_instance.xmax_line = float(
-                    self.axes.bbox.bounds[0] + self.axes.bbox.bounds[2]) + self.x
-                self.hover_instance.ymin_line = float(
-                    self.axes.bbox.bounds[1]) + self.y
-                self.hover_instance.ymax_line = float(
-                    self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3]) + self.y
+                self.hover_instance.xmin_line = (
+                    float(self.axes.bbox.bounds[0]) + self.x
+                )
+                self.hover_instance.xmax_line = (
+                    float(self.axes.bbox.bounds[0] + self.axes.bbox.bounds[2])
+                    + self.x
+                )
+                self.hover_instance.ymin_line = (
+                    float(self.axes.bbox.bounds[1]) + self.y
+                )
+                self.hover_instance.ymax_line = (
+                    float(self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3])
+                    + self.y
+                )
 
-                if self.hover_instance.x_hover_pos > self.x + self.axes.bbox.bounds[2] + self.axes.bbox.bounds[0] or \
-                        self.hover_instance.x_hover_pos < self.x + self.axes.bbox.bounds[0] or \
-                        self.hover_instance.y_hover_pos > self.y + self.axes.bbox.bounds[1] + self.axes.bbox.bounds[3] or \
-                        self.hover_instance.y_hover_pos < self.y + self.axes.bbox.bounds[1]:
+                if (
+                    self.hover_instance.x_hover_pos
+                    > self.x
+                    + self.axes.bbox.bounds[2]
+                    + self.axes.bbox.bounds[0]
+                    or self.hover_instance.x_hover_pos
+                    < self.x + self.axes.bbox.bounds[0]
+                    or self.hover_instance.y_hover_pos
+                    > self.y
+                    + self.axes.bbox.bounds[1]
+                    + self.axes.bbox.bounds[3]
+                    or self.hover_instance.y_hover_pos
+                    < self.y + self.axes.bbox.bounds[1]
+                ):
                     self.hover_instance.hover_outside_bound = True
                 else:
                     self.hover_instance.hover_outside_bound = False
 
     def update_selector(self, *args):
-        """ update selector on fast draw (if exist)"""
+        """update selector on fast draw (if exist)"""
         if self.selector:
             # update selector pos if needed
             if self.selector.resize_wgt.verts and (
-                    len(args) != 0 or self.touch_mode != 'selector'):
+                len(args) != 0 or self.touch_mode != "selector"
+            ):
                 resize_wgt = self.selector.resize_wgt
 
-                if hasattr(resize_wgt, 'shapes'):
+                if hasattr(resize_wgt, "shapes"):
                     # lasso widget or ellipse
                     if resize_wgt.shapes:
-                        if hasattr(resize_wgt.shapes[0], 'radius_x'):
+                        if hasattr(resize_wgt.shapes[0], "radius_x"):
                             # ellipse widget
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[1][0], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[1][0],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             pos0 = new_pos[0] + self.x
                             pos1 = new_pos[1] + self.y
 
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[2][0],
+                                        resize_wgt.verts[2][1],
+                                    )
+                                ]
+                            )
                             new_pos2 = resize_wgt.to_widget(
-                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1])))
+                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1]))
+                            )
                             pos0_2 = new_pos2[0] + self.x
                             pos1_2 = new_pos2[1] + self.y
 
                             current_shape = resize_wgt.shapes[0]
                             dataxy1 = current_shape.selection_point_inst.points
-                            dataxy2 = current_shape.selection_point_inst2.points
+                            dataxy2 = (
+                                current_shape.selection_point_inst2.points
+                            )
 
                             # note: the 2 first points are the same in
                             # current_shape.points
@@ -1695,17 +1934,26 @@ class MatplotFigureScatter(Widget):
                             pos1_2_old = dataxy2[1]
 
                             old_length = np.sqrt(
-                                (pos0_2_old - pos0_old) ** 2 +
-                                (pos1_2_old - pos1_old) ** 2)
+                                (pos0_2_old - pos0_old) ** 2
+                                + (pos1_2_old - pos1_old) ** 2
+                            )
                             new_length = np.sqrt(
-                                (pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                                (pos0_2 - pos0) ** 2 + (pos1_2 - pos1) ** 2
+                            )
 
                             scale = float(new_length / old_length)
 
                             xy_pos3 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos3 = resize_wgt.to_widget(
-                                *(float(xy_pos3[0][0]), float(xy_pos3[0][1])))
+                                *(float(xy_pos3[0][0]), float(xy_pos3[0][1]))
+                            )
                             pos0_c = new_pos3[0] + self.x
                             pos1_c = new_pos3[1] + self.y
 
@@ -1715,27 +1963,43 @@ class MatplotFigureScatter(Widget):
                             for s in resize_wgt.shapes:
                                 s.translate(pos=(pos0_c, pos1_c))
 
-                            xmin, xmax, ymin, ymax = resize_wgt.shapes[0].get_min_max(
-                            )
+                            xmin, xmax, ymin, ymax = resize_wgt.shapes[
+                                0
+                            ].get_min_max()
                         else:
                             # lasso widget
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             pos0 = new_pos[0] + self.x
                             pos1 = new_pos[1] + self.y
 
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[1][0], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[1][0],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             new_pos2 = resize_wgt.to_widget(
-                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1])))
+                                *(float(xy_pos2[0][0]), float(xy_pos2[0][1]))
+                            )
                             pos0_2 = new_pos2[0] + self.x
                             pos1_2 = new_pos2[1] + self.y
 
                             current_shape = resize_wgt.shapes[0]
-                            dataxy = np.array(
-                                current_shape.points).reshape(-1, 2)
+                            dataxy = np.array(current_shape.points).reshape(
+                                -1, 2
+                            )
 
                             # note: the 2 first points are the same in
                             # current_shape.points
@@ -1746,10 +2010,12 @@ class MatplotFigureScatter(Widget):
                             pos1_2_old = dataxy[2][1]
 
                             old_length = np.sqrt(
-                                (pos0_2_old - pos0_old) ** 2 +
-                                (pos1_2_old - pos1_old) ** 2)
+                                (pos0_2_old - pos0_old) ** 2
+                                + (pos1_2_old - pos1_old) ** 2
+                            )
                             new_length = np.sqrt(
-                                (pos0_2 - pos0)**2 + (pos1_2 - pos1)**2)
+                                (pos0_2 - pos0) ** 2 + (pos1_2 - pos1) ** 2
+                            )
 
                             scale = new_length / old_length
 
@@ -1763,73 +2029,105 @@ class MatplotFigureScatter(Widget):
                             xmin, ymin = dataxy.min(axis=0)
 
                         if self.collide_point(
-                            *
-                            resize_wgt.to_window(
-                                xmin,
-                                ymin)) and self.collide_point(
-                            *
-                            resize_wgt.to_window(
-                                xmax,
-                                ymax)):
+                            *resize_wgt.to_window(xmin, ymin)
+                        ) and self.collide_point(
+                            *resize_wgt.to_window(xmax, ymax)
+                        ):
                             resize_wgt.opacity = 1
                         else:
                             resize_wgt.opacity = 0
 
-                elif self.selector.resize_wgt.verts and (len(args) != 0 or self.touch_mode != 'selector'):
+                elif self.selector.resize_wgt.verts and (
+                    len(args) != 0 or self.touch_mode != "selector"
+                ):
                     resize_wgt = self.selector.resize_wgt
                     if not (resize_wgt.size[0] > 1 and resize_wgt.size[1] > 1):
                         return
 
                     # rectangle or spann selector
-                    if hasattr(resize_wgt, 'span_orientation'):
+                    if hasattr(resize_wgt, "span_orientation"):
                         # span selector
-                        if resize_wgt.span_orientation == 'vertical':
+                        if resize_wgt.span_orientation == "vertical":
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             resize_wgt.pos[0] = new_pos[0] + self.x
 
                             top_bound = float(
-                                self.y +
-                                resize_wgt.ax.bbox.bounds[3] +
-                                resize_wgt.ax.bbox.bounds[1])
+                                self.y
+                                + resize_wgt.ax.bbox.bounds[3]
+                                + resize_wgt.ax.bbox.bounds[1]
+                            )
                             bottom_bound = float(
-                                self.y + resize_wgt.ax.bbox.bounds[1])
+                                self.y + resize_wgt.ax.bbox.bounds[1]
+                            )
                             resize_wgt.pos[1] = bottom_bound - self.y
 
                             # recalcul size
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[3][0], resize_wgt.verts[3][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[3][0],
+                                        resize_wgt.verts[3][1],
+                                    )
+                                ]
+                            )
                             resize_wgt.size[0] = float(
-                                xy_pos2[0][0] - xy_pos[0][0])
+                                xy_pos2[0][0] - xy_pos[0][0]
+                            )
                             resize_wgt.size[1] = top_bound - bottom_bound
 
-                        elif resize_wgt.span_orientation == 'horizontal':
+                        elif resize_wgt.span_orientation == "horizontal":
                             xy_pos = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][0],
+                                        resize_wgt.verts[0][1],
+                                    )
+                                ]
+                            )
                             new_pos = resize_wgt.to_widget(
-                                *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                                *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                            )
                             left_bound = float(
-                                self.x + resize_wgt.ax.bbox.bounds[0])
+                                self.x + resize_wgt.ax.bbox.bounds[0]
+                            )
                             right_bound = float(
-                                self.x + resize_wgt.ax.bbox.bounds[2] +
-                                resize_wgt.ax.bbox.bounds[0])
+                                self.x
+                                + resize_wgt.ax.bbox.bounds[2]
+                                + resize_wgt.ax.bbox.bounds[0]
+                            )
 
                             width = right_bound - left_bound
 
                             left_bound, right_bound = resize_wgt.to_widget(
-                                left_bound, right_bound)
+                                left_bound, right_bound
+                            )
 
                             resize_wgt.pos[0] = left_bound
                             resize_wgt.pos[1] = new_pos[1] + self.y
 
                             # recalcul size
                             xy_pos2 = resize_wgt.ax.transData.transform(
-                                [(resize_wgt.verts[0][1], resize_wgt.verts[1][1])])
+                                [
+                                    (
+                                        resize_wgt.verts[0][1],
+                                        resize_wgt.verts[1][1],
+                                    )
+                                ]
+                            )
                             resize_wgt.size[0] = width
                             resize_wgt.size[1] = float(
-                                xy_pos2[0][1] - xy_pos[0][1])
+                                xy_pos2[0][1] - xy_pos[0][1]
+                            )
 
                     else:
                         # rectangle selector
@@ -1837,117 +2135,148 @@ class MatplotFigureScatter(Widget):
                         # update all selector pts
                         # recalcul pos
                         xy_pos = resize_wgt.ax.transData.transform(
-                            [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])])
+                            [(resize_wgt.verts[0][0], resize_wgt.verts[0][1])]
+                        )
                         new_pos = resize_wgt.to_widget(
-                            *(float(xy_pos[0][0]), float(xy_pos[0][1])))
+                            *(float(xy_pos[0][0]), float(xy_pos[0][1]))
+                        )
                         resize_wgt.pos[0] = new_pos[0] + self.x
                         resize_wgt.pos[1] = new_pos[1] + self.y
 
                         # recalcul size
                         xy_pos2 = resize_wgt.ax.transData.transform(
-                            [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])])
+                            [(resize_wgt.verts[2][0], resize_wgt.verts[2][1])]
+                        )
                         resize_wgt.size[0] = float(
-                            xy_pos2[0][0] - xy_pos[0][0])
+                            xy_pos2[0][0] - xy_pos[0][0]
+                        )
                         resize_wgt.size[1] = float(
-                            xy_pos2[0][1] - xy_pos[0][1])
+                            xy_pos2[0][1] - xy_pos[0][1]
+                        )
 
                     if self.collide_point(
-                        *
-                        resize_wgt.to_window(
-                            resize_wgt.pos[0],
-                            resize_wgt.pos[1])) and self.collide_point(
-                        *
-                        resize_wgt.to_window(
-                            resize_wgt.pos[0] +
-                            resize_wgt.size[0],
-                            resize_wgt.pos[1] +
-                            resize_wgt.size[1])):
+                        *resize_wgt.to_window(
+                            resize_wgt.pos[0], resize_wgt.pos[1]
+                        )
+                    ) and self.collide_point(
+                        *resize_wgt.to_window(
+                            resize_wgt.pos[0] + resize_wgt.size[0],
+                            resize_wgt.pos[1] + resize_wgt.size[1],
+                        )
+                    ):
                         resize_wgt.opacity = 1
                     else:
                         resize_wgt.opacity = 0
 
     def min_max(self, event):
-        """ manage min/max touch mode """
+        """manage min/max touch mode"""
         ax = self.axes
-        xlabelbottom = ax.xaxis._major_tick_kw.get('tick1On')
-        ylabelleft = ax.yaxis._major_tick_kw.get('tick1On')
+        xlabelbottom = ax.xaxis._major_tick_kw.get("tick1On")
+        ylabelleft = ax.yaxis._major_tick_kw.get("tick1On")
 
-        if xlabelbottom and event.x > self.x + ax.bbox.bounds[0] and \
-                event.x < self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0] and \
-                event.y < self.y + ax.bbox.bounds[1]:
+        if (
+            xlabelbottom
+            and event.x > self.x + ax.bbox.bounds[0]
+            and event.x < self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+            and event.y < self.y + ax.bbox.bounds[1]
+        ):
 
             right_lim = self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
             left_lim = self.x + ax.bbox.bounds[0]
-            left_anchor_zone = (right_lim - left_lim) * .2 + left_lim
-            right_anchor_zone = (right_lim - left_lim) * .8 + left_lim
+            left_anchor_zone = (right_lim - left_lim) * 0.2 + left_lim
+            right_anchor_zone = (right_lim - left_lim) * 0.8 + left_lim
 
             if event.x < left_anchor_zone or event.x > right_anchor_zone:
 
                 if self.text_instance:
                     if not self.text_instance.show_text:
                         midpoint = (
-                            (self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]) +
-                            (self.x + ax.bbox.bounds[0])) / 2
+                            (self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0])
+                            + (self.x + ax.bbox.bounds[0])
+                        ) / 2
                         if event.x < midpoint:
-                            anchor = 'left'
+                            anchor = "left"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0])
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[0]
+                            )
+                            self.text_instance.y_text_pos = (
+                                float(self.y + ax.bbox.bounds[1])
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = False
                         else:
-                            anchor = 'right'
+                            anchor = "right"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0])
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[2] + ax.bbox.bounds[0]
+                            )
+                            self.text_instance.y_text_pos = (
+                                float(self.y + ax.bbox.bounds[1])
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = True
 
                         self.text_instance.current_axis = ax
                         self.text_instance.kind = {
-                            'axis': 'x', 'anchor': anchor}
+                            "axis": "x",
+                            "anchor": anchor,
+                        }
 
                         self.text_instance.show_text = True
                         return
 
-        elif ylabelleft and event.x < self.x + ax.bbox.bounds[0] and \
-                event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3] and \
-                event.y > self.y + ax.bbox.bounds[1]:
+        elif (
+            ylabelleft
+            and event.x < self.x + ax.bbox.bounds[0]
+            and event.y < self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]
+            and event.y > self.y + ax.bbox.bounds[1]
+        ):
 
             top_lim = self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]
             bottom_lim = self.y + ax.bbox.bounds[1]
-            bottom_anchor_zone = (top_lim - bottom_lim) * .2 + bottom_lim
-            top_anchor_zone = (top_lim - bottom_lim) * .8 + bottom_lim
+            bottom_anchor_zone = (top_lim - bottom_lim) * 0.2 + bottom_lim
+            top_anchor_zone = (top_lim - bottom_lim) * 0.8 + bottom_lim
 
             if event.y < bottom_anchor_zone or event.y > top_anchor_zone:
                 if self.text_instance:
                     if not self.text_instance.show_text:
                         midpoint = (
-                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1]) +
-                            (self.y + ax.bbox.bounds[1])) / 2
+                            (self.y + ax.bbox.bounds[3] + ax.bbox.bounds[1])
+                            + (self.y + ax.bbox.bounds[1])
+                        ) / 2
                         if event.y > midpoint:
-                            anchor = 'top'
+                            anchor = "top"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0]) - dp(40)
-                            self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1] + ax.bbox.bounds[3]) - self.text_instance.text_height
+                                self.x + ax.bbox.bounds[0]
+                            ) - dp(40)
+                            self.text_instance.y_text_pos = (
+                                float(
+                                    self.y
+                                    + ax.bbox.bounds[1]
+                                    + ax.bbox.bounds[3]
+                                )
+                                - self.text_instance.text_height
+                            )
                             self.text_instance.offset_text = False
                         else:
-                            anchor = 'bottom'
+                            anchor = "bottom"
                             self.text_instance.x_text_pos = float(
-                                self.x + ax.bbox.bounds[0]) - dp(40)
+                                self.x + ax.bbox.bounds[0]
+                            ) - dp(40)
                             self.text_instance.y_text_pos = float(
-                                self.y + ax.bbox.bounds[1]) - dp(6)
+                                self.y + ax.bbox.bounds[1]
+                            ) - dp(6)
                             self.text_instance.offset_text = False
                         self.text_instance.current_axis = ax
                         self.text_instance.kind = {
-                            'axis': 'y', 'anchor': anchor}
+                            "axis": "y",
+                            "anchor": anchor,
+                        }
 
                         self.text_instance.show_text = True
                         return
 
     def apply_drag_legend(self, ax, event):
-        """ drag legend method """
+        """drag legend method"""
 
         dx = event.x - self._last_touch_pos[event][0]
         if not self.legend_do_scroll_x:
@@ -1969,7 +2298,11 @@ class MatplotFigureScatter(Widget):
             legend_y = bbox.ymin
 
             loc_in_canvas = legend_x + dx, legend_y + dy
-            loc_in_norm_axes = legend.parent.transAxes.inverted().transform_point(loc_in_canvas)
+            loc_in_norm_axes = (
+                legend.parent.transAxes.inverted().transform_point(
+                    loc_in_canvas
+                )
+            )
             legend._loc = tuple(loc_in_norm_axes)
 
             # use blit method
@@ -1978,7 +2311,8 @@ class MatplotFigureScatter(Widget):
                 ax.figure.canvas.draw_idle()
                 ax.figure.canvas.flush_events()
                 self.background = ax.figure.canvas.copy_from_bbox(
-                    ax.figure.bbox)
+                    ax.figure.bbox
+                )
                 legend.set_visible(True)
             ax.figure.canvas.restore_region(self.background)
 
@@ -1990,7 +2324,7 @@ class MatplotFigureScatter(Widget):
             self.current_legend.update_size()
 
     def zoom_factory(self, event, ax, base_scale=1.1):
-        """ zoom with scrolling mouse method """
+        """zoom with scrolling mouse method"""
 
         newcoord = self.to_widget(event.x, event.y, relative=True)
         x = newcoord[0]
@@ -2005,7 +2339,7 @@ class MatplotFigureScatter(Widget):
         scale = ax.get_xscale()
         yscale = ax.get_yscale()
 
-        if scale == 'linear':
+        if scale == "linear":
             old_min = cur_xlim[0]
             old_max = cur_xlim[1]
 
@@ -2016,7 +2350,7 @@ class MatplotFigureScatter(Widget):
             xdata = self.transform_eval(xdata, ax.yaxis)
             old_max = self.transform_eval(max_, ax.yaxis)
 
-        if yscale == 'linear':
+        if yscale == "linear":
             yold_min = cur_ylim[0]
             yold_max = cur_ylim[1]
 
@@ -2027,10 +2361,10 @@ class MatplotFigureScatter(Widget):
             ydata = self.transform_eval(ydata, ax.yaxis)
             yold_max = self.transform_eval(ymax_, ax.yaxis)
 
-        if event.button == 'scrolldown':
+        if event.button == "scrolldown":
             # deal with zoom in
             scale_factor = 1 / base_scale
-        elif event.button == 'scrollup':
+        elif event.button == "scrollup":
             # deal with zoom out
             scale_factor = base_scale
         else:
@@ -2045,36 +2379,44 @@ class MatplotFigureScatter(Widget):
         rely = (yold_max - ydata) / (yold_max - yold_min)
 
         if self.do_zoom_x:
-            if scale == 'linear':
-                ax.set_xlim([xdata - new_width * (1 - relx),
-                            xdata + new_width * (relx)])
+            if scale == "linear":
+                ax.set_xlim(
+                    [
+                        xdata - new_width * (1 - relx),
+                        xdata + new_width * (relx),
+                    ]
+                )
             else:
                 new_min = xdata - new_width * (1 - relx)
                 new_max = xdata + new_width * (relx)
                 try:
                     new_min, new_max = self.inv_transform_eval(
-                        new_min, ax.yaxis), self.inv_transform_eval(
-                        new_max, ax.yaxis)
+                        new_min, ax.yaxis
+                    ), self.inv_transform_eval(new_max, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_min, new_max = min_, max_
-                    if new_min <= 0. or new_max <= 0.:  # Limit case
+                    if new_min <= 0.0 or new_max <= 0.0:  # Limit case
                         new_min, new_max = min_, max_
                 ax.set_xlim([new_min, new_max])
 
         if self.do_zoom_y:
-            if yscale == 'linear':
-                ax.set_ylim([ydata - new_height * (1 - rely),
-                            ydata + new_height * (rely)])
+            if yscale == "linear":
+                ax.set_ylim(
+                    [
+                        ydata - new_height * (1 - rely),
+                        ydata + new_height * (rely),
+                    ]
+                )
             else:
                 new_ymin = ydata - new_height * (1 - rely)
                 new_ymax = ydata + new_height * (rely)
                 try:
                     new_ymin, new_ymax = self.inv_transform_eval(
-                        new_ymin, ax.yaxis), self.inv_transform_eval(
-                        new_ymax, ax.yaxis)
+                        new_ymin, ax.yaxis
+                    ), self.inv_transform_eval(new_ymax, ax.yaxis)
                 except OverflowError:  # Limit case
                     new_ymin, new_ymax = ymin_, ymax_
-                    if new_ymin <= 0. or new_ymax <= 0.:  # Limit case
+                    if new_ymin <= 0.0 or new_ymax <= 0.0:  # Limit case
                         new_ymin, new_ymax = ymin_, ymax_
                 ax.set_ylim([new_ymin, new_ymax])
 
@@ -2082,7 +2424,7 @@ class MatplotFigureScatter(Widget):
         ax.figure.canvas.flush_events()
 
     def _onSize(self, o, size):
-        """ _onsize method """
+        """_onsize method"""
         if self.figure is None:
             return
         # Create a new, correctly sized bitmap
@@ -2097,7 +2439,7 @@ class MatplotFigureScatter(Widget):
         hinch = self._height / dpival
         self.figure.set_size_inches(winch, hinch)
 
-        s = 'resize_event'
+        s = "resize_event"
         event = ResizeEvent(s, self.figcanvas)
         self.figcanvas.callbacks.process(s, event)
         self.figcanvas.draw_idle()
@@ -2116,7 +2458,7 @@ class MatplotFigureScatter(Widget):
             Clock.schedule_once(self.update_selector)
 
     def update_lim(self):
-        """ update axis lim if zoombox is used"""
+        """update axis lim if zoombox is used"""
         ax = self.axes
 
         self.do_update = False
@@ -2127,34 +2469,41 @@ class MatplotFigureScatter(Widget):
 
         if xright > xleft:
             ax.set_xlim(
-                left=min(
-                    self.x0_box, self.x1_box), right=max(
-                    self.x0_box, self.x1_box))
+                left=min(self.x0_box, self.x1_box),
+                right=max(self.x0_box, self.x1_box),
+            )
         else:
             ax.set_xlim(
-                right=min(
-                    self.x0_box, self.x1_box), left=max(
-                    self.x0_box, self.x1_box))
+                right=min(self.x0_box, self.x1_box),
+                left=max(self.x0_box, self.x1_box),
+            )
         if ytop > ybottom:
             ax.set_ylim(
-                bottom=min(
-                    self.y0_box, self.y1_box), top=max(
-                    self.y0_box, self.y1_box))
+                bottom=min(self.y0_box, self.y1_box),
+                top=max(self.y0_box, self.y1_box),
+            )
         else:
             ax.set_ylim(
-                top=min(
-                    self.y0_box, self.y1_box), bottom=max(
-                    self.y0_box, self.y1_box))
+                top=min(self.y0_box, self.y1_box),
+                bottom=max(self.y0_box, self.y1_box),
+            )
 
     def reset_box(self):
-        """ reset zoombox and apply zoombox limit if zoombox option if selected"""
+        """reset zoombox and apply zoombox limit if zoombox option if selected"""
         if min(abs(self._box_size[0]), abs(self._box_size[1])) > self.minzoom:
             trans = self.axes.transData.inverted()
             self.x0_box, self.y0_box = trans.transform_point(
-                (self._box_pos[0] - self.pos[0], self._box_pos[1] - self.pos[1]))
+                (
+                    self._box_pos[0] - self.pos[0],
+                    self._box_pos[1] - self.pos[1],
+                )
+            )
             self.x1_box, self.y1_box = trans.transform_point(
-                (self._box_size[0] + self._box_pos[0] - self.pos[0],
-                 self._box_size[1] + self._box_pos[1] - self.pos[1]))
+                (
+                    self._box_size[0] + self._box_pos[0] - self.pos[0],
+                    self._box_size[1] + self._box_pos[1] - self.pos[1],
+                )
+            )
             self.do_update = True
 
         self._box_size = 0, 0
@@ -2169,7 +2518,7 @@ class MatplotFigureScatter(Widget):
         self._alpha_ver = 0
 
     def draw_box(self, event, x0, y0, x1, y1) -> None:
-        """ Draw zoombox method
+        """Draw zoombox method
 
         Args:
             event: touch kivy event
@@ -2192,7 +2541,8 @@ class MatplotFigureScatter(Widget):
 
         trans = self.axes.transData.inverted()
         xdata, ydata = trans.transform_point(
-            (event.x - pos_x, event.y - pos_y))
+            (event.x - pos_x, event.y - pos_y)
+        )
 
         xleft, xright = self.axes.get_xlim()
         ybottom, ytop = self.axes.get_ylim()
@@ -2324,9 +2674,10 @@ class FakeEventScatter:
     y: None
 
 
-Factory.register('MatplotFigureScatter', MatplotFigureScatter)
+Factory.register("MatplotFigureScatter", MatplotFigureScatter)
 
-Builder.load_string('''
+Builder.load_string(
+    """
 <MatplotFigureScatter>
     canvas:
         Color:
@@ -2384,4 +2735,5 @@ Builder.load_string('''
                 (self.pos_x_rect_ver-dp(20),self.pos_y_rect_ver-dp(4)+self._box_size[1] \
                  if root.invert_rect_hor else self.pos_y_rect_ver+dp(1)+self._box_size[1], \
                  dp(40),dp(4))
-        ''')
+        """
+)

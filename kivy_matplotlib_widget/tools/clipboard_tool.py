@@ -16,16 +16,16 @@ from kivy.utils import platform
 from io import BytesIO
 from PIL import Image as PILImage
 
-if platform == 'win':
+if platform == "win":
     import win32clipboard
-elif platform == 'linux':
+elif platform == "linux":
     """
     used xclip to copy to clipboard
     """
     import subprocess
     import tempfile
 
-elif platform == 'macosx':
+elif platform == "macosx":
     """
     Appkit come with pyobjc
     """
@@ -38,7 +38,8 @@ elif platform == 'macosx':
 
 def image2clipboard(widget):
 
-    if platform == 'win':
+    if platform == "win":
+
         def send_to_clipboard(clip_type, data):
             win32clipboard.OpenClipboard()
             win32clipboard.EmptyClipboard()
@@ -46,9 +47,9 @@ def image2clipboard(widget):
             win32clipboard.CloseClipboard()
 
         img = widget.export_as_image()  # export widget as image
-        pil_img = PILImage.frombytes('RGBA',
-                                     img.texture.size,
-                                     img.texture.pixels)
+        pil_img = PILImage.frombytes(
+            "RGBA", img.texture.size, img.texture.pixels
+        )
 
         output = BytesIO()
         pil_img.convert("RGB").save(output, "BMP")
@@ -56,7 +57,7 @@ def image2clipboard(widget):
         output.close()
         send_to_clipboard(win32clipboard.CF_DIB, data)
 
-    elif platform == 'linux':
+    elif platform == "linux":
 
         def _copy_linux_xclip(image):
             """On Linux, copy the `image` to the clipboard. The `image` arg can either be
@@ -64,26 +65,30 @@ def image2clipboard(widget):
             """
 
             with tempfile.NamedTemporaryFile() as temp_file_obj:
-                image.save(temp_file_obj.name, format='png')
-                subprocess.run(['xclip',
-                                '-selection',
-                                'clipboard',
-                                '-t',
-                                'image/png',
-                                '-i',
-                                temp_file_obj.name])
+                image.save(temp_file_obj.name, format="png")
+                subprocess.run(
+                    [
+                        "xclip",
+                        "-selection",
+                        "clipboard",
+                        "-t",
+                        "image/png",
+                        "-i",
+                        temp_file_obj.name,
+                    ]
+                )
 
         img = widget.export_as_image()  # export widget as image
-        pil_img = PILImage.frombytes('RGBA',
-                                     img.texture.size,
-                                     img.texture.pixels)
+        pil_img = PILImage.frombytes(
+            "RGBA", img.texture.size, img.texture.pixels
+        )
         _copy_linux_xclip(pil_img)
 
-    elif platform == 'macosx':
+    elif platform == "macosx":
         img = widget.export_as_image()  # export widget as image
-        pil_img = PILImage.frombytes('RGBA',
-                                     img.texture.size,
-                                     img.texture.pixels)
+        pil_img = PILImage.frombytes(
+            "RGBA", img.texture.size, img.texture.pixels
+        )
         output = BytesIO()
         pil_img.save(output, format="PNG")
         data = output.getvalue()

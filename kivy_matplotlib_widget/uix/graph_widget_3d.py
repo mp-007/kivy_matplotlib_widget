@@ -1,5 +1,4 @@
-""" MatplotFigure3D for matplotlib 3D graph
-"""
+"""MatplotFigure3D for matplotlib 3D graph"""
 
 from kivy.factory import Factory
 import time
@@ -18,15 +17,24 @@ from matplotlib.backend_bases import ResizeEvent
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from kivy.vector import Vector
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty, StringProperty, ColorProperty
+from kivy.properties import (
+    ObjectProperty,
+    ListProperty,
+    BooleanProperty,
+    BoundedNumericProperty,
+    AliasProperty,
+    NumericProperty,
+    StringProperty,
+    ColorProperty,
+)
 from kivy.lang import Builder
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
 import math
 
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 
 
 def line2d_seg_dist(p1, p2, p0):
@@ -61,8 +69,9 @@ def get_xyz_mouse_click(event, ax):
     xd, yd = event.xdata, event.ydata
     p = (xd, yd)
     edges = ax.tunit_edges()
-    ldists = [(line2d_seg_dist(p0, p1, p), i) for
-              i, (p0, p1) in enumerate(edges)]
+    ldists = [
+        (line2d_seg_dist(p0, p1, p), i) for i, (p0, p1) in enumerate(edges)
+    ]
     ldists.sort()
 
     # nearest edge
@@ -155,7 +164,8 @@ class MatplotFigure3D(ScatterLayout):
         if self.matplot_figure_layout:
 
             self.cursor = self.figure.axes[0].scatter(
-                [0], [0], [0], marker="s", color="k", s=100, alpha=0)
+                [0], [0], [0], marker="s", color="k", s=100, alpha=0
+            )
             self.cursor_cls = cursor(self.figure, remove_artists=[self.cursor])
 
             self.cursor_label = CursorInfo()
@@ -179,7 +189,7 @@ class MatplotFigure3D(ScatterLayout):
         self.zoompan = None
         self.fast_draw = True
         self.draw_left_spline = False  # available only when fast_draw is True
-        self.touch_mode = 'rotate'
+        self.touch_mode = "rotate"
         self.hover_on = False
         self.xsorted = True  # to manage x sorted data (if numpy is used)
 
@@ -189,7 +199,7 @@ class MatplotFigure3D(ScatterLayout):
         self.x1_box = None
         self.y1_box = None
 
-        if hasattr(cbook, '_Stack'):
+        if hasattr(cbook, "_Stack"):
             # manage matplotlib version with no Stack (replace by _Stack)
             self._nav_stack = cbook._Stack()
         else:
@@ -223,7 +233,7 @@ class MatplotFigure3D(ScatterLayout):
         # prevent anything wrong with scale, just avoid to dispatch it
         # if the scale "visually" didn't change. #947
         # Remove this ugly hack when we'll be Python 3 only.
-        if hasattr(self, '_scale_p'):
+        if hasattr(self, "_scale_p"):
             if str(scale) == str(self._scale_p):
                 return self._scale_p
 
@@ -236,20 +246,12 @@ class MatplotFigure3D(ScatterLayout):
         # update center
         new_center = self.parent.to_local(*self.parent.center)
         self.apply_transform(
-            Matrix().scale(
-                rescale,
-                rescale,
-                rescale),
+            Matrix().scale(rescale, rescale, rescale),
             post_multiply=True,
-            anchor=(
-                new_center[0] /
-                2 /
-                scale,
-                new_center[1] /
-                2 /
-                scale))
+            anchor=(new_center[0] / 2 / scale, new_center[1] / 2 / scale),
+        )
 
-    scale = AliasProperty(_get_scale, _set_scale, bind=('x', 'y', 'transform'))
+    scale = AliasProperty(_get_scale, _set_scale, bind=("x", "y", "transform"))
 
     def set_custom_label_widget(self, custom_widget):
         self.cursor_label = custom_widget
@@ -281,11 +283,19 @@ class MatplotFigure3D(ScatterLayout):
         """Push the current view limits and position onto the stack."""
         self._nav_stack.push(
             WeakKeyDictionary(
-                {ax: (ax._get_view(),
-                      # Store both the original and modified positions.
-                      (ax.get_position(True).frozen(),
-                       ax.get_position().frozen()))
-                 for ax in self.figure.axes}))
+                {
+                    ax: (
+                        ax._get_view(),
+                        # Store both the original and modified positions.
+                        (
+                            ax.get_position(True).frozen(),
+                            ax.get_position().frozen(),
+                        ),
+                    )
+                    for ax in self.figure.axes
+                }
+            )
+        )
         self.set_history_buttons()
 
     def update(self):
@@ -307,15 +317,15 @@ class MatplotFigure3D(ScatterLayout):
         for ax, (view, (pos_orig, pos_active)) in items:
             ax._set_view(view)
             # Restore both the original and modified positions
-            ax._set_position(pos_orig, 'original')
-            ax._set_position(pos_active, 'active')
+            ax._set_position(pos_orig, "original")
+            ax._set_position(pos_active, "active")
         self.figcanvas.draw()
 
     def set_history_buttons(self):
         """Enable or disable the back/forward button."""
 
     def reset_touch(self) -> None:
-        """ reset touch
+        """reset touch
 
         Return:
             None
@@ -330,10 +340,12 @@ class MatplotFigure3D(ScatterLayout):
         if len(self._touches) == self.translation_touches:
             # _last_touch_pos has last pos in correct parent space,
             # just like incoming touch
-            dx = (touch.x - self._last_touch_pos[touch][0]) \
-                * self.do_translation_x
-            dy = (touch.y - self._last_touch_pos[touch][1]) \
-                * self.do_translation_y
+            dx = (
+                touch.x - self._last_touch_pos[touch][0]
+            ) * self.do_translation_x
+            dy = (
+                touch.y - self._last_touch_pos[touch][1]
+            ) * self.do_translation_y
             dx = dx / self.translation_touches
             dy = dy / self.translation_touches
 
@@ -347,10 +359,8 @@ class MatplotFigure3D(ScatterLayout):
                 scale_y = scale_y**0.5
 
             self.apply_transform(
-                Matrix().translate(
-                    dx / 2 / scale_x,
-                    dy / 2 / scale_y,
-                    0))
+                Matrix().translate(dx / 2 / scale_x, dy / 2 / scale_y, 0)
+            )
             changed = True
 
             if self.cursor_alpha == 1.0:
@@ -360,8 +370,11 @@ class MatplotFigure3D(ScatterLayout):
             return changed
 
         # we have more than one touch... list of last known pos
-        points = [Vector(self._last_touch_pos[t]) for t in self._touches
-                  if t is not touch]
+        points = [
+            Vector(self._last_touch_pos[t])
+            for t in self._touches
+            if t is not touch
+        ]
         # add current touch last
         points.append(Vector(touch.pos))
 
@@ -412,22 +425,23 @@ class MatplotFigure3D(ScatterLayout):
         return changed
 
     def _draw_bitmap(self):
-        """ draw bitmap method. based on kivy scatter method"""
+        """draw bitmap method. based on kivy scatter method"""
         if self._bitmap is None:
             print("No bitmap!")
             return
         self._img_texture = Texture.create(size=(self.bt_w, self.bt_h))
         self._img_texture.blit_buffer(
-            bytes(self._bitmap), colorfmt="rgba", bufferfmt='ubyte')
+            bytes(self._bitmap), colorfmt="rgba", bufferfmt="ubyte"
+        )
         self._img_texture.flip_vertical()
 
     def transform_with_touch2(self, event):
-        """ manage touch behaviour. based on kivy scatter method"""
+        """manage touch behaviour. based on kivy scatter method"""
         # just do a simple one finger drag
         changed = False
 
         if len(self._touches) == self.translation_touches:
-            if self.touch_mode == 'pan':
+            if self.touch_mode == "pan":
                 ax = self.figure.axes[0]
                 # Start the pan event with pixel coordinates
                 px, py = ax.transData.transform([ax._sx, ax._sy])
@@ -454,8 +468,11 @@ class MatplotFigure3D(ScatterLayout):
             return changed
 
         # we have more than one touch... list of last known pos
-        points = [Vector(self._last_touch_pos[t]) for t in self._touches
-                  if t is not event]
+        points = [
+            Vector(self._last_touch_pos[t])
+            for t in self._touches
+            if t is not event
+        ]
         # add current touch last
         points.append(Vector(event.pos))
 
@@ -495,7 +512,7 @@ class MatplotFigure3D(ScatterLayout):
         return changed
 
     def on_touch_down(self, touch):
-        """ Manage Mouse/touch press """
+        """Manage Mouse/touch press"""
         x, y = touch.x, touch.y
         self.prev_x = touch.x
         self.prev_y = touch.y
@@ -505,16 +522,16 @@ class MatplotFigure3D(ScatterLayout):
             # self.figcanvas.button_press_event(x, real_y, 1, guiEvent=event)
             if touch.is_mouse_scrolling:
 
-                if self.touch_mode == 'figure_zoom_pan':
+                if self.touch_mode == "figure_zoom_pan":
 
-                    if touch.button == 'scrolldown':
+                    if touch.button == "scrolldown":
                         # zoom in
                         if self.scale < 5:
                             self.scale = self.scale * 1.1
 
                             self.crop_factor = 1 / self.scale
 
-                    elif touch.button == 'scrollup':
+                    elif touch.button == "scrollup":
                         # zoom out
                         if self.scale > 0.6:
                             self.scale = self.scale * 0.8
@@ -525,16 +542,17 @@ class MatplotFigure3D(ScatterLayout):
                         self.recalcul_cursor()
 
                 else:
-                    if touch.button == 'scrollup':
+                    if touch.button == "scrollup":
                         # zoom in
                         scale_factor = 1.1
 
-                    elif touch.button == 'scrolldown':
+                    elif touch.button == "scrolldown":
                         # zoom out
                         scale_factor = 0.8
                     ax = self.figure.axes[0]
                     ax._scale_axis_limits(
-                        scale_factor, scale_factor, scale_factor)
+                        scale_factor, scale_factor, scale_factor
+                    )
                     self.figcanvas.draw()
                     if self.cursor_alpha == 1.0:
                         self.recalcul_cursor()
@@ -544,7 +562,7 @@ class MatplotFigure3D(ScatterLayout):
                     self.home()
                 return True
 
-            elif self.touch_mode == 'pan':
+            elif self.touch_mode == "pan":
                 ax = self.figure.axes[0]
                 # transform kivy x,y touch event to x,y data
                 trans = ax.transData.inverted()
@@ -557,7 +575,7 @@ class MatplotFigure3D(ScatterLayout):
                 real_y = (touch.y) / self.crop_factor
 
                 self.figcanvas._button = 1
-                s = 'button_press_event'
+                s = "button_press_event"
                 mouseevent = MouseEvent(
                     s,
                     self.figcanvas,
@@ -566,7 +584,8 @@ class MatplotFigure3D(ScatterLayout):
                     1,
                     self.figcanvas._key,
                     dblclick=False,
-                    guiEvent=touch)
+                    guiEvent=touch,
+                )
                 self.figcanvas.callbacks.process(s, mouseevent)
 
         # if the touch isnt on the widget we do nothing
@@ -579,7 +598,7 @@ class MatplotFigure3D(ScatterLayout):
         touch.apply_transform_2d(self.to_local)
         if super(Scatter, self).on_touch_down(touch):
             # ensure children don't have to do it themselves
-            if 'multitouch_sim' in touch.profile:
+            if "multitouch_sim" in touch.profile:
                 touch.multitouch_sim = True
             touch.pop()
             self._bring_to_front(touch)
@@ -590,30 +609,31 @@ class MatplotFigure3D(ScatterLayout):
 
         # if our child didn't do anything, and if we don't have any active
         # interaction control, then don't accept the touch.
-        if not self.do_translation_x and \
-                not self.do_translation_y and \
-                not self.do_rotation and \
-                not self.do_scale:
+        if (
+            not self.do_translation_x
+            and not self.do_translation_y
+            and not self.do_rotation
+            and not self.do_scale
+        ):
             return False
 
         if self.do_collide_after_children:
             if not self.collide_point(x, y):
                 return False
 
-        if 'multitouch_sim' in touch.profile:
+        if "multitouch_sim" in touch.profile:
             touch.multitouch_sim = True
         # grab the touch so we get all it later move events for sure
         self._bring_to_front(touch)
         touch.grab(self)
         self._touches.append(touch)
-        self._last_touch_pos[touch] = (touch.pos[0],
-                                       touch.pos[1])
+        self._last_touch_pos[touch] = (touch.pos[0], touch.pos[1])
 
         # return True
         return False
 
     def on_touch_move(self, event):
-        """ Mouse move while pressed """
+        """Mouse move while pressed"""
 
         x, y = event.x, event.y
         if self.collide_point(x, y):
@@ -628,7 +648,7 @@ class MatplotFigure3D(ScatterLayout):
                     self.home()
                 return True
 
-            elif self.touch_mode == 'figure_zoom_pan':
+            elif self.touch_mode == "figure_zoom_pan":
 
                 touch = event
                 # let the child widgets handle the event if they want
@@ -643,14 +663,13 @@ class MatplotFigure3D(ScatterLayout):
                 # rotate/scale/translate
                 if touch in self._touches and touch.grab_current == self:
                     self.transform_with_touch(touch)
-                    self._last_touch_pos[touch] = (touch.pos[0],
-                                                   touch.pos[1])
+                    self._last_touch_pos[touch] = (touch.pos[0], touch.pos[1])
 
                 # stop propagating if its within our bounds
                 if self.collide_point(x, y):
                     return True
 
-            elif self.touch_mode == 'cursor':
+            elif self.touch_mode == "cursor":
                 if self.cursor_label is None:
                     return
                 # trick to improve app fps (use for big data)
@@ -658,7 +677,10 @@ class MatplotFigure3D(ScatterLayout):
 
                     if self.last_hover_time is None:
                         self.last_hover_time = time.time()
-                    elif time.time() - self.last_hover_time < self.max_hover_rate:
+                    elif (
+                        time.time() - self.last_hover_time
+                        < self.max_hover_rate
+                    ):
                         return
                     else:
                         self.last_hover_time = None
@@ -668,15 +690,22 @@ class MatplotFigure3D(ScatterLayout):
 
                 if self.scale != 1.0:
 
-                    self.myevent.x = event.x / self.scale - \
-                        self.pos[0] / self.scale - self.bbox[0][0]
-                    self.myevent.y = event.y / self.scale - \
-                        self.pos[1] / self.scale - self.bbox[0][1]
+                    self.myevent.x = (
+                        event.x / self.scale
+                        - self.pos[0] / self.scale
+                        - self.bbox[0][0]
+                    )
+                    self.myevent.y = (
+                        event.y / self.scale
+                        - self.pos[1] / self.scale
+                        - self.bbox[0][1]
+                    )
 
                 self.myevent.x = self.myevent.x / self.crop_factor
                 self.myevent.y = self.myevent.y / self.crop_factor
                 self.myevent.inaxes = self.figure.canvas.inaxes(
-                    (self.myevent.x, self.myevent.y))
+                    (self.myevent.x, self.myevent.y)
+                )
                 self.myevent.pickradius = self.pickradius
                 self.myevent.projection = self.projection
                 self.myevent.compare_xdata = False
@@ -691,21 +720,27 @@ class MatplotFigure3D(ScatterLayout):
                     self.myevent.xdata = sel.target[0]
                     self.myevent.ydata = sel.target[1]
                     try:
-                        if hasattr(sel.artist, 'get_data_3d'):  # 3d line
-                            result = [sel.artist.get_data_3d()[0][sel.index],
-                                      sel.artist.get_data_3d()[1][sel.index],
-                                      sel.artist.get_data_3d()[2][sel.index]]
+                        if hasattr(sel.artist, "get_data_3d"):  # 3d line
+                            result = [
+                                sel.artist.get_data_3d()[0][sel.index],
+                                sel.artist.get_data_3d()[1][sel.index],
+                                sel.artist.get_data_3d()[2][sel.index],
+                            ]
 
-                        elif hasattr(sel.artist, '_offsets3d'):  # scatter
-                            result = [sel.artist._offsets3d[0].data[sel.index],
-                                      sel.artist._offsets3d[1].data[sel.index],
-                                      sel.artist._offsets3d[2][sel.index]]
+                        elif hasattr(sel.artist, "_offsets3d"):  # scatter
+                            result = [
+                                sel.artist._offsets3d[0].data[sel.index],
+                                sel.artist._offsets3d[1].data[sel.index],
+                                sel.artist._offsets3d[2][sel.index],
+                            ]
                         else:  # other z is a projectio. so it can not reflrct a real value
                             result = get_xyz_mouse_click(
-                                self.myevent, self.figure.axes[0])
+                                self.myevent, self.figure.axes[0]
+                            )
                     except BaseException:
                         result = get_xyz_mouse_click(
-                            self.myevent, self.figure.axes[0])
+                            self.myevent, self.figure.axes[0]
+                        )
 
                     self.cursor_alpha = 1.0
 
@@ -715,12 +750,15 @@ class MatplotFigure3D(ScatterLayout):
                     self.last_y = result[1]
                     self.last_z = result[2]
 
-                    x = ax.xaxis.get_major_formatter(
-                    ).format_data_short(result[0])
-                    y = ax.yaxis.get_major_formatter(
-                    ).format_data_short(result[1])
-                    z = ax.yaxis.get_major_formatter(
-                    ).format_data_short(result[2])
+                    x = ax.xaxis.get_major_formatter().format_data_short(
+                        result[0]
+                    )
+                    y = ax.yaxis.get_major_formatter().format_data_short(
+                        result[1]
+                    )
+                    z = ax.yaxis.get_major_formatter().format_data_short(
+                        result[2]
+                    )
                     # self.text.set_text(f"x={x}, y={y}, z={z}")
                     self.cursor_label.label_x_value = f"{x}"
                     self.cursor_label.label_y_value = f"{y}"
@@ -728,7 +766,7 @@ class MatplotFigure3D(ScatterLayout):
 
                     self.recalcul_cursor()
 
-            elif self.touch_mode == 'pan':
+            elif self.touch_mode == "pan":
                 touch = event
                 # let the child widgets handle the event if they want
                 if self.collide_point(x, y) and not touch.grab_current == self:
@@ -742,14 +780,13 @@ class MatplotFigure3D(ScatterLayout):
                 # rotate/scale/translate
                 if touch in self._touches and touch.grab_current == self:
                     self.transform_with_touch2(touch)
-                    self._last_touch_pos[touch] = (touch.pos[0],
-                                                   touch.pos[1])
+                    self._last_touch_pos[touch] = (touch.pos[0], touch.pos[1])
 
                 # stop propagating if its within our bounds
                 if self.collide_point(x, y):
                     return True
 
-            elif self.touch_mode == 'zoom':
+            elif self.touch_mode == "zoom":
                 ax = self.figure.axes[0]
             else:
 
@@ -759,7 +796,7 @@ class MatplotFigure3D(ScatterLayout):
 
                 self.figcanvas._lastx, self.figcanvas._lasty = x, real_y
 
-                s = 'motion_notify_event'
+                s = "motion_notify_event"
                 event = MouseEvent(
                     s,
                     self.figcanvas,
@@ -767,7 +804,8 @@ class MatplotFigure3D(ScatterLayout):
                     y,
                     self.figcanvas._button,
                     self.figcanvas._key,
-                    guiEvent=None)
+                    guiEvent=None,
+                )
                 event.inaxes = self.figure.axes[0]
                 self.figcanvas.callbacks.process(s, event)
 
@@ -777,20 +815,16 @@ class MatplotFigure3D(ScatterLayout):
     def recalcul_cursor(self):
         ax = self.figure.axes[0]
         x, y, z = mplot3d.proj3d.transform(
-            self.last_x, self.last_y, self.last_z, ax.M)
+            self.last_x, self.last_y, self.last_z, ax.M
+        )
         xy_pos = ax.transData.transform([(x, y)])
         self.center_graph = (
-            float(
-                xy_pos[0][0]) *
-            self.crop_factor +
-            self.x,
-            float(
-                xy_pos[0][1]) *
-            self.crop_factor +
-            self.y)
+            float(xy_pos[0][0]) * self.crop_factor + self.x,
+            float(xy_pos[0][1]) * self.crop_factor + self.y,
+        )
 
     def _onSize(self, o, size):
-        """ _onsize method """
+        """_onsize method"""
         if self.figure is None:
             return
         # Create a new, correctly sized bitmap
@@ -804,10 +838,10 @@ class MatplotFigure3D(ScatterLayout):
         winch = self._width / dpival
         hinch = self._height / dpival
         self.figure.set_size_inches(
-            winch / self.crop_factor,
-            hinch / self.crop_factor)
+            winch / self.crop_factor, hinch / self.crop_factor
+        )
 
-        s = 'resize_event'
+        s = "resize_event"
         event = ResizeEvent(s, self.figcanvas)
         self.figcanvas.callbacks.process(s, event)
         self.figcanvas.draw_idle()
@@ -818,8 +852,9 @@ class MatplotFigure3D(ScatterLayout):
 
         if self.cursor_label and self.figure and self.cursor_label is not None:
             self.cursor_label.xmin_line = self.parent.x + dp(20)
-            self.cursor_label.ymax_line = self.parent.y + \
-                int(math.ceil(h)) * self.crop_factor - dp(48)
+            self.cursor_label.ymax_line = (
+                self.parent.y + int(math.ceil(h)) * self.crop_factor - dp(48)
+            )
 
 
 class _FigureCanvas(FigureCanvasAgg):
@@ -869,7 +904,7 @@ class MatplotFigure3DLayout(BoxLayout):
     figure_background = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
     def set_figure_background(self, color):
@@ -895,25 +930,26 @@ class CursorInfo(FloatLayout):
     xmin_line = NumericProperty(1)
     ymax_line = NumericProperty(1)
     show_cursor = BooleanProperty(False)
-    label_x = StringProperty('x')
-    label_y = StringProperty('y')
-    label_z = StringProperty('z')
-    label_x_value = StringProperty('')
-    label_y_value = StringProperty('')
-    label_z_value = StringProperty('')
+    label_x = StringProperty("x")
+    label_y = StringProperty("y")
+    label_z = StringProperty("z")
+    label_x_value = StringProperty("")
+    label_y_value = StringProperty("")
+    label_z_value = StringProperty("")
     text_color = ColorProperty([0, 0, 0, 1])
     text_font = StringProperty("Roboto")
     text_size = NumericProperty(dp(14))
     background_color = ColorProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
-        """ init class """
+        """init class"""
         super().__init__(**kwargs)
 
 
-Factory.register('MatplotFigure3D', MatplotFigure3D)
+Factory.register("MatplotFigure3D", MatplotFigure3D)
 
-Builder.load_string('''
+Builder.load_string(
+    """
 <MatplotFigure3DLayout>
     figure_wgt : figure_wgt.__self__
     canvas.before:
@@ -994,4 +1030,5 @@ Builder.load_string('''
                 font_name : root.text_font
                 color: root.text_color
 
-''')
+"""
+)

@@ -1,5 +1,12 @@
 from matplotlib.backend_bases import NavigationToolbar2
-from kivy.properties import ObjectProperty, OptionProperty, ListProperty, BooleanProperty, NumericProperty, StringProperty
+from kivy.properties import (
+    ObjectProperty,
+    OptionProperty,
+    ListProperty,
+    BooleanProperty,
+    NumericProperty,
+    StringProperty,
+)
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.relativelayout import RelativeLayout
@@ -11,8 +18,8 @@ from kivy.metrics import dp
 
 
 class MatplotNavToolbar(BoxLayout):
-
     """Figure Toolbar"""
+
     pan_btn = ObjectProperty(None)
     zoom_btn = ObjectProperty(None)
     home_btn = ObjectProperty(None)
@@ -46,7 +53,7 @@ class _NavigationToolbar(NavigationToolbar2):
             self._init_toolbar()
 
     def _init_toolbar(self):
-        print('init toolbar')
+        print("init toolbar")
         self.widget.home_btn.bind(on_press=self.home)
         self.widget.pan_btn.bind(on_press=self.pan)
         self.widget.zoom_btn.bind(on_press=self.zoom)
@@ -64,8 +71,8 @@ class _NavigationToolbar(NavigationToolbar2):
 
 
 class KivyMatplotNavToolbar(RelativeLayout):
-
     """Figure Toolbar"""
+
     pan_btn = ObjectProperty(None)
     zoom_btn = ObjectProperty(None)
     home_btn = ObjectProperty(None)
@@ -76,11 +83,12 @@ class KivyMatplotNavToolbar(RelativeLayout):
     figure_wgt = ObjectProperty(None)
     figure_wgt_layout = ObjectProperty(None)  # 3D graph only
     orientation_type = OptionProperty(
-        "actionbar", options=["rail", "actionbar"])
+        "actionbar", options=["rail", "actionbar"]
+    )
     nav_icon = OptionProperty(
-        "normal", options=["minimal", "normal", "all", "3D", "custom"])
-    hover_mode = OptionProperty(
-        "touch", options=["touch", "desktop"])
+        "normal", options=["minimal", "normal", "all", "3D", "custom"]
+    )
+    hover_mode = OptionProperty("touch", options=["touch", "desktop"])
 
     custom_icon = ListProperty([])
     show_cursor_data = BooleanProperty(False)
@@ -100,17 +108,13 @@ class KivyMatplotNavToolbar(RelativeLayout):
 
             # pan button
             self.add_nav_btn(
-                "pan",
-                self.set_touch_mode,
-                mode='pan',
-                btn_type='group')
+                "pan", self.set_touch_mode, mode="pan", btn_type="group"
+            )
 
             # zoombox button
             self.add_nav_btn(
-                "zoom",
-                self.set_touch_mode,
-                mode='zoombox',
-                btn_type='group')
+                "zoom", self.set_touch_mode, mode="zoombox", btn_type="group"
+            )
 
         elif self.nav_icon == "normal" and not self.custom_icon:
 
@@ -119,52 +123,53 @@ class KivyMatplotNavToolbar(RelativeLayout):
 
             # pan button
             self.add_nav_btn(
-                "pan",
-                self.set_touch_mode,
-                mode='pan',
-                btn_type='group')
+                "pan", self.set_touch_mode, mode="pan", btn_type="group"
+            )
 
             # zoombox button
             self.add_nav_btn(
-                "zoom",
-                self.set_touch_mode,
-                mode='zoombox',
-                btn_type='group')
+                "zoom", self.set_touch_mode, mode="zoombox", btn_type="group"
+            )
 
             if self.hover_mode == "touch" and not self.compare_hover:
                 # cursor button
                 self.add_nav_btn(
                     "cursor",
                     self.set_touch_mode,
-                    mode='cursor',
-                    btn_type='group')
+                    mode="cursor",
+                    btn_type="group",
+                )
             elif self.hover_mode == "touch":
                 # nearest hover button
                 self.add_nav_btn(
                     "hover",
                     self.change_hover_type,
-                    mode='nearest',
-                    btn_type='hover_type')
+                    mode="nearest",
+                    btn_type="hover_type",
+                )
                 # compare hover button
                 self.add_nav_btn(
                     "hover_compare",
                     self.change_hover_type,
-                    mode='compare',
-                    btn_type='hover_type')
+                    mode="compare",
+                    btn_type="hover_type",
+                )
 
             elif self.compare_hover:
                 # nearest hover button
                 self.add_nav_btn(
                     "hover",
                     self.change_hover_type,
-                    mode='nearest',
-                    btn_type='hover_type')
+                    mode="nearest",
+                    btn_type="hover_type",
+                )
                 # compare hover button
                 self.add_nav_btn(
                     "hover_compare",
                     self.change_hover_type,
-                    mode='compare',
-                    btn_type='hover_type')
+                    mode="compare",
+                    btn_type="hover_type",
+                )
 
         elif self.nav_icon == "all" and not self.custom_icon:
 
@@ -179,60 +184,59 @@ class KivyMatplotNavToolbar(RelativeLayout):
 
             # pan button
             self.add_nav_btn(
-                "pan",
-                self.set_touch_mode,
-                mode='pan',
-                btn_type='group')
+                "pan", self.set_touch_mode, mode="pan", btn_type="group"
+            )
 
             # zoombox button
             self.add_nav_btn(
-                "zoom",
-                self.set_touch_mode,
-                mode='zoombox',
-                btn_type='group')
+                "zoom", self.set_touch_mode, mode="zoombox", btn_type="group"
+            )
 
             if self.hover_mode == "touch" and not self.compare_hover:
                 # cursor button
                 self.add_nav_btn(
                     "cursor",
                     self.set_touch_mode,
-                    mode='cursor',
-                    btn_type='group')
+                    mode="cursor",
+                    btn_type="group",
+                )
 
             elif self.hover_mode == "touch":
                 # nearest hover button
                 self.add_nav_btn(
                     "hover",
                     self.change_hover_type,
-                    mode='nearest',
-                    btn_type='group')
+                    mode="nearest",
+                    btn_type="group",
+                )
                 # compare hover button
                 self.add_nav_btn(
                     "hover_compare",
                     self.change_hover_type,
-                    mode='compare',
-                    btn_type='group')
+                    mode="compare",
+                    btn_type="group",
+                )
 
             elif self.compare_hover:
                 # nearest hover button
                 self.add_nav_btn(
                     "hover",
                     self.change_hover_type,
-                    mode='nearest',
-                    btn_type='group')
+                    mode="nearest",
+                    btn_type="group",
+                )
                 # compare hover button
                 self.add_nav_btn(
                     "hover_compare",
                     self.change_hover_type,
-                    mode='compare',
-                    btn_type='group')
+                    mode="compare",
+                    btn_type="group",
+                )
 
             # minmax button
             self.add_nav_btn(
-                "minmax",
-                self.set_touch_mode,
-                mode='minmax',
-                btn_type='group')
+                "minmax", self.set_touch_mode, mode="minmax", btn_type="group"
+            )
 
             # home button
             self.add_nav_btn("autoscale", self.autoscale)
@@ -242,8 +246,9 @@ class KivyMatplotNavToolbar(RelativeLayout):
                 self.add_nav_btn(
                     "drag_legend",
                     self.set_touch_mode,
-                    mode='drag_legend',
-                    btn_type='group')
+                    mode="drag_legend",
+                    btn_type="group",
+                )
 
         elif self.custom_icon:
             pass
@@ -256,38 +261,41 @@ class KivyMatplotNavToolbar(RelativeLayout):
             self.add_nav_btn(
                 "axis-z-rotate-clockwise",
                 self.set_touch_mode_3D,
-                mode='rotate',
-                btn_type='group')
+                mode="rotate",
+                btn_type="group",
+            )
 
             # data pan/zoom button
             self.add_nav_btn(
-                "pan",
-                self.set_touch_mode_3D,
-                mode='pan',
-                btn_type='group')
+                "pan", self.set_touch_mode_3D, mode="pan", btn_type="group"
+            )
 
             # figure pan/zoom button
             self.add_nav_btn(
                 "magnify",
                 self.set_touch_mode_3D,
-                mode='figure_zoom_pan',
-                btn_type='group')
+                mode="figure_zoom_pan",
+                btn_type="group",
+            )
 
             # cursor button
             self.add_nav_btn(
                 "cursor",
                 self.set_touch_mode_3D,
-                mode='cursor',
-                btn_type='group')
+                mode="cursor",
+                btn_type="group",
+            )
 
         if self.show_cursor_data:
             Window.bind(mouse_pos=self.on_motion)
 
     def on_motion(self, *args):
-        '''Kivy Event to trigger mouse event on motion
-           `enter_notify_event`.
-        '''
-        if self.figure_wgt._pressed:  # Do not process this event if there's a touch_move
+        """Kivy Event to trigger mouse event on motion
+        `enter_notify_event`.
+        """
+        if (
+            self.figure_wgt._pressed
+        ):  # Do not process this event if there's a touch_move
             return
         pos = args[1]
         newcoord = self.figure_wgt.to_widget(pos[0], pos[1])
@@ -311,15 +319,16 @@ class KivyMatplotNavToolbar(RelativeLayout):
                     self.current_label.text = ""
 
     def add_nav_btn(self, icon, fct, mode=None, btn_type=None):
-        if btn_type == 'group':
-            if 'hover' in icon:
+        if btn_type == "group":
+            if "hover" in icon:
                 btn = Factory.NavToggleButton(group="hover_type")
                 if self.hover_mode == "touch":
                     btn.bind(
-                        on_release=lambda x: self.set_touch_mode('cursor'))
+                        on_release=lambda x: self.set_touch_mode("cursor")
+                    )
 
-                elif mode == 'nearest':
-                    btn.state = 'down'
+                elif mode == "nearest":
+                    btn.state = "down"
 
             else:
                 btn = Factory.NavToggleButton(group="toolbar_btn")
@@ -335,12 +344,12 @@ class KivyMatplotNavToolbar(RelativeLayout):
         else:
             btn.bind(on_release=lambda x: fct())
 
-        if self.nav_icon != "3D" and mode == 'pan':
+        if self.nav_icon != "3D" and mode == "pan":
             # by default pan button is press down
-            btn.state = 'down'
+            btn.state = "down"
 
-        if self.nav_icon == "3D" and mode == 'rotate':
-            btn.state = 'down'
+        if self.nav_icon == "3D" and mode == "rotate":
+            btn.state = "down"
 
         self.ids.container.add_widget(btn)
 
@@ -348,7 +357,7 @@ class KivyMatplotNavToolbar(RelativeLayout):
         self.figure_wgt.touch_mode = mode
 
     def home(self):
-        if hasattr(self.figure_wgt, 'main_home'):
+        if hasattr(self.figure_wgt, "main_home"):
             self.figure_wgt.main_home()
         else:
             self.figure_wgt.home()
@@ -372,9 +381,10 @@ class KivyMatplotNavToolbar(RelativeLayout):
         self.figure_wgt_layout.figure_wgt.home()
 
 
-Factory.register('MatplotNavToolbar', MatplotNavToolbar)
+Factory.register("MatplotNavToolbar", MatplotNavToolbar)
 
-Builder.load_string('''
+Builder.load_string(
+    """
 #:import nav_icons kivy_matplotlib_widget.icon_definitions.nav_icons
 
 <MatplotNavToolbar>:
@@ -494,4 +504,5 @@ Builder.load_string('''
     background_color :1,1,1,1
 
 
-        ''')
+        """
+)

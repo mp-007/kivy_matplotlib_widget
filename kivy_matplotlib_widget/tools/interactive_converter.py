@@ -1,14 +1,19 @@
-
 from kivy_matplotlib_widget.uix.hover_widget import (
-    add_hover, BaseHoverFloatLayout, TagCompareHover, PlotlyHover
+    add_hover,
+    BaseHoverFloatLayout,
+    TagCompareHover,
+    PlotlyHover,
 )
 from kivy.properties import (
-    ColorProperty, NumericProperty, StringProperty, BooleanProperty
+    ColorProperty,
+    NumericProperty,
+    StringProperty,
+    BooleanProperty,
 )
 import multiprocessing as mp
 from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
 from kivy_matplotlib_widget.uix.legend_widget import (
-    MatplotlibInteractiveLegend
+    MatplotlibInteractiveLegend,
 )
 import matplotlib.pyplot as plt
 from kivy.core.window import Window
@@ -16,14 +21,15 @@ from kivy.metrics import dp
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.config import Config
+
 # avoid double-click on touch device
-Config.set('input', 'mouse', 'mouse,disable_on_activity')
+Config.set("input", "mouse", "mouse,disable_on_activity")
 # disable red dot (user use mouse scroll for zooming)
-Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
-Config.set('kivy', 'keyboard_mode', '')  # disable keyboard mode
+Config.set("input", "mouse", "mouse,multitouch_on_demand")
+Config.set("kivy", "keyboard_mode", "")  # disable keyboard mode
 
 
-KV = '''
+KV = """
 Screen
     figure_wgt:figure_wgt
 
@@ -55,9 +61,9 @@ Screen
             hist_range:app.hist_range
             autoscale_tight:app.autoscale_tight
 
-'''
+"""
 
-KV3D = '''
+KV3D = """
 Screen
     figure_wgt_layout:figure_wgt_layout
 
@@ -77,7 +83,7 @@ Screen
         MatplotFigure3DLayout:
             id:figure_wgt_layout
 
-'''
+"""
 
 
 class GraphApp(App):
@@ -92,26 +98,28 @@ class GraphApp(App):
     hist_range = BooleanProperty(True)
     autoscale_tight = BooleanProperty(False)
 
-    def __init__(self,
-                 figure,
-                 show_cursor_data=True,
-                 hover_widget=PlotlyHover,
-                 compare_hover_widget=TagCompareHover,
-                 compare_hover=False,
-                 legend_instance=None,
-                 custom_handlers=None,
-                 multi_legend=False,
-                 drag_legend=False,
-                 legend_do_scroll_x=True,
-                 disable_interactive_legend=False,
-                 max_hover_rate=5 / 60,
-                 disable_hover=False,
-                 fast_draw=True,
-                 hist_range=True,
-                 autoscale_tight=False,
-                 register_cursor=None,
-                 figsize=None,
-                 **kwargs):
+    def __init__(
+        self,
+        figure,
+        show_cursor_data=True,
+        hover_widget=PlotlyHover,
+        compare_hover_widget=TagCompareHover,
+        compare_hover=False,
+        legend_instance=None,
+        custom_handlers=None,
+        multi_legend=False,
+        drag_legend=False,
+        legend_do_scroll_x=True,
+        disable_interactive_legend=False,
+        max_hover_rate=5 / 60,
+        disable_hover=False,
+        fast_draw=True,
+        hist_range=True,
+        autoscale_tight=False,
+        register_cursor=None,
+        figsize=None,
+        **kwargs,
+    ):
         """__init__ function class"""
         self.figure = figure
         self.hover_widget = hover_widget
@@ -147,7 +155,7 @@ class GraphApp(App):
         return self.screen
 
     def on_start(self, *args):
-        if hasattr(self.figure, 'get'):
+        if hasattr(self.figure, "get"):
             figure = self.figure.get()[0]
         else:
             figure = self.figure
@@ -160,56 +168,65 @@ class GraphApp(App):
 
         if self.register_cursor:
             self.screen.figure_wgt.register_cursor(
-                pickables=self.register_cursor)
+                pickables=self.register_cursor
+            )
 
         if self.compare_hover:
             if self.compare_hover_widget:
                 add_hover(
                     self.screen.figure_wgt,
-                    mode='desktop',
-                    hover_type='compare',
-                    hover_widget=self.compare_hover_widget())
+                    mode="desktop",
+                    hover_type="compare",
+                    hover_widget=self.compare_hover_widget(),
+                )
             else:
                 add_hover(
                     self.screen.figure_wgt,
-                    mode='desktop',
-                    hover_type='compare')
+                    mode="desktop",
+                    hover_type="compare",
+                )
 
         if not self.disable_hover:
             if self.hover_widget:
                 add_hover(
                     self.screen.figure_wgt,
-                    mode='desktop',
-                    hover_widget=self.hover_widget())
+                    mode="desktop",
+                    hover_widget=self.hover_widget(),
+                )
             else:
-                add_hover(self.screen.figure_wgt, mode='desktop')
+                add_hover(self.screen.figure_wgt, mode="desktop")
         add_minmax(self.screen.figure_wgt)
 
         if not self.disable_interactive_legend:
-            if len(self.screen.figure_wgt.figure.axes) > 0 and \
-                (self.screen.figure_wgt.figure.axes[0].get_legend() or
-                 self.legend_instance):
+            if len(self.screen.figure_wgt.figure.axes) > 0 and (
+                self.screen.figure_wgt.figure.axes[0].get_legend()
+                or self.legend_instance
+            ):
 
                 if self.multi_legend:
                     for i, current_legend_instance in enumerate(
-                            self.legend_instance):
+                        self.legend_instance
+                    ):
                         if i == 0:
                             MatplotlibInteractiveLegend(
                                 self.screen.figure_wgt,
                                 legend_instance=current_legend_instance,
-                                custom_handlers=self.custom_handlers[i])
+                                custom_handlers=self.custom_handlers[i],
+                            )
                         else:
                             MatplotlibInteractiveLegend(
                                 self.screen.figure_wgt,
                                 legend_instance=current_legend_instance,
                                 custom_handlers=self.custom_handlers[i],
-                                multi_legend=True)
+                                multi_legend=True,
+                            )
 
                 else:
                     MatplotlibInteractiveLegend(
                         self.screen.figure_wgt,
                         legend_instance=self.legend_instance,
-                        custom_handlers=self.custom_handlers)
+                        custom_handlers=self.custom_handlers,
+                    )
 
 
 def app_window(plot_queue, **kwargs):
@@ -221,10 +238,7 @@ class GraphApp3D(App):
     figure = None
     figsize = None  # figure size in pixel. inpu is a tuple ex: (1200,400)
 
-    def __init__(self,
-                 figure,
-                 figsize=None,
-                 **kwargs):
+    def __init__(self, figure, figsize=None, **kwargs):
         """__init__ function class"""
         self.figure = figure
         self.figsize = figsize
@@ -242,7 +256,7 @@ class GraphApp3D(App):
         return self.screen
 
     def on_start(self, *args):
-        if hasattr(self.figure, 'get'):
+        if hasattr(self.figure, "get"):
             figure = self.figure.get()[0]
         else:
             figure = self.figure
@@ -260,14 +274,14 @@ def app_window_3D(plot_queue, **kwargs):
 
 
 def interactive_graph(fig, **kwargs):
-    """ Interactive grpah using multiprocessing method.
+    """Interactive grpah using multiprocessing method.
     function need to be call in if __name__ == "__main__": method
     """
     # Create a queue to pass the Matplotlib instance object
     plot_queue = mp.Queue()
 
     # switch to agg backend
-    plt.switch_backend('Agg')
+    plt.switch_backend("Agg")
 
     # Put the Matplotlib instance object into the queue
     plot_queue.put((fig,))
@@ -286,14 +300,14 @@ def interactive_graph3D_ipython(fig, **kwargs):
 
 
 def interactive_graph3D(fig, **kwargs):
-    """ Interactive grpah using multiprocessing method.
+    """Interactive grpah using multiprocessing method.
     function need to be call in if __name__ == "__main__": method
     """
     # Create a queue to pass the Matplotlib instance object
     plot_queue = mp.Queue()
 
     # switch to agg backend
-    plt.switch_backend('Agg')
+    plt.switch_backend("Agg")
 
     # Put the Matplotlib instance object into the queue
     plot_queue.put((fig,))
@@ -306,8 +320,8 @@ def interactive_graph3D(fig, **kwargs):
 if __name__ == "__main__":
     fig, ax1 = plt.subplots(1, 1)
 
-    line1, = ax1.plot([0, 1, 2, 3, 4], [1, 2, 8, 9, 4], label='line1')
-    line2, = ax1.plot([2, 8, 10, 15], [15, 0, 2, 4], label='line2')
+    (line1,) = ax1.plot([0, 1, 2, 3, 4], [1, 2, 8, 9, 4], label="line1")
+    (line2,) = ax1.plot([2, 8, 10, 15], [15, 0, 2, 4], label="line2")
 
     ax1.legend()
 
