@@ -12,8 +12,9 @@ https://github.com/kivy/kivy/issues/8631
 So this tool will certaintly be removed or modified in the futur
 """
 
-from kivy.utils import platform
 from io import BytesIO
+
+from kivy.utils import platform
 from PIL import Image as PILImage
 
 if platform == 'win':
@@ -29,10 +30,7 @@ elif platform == 'macosx':
     """
     Appkit come with pyobjc
     """
-    from AppKit import (
-        NSPasteboard,
-        NSPasteboardTypePNG,
-    )
+    from AppKit import NSPasteboard, NSPasteboardTypePNG
     from Foundation import NSData
 
 

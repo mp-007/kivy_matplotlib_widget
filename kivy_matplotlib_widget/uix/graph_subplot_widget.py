@@ -1,24 +1,29 @@
 """ Custom MatplotFigure
 """
 
-import math
 import copy
+import math
 import time
 
 import matplotlib
+
 matplotlib.use('Agg')
-from kivy_matplotlib_widget.uix.graph_widget import _FigureCanvas ,MatplotFigure,MatplotlibEvent
-from kivy.utils import get_color_from_hex
-from matplotlib.colors import to_hex
-from kivy.metrics import dp
-from kivy_matplotlib_widget.tools.cursors import cursor
-from kivy.properties import NumericProperty,BooleanProperty,OptionProperty
-from kivy.graphics.texture import Texture
 import matplotlib.image as mimage
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.transforms as mtransforms
+from kivy.graphics.texture import Texture
+from kivy.metrics import dp
+from kivy.properties import BooleanProperty, NumericProperty, OptionProperty
+from kivy.utils import get_color_from_hex
+from matplotlib.colors import to_hex
 from matplotlib.container import BarContainer
+
+from kivy_matplotlib_widget.tools.cursors import cursor
+from kivy_matplotlib_widget.uix.graph_widget import (MatplotFigure,
+                                                     MatplotlibEvent,
+                                                     _FigureCanvas)
+
 
 def _iter_axes_subartists(ax):
     r"""Yield all child `Artist`\s (*not* `Container`\s) of *ax*."""

@@ -2,34 +2,41 @@
 and kivy scatter
 """
 
-import math
 import copy
+import math
 
 import matplotlib
+
 matplotlib.use('Agg')
 selector_widgets_available = False
 try:
     selector_widgets_available = True
-    from kivy_matplotlib_widget.uix.selector_widget import ResizeRelativeLayout,LassoRelativeLayout,EllipseRelativeLayout,SpanRelativeLayout
+    from kivy_matplotlib_widget.uix.selector_widget import (
+        EllipseRelativeLayout, LassoRelativeLayout, ResizeRelativeLayout,
+        SpanRelativeLayout)
 except ImportError:
     print('Selector widgets are not available')
+from weakref import WeakKeyDictionary
+
+import numpy as np
+from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty, OptionProperty, DictProperty
-from kivy.uix.widget import Widget
-from kivy.vector import Vector
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib import cbook
-from matplotlib.colors import to_hex
-from matplotlib.backend_bases import ResizeEvent
-from weakref import WeakKeyDictionary
 from kivy.metrics import dp
-import numpy as np
+from kivy.properties import (AliasProperty, BooleanProperty,
+                             BoundedNumericProperty, DictProperty,
+                             ListProperty, NumericProperty, ObjectProperty,
+                             OptionProperty)
+from kivy.uix.widget import Widget
 from kivy.utils import get_color_from_hex
-from kivy.core.window import Window
-from kivy.clock import Clock
+from kivy.vector import Vector
+from matplotlib import cbook
+from matplotlib.backend_bases import ResizeEvent
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.colors import to_hex
+
 
 class MatplotlibEvent:
     x=None

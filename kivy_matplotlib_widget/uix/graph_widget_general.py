@@ -2,25 +2,27 @@
 and kivy scatter
 """
 
-import math
 import copy
+import math
 
 import matplotlib
+
 matplotlib.use('Agg')
+import numpy as np
+from kivy.base import EventLoop
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty
+from kivy.metrics import dp
+from kivy.properties import (AliasProperty, BooleanProperty,
+                             BoundedNumericProperty, ListProperty,
+                             NumericProperty, ObjectProperty)
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
+from matplotlib.backend_bases import MouseEvent, ResizeEvent
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.transforms import Bbox
-from matplotlib.backend_bases import ResizeEvent
-from matplotlib.backend_bases import MouseEvent
-from kivy.metrics import dp
-import numpy as np
-from kivy.base import EventLoop
+
 
 class MatplotFigureGeneral(Widget):
     """Widget to show a matplotlib figure in kivy.

@@ -1,19 +1,12 @@
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-
-from kivy.properties import (
-    ObjectProperty,
-    OptionProperty,
-    NumericProperty,
-    StringProperty,
-    BooleanProperty,
-    ColorProperty
-    )
-
-from kivy.lang import Builder
-from kivy.core.window import Window
-from kivy.metrics import dp
 import numpy as np
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.properties import (BooleanProperty, ColorProperty, NumericProperty,
+                             ObjectProperty, OptionProperty, StringProperty)
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+
 
 def add_hover(figure_wgt,mode='touch',label_x='x',label_y='y',hover_widget=None,hover_type='nearest'):
     """ add hover to matpotlib figure

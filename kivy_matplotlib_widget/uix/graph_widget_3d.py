@@ -4,30 +4,33 @@
 import math
 
 import matplotlib
+
 matplotlib.use('Agg')
+import time
+from weakref import WeakKeyDictionary
+
+import numpy as np
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, BoundedNumericProperty, AliasProperty, \
-    NumericProperty,StringProperty,ColorProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.vector import Vector
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.backend_bases import ResizeEvent
-from matplotlib.backend_bases import MouseEvent
-from matplotlib.colors import to_hex
 from kivy.metrics import dp
-from kivy_matplotlib_widget.tools.cursors import cursor
-
-import numpy as np
-from mpl_toolkits import mplot3d
-from weakref import WeakKeyDictionary
-from matplotlib import cbook
-
+from kivy.properties import (AliasProperty, BooleanProperty,
+                             BoundedNumericProperty, ColorProperty,
+                             ListProperty, NumericProperty, ObjectProperty,
+                             StringProperty)
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatter import Scatter
 from kivy.uix.scatterlayout import ScatterLayout
-from kivy.uix.floatlayout import FloatLayout
-import time
+from kivy.vector import Vector
+from matplotlib import cbook
+from matplotlib.backend_bases import MouseEvent, ResizeEvent
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.colors import to_hex
+from mpl_toolkits import mplot3d
+
+from kivy_matplotlib_widget.tools.cursors import cursor
+
 
 def line2d_seg_dist(p1, p2, p0):
     """distance(s) from line defined by p1 - p2 to point(s) p0
