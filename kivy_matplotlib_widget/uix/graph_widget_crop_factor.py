@@ -1,31 +1,32 @@
 """MatplotFigure is based on https://github.com/mp-007/kivy_matplotlib_widget"""
 
-import numpy as np
-from kivy.metrics import dp
 from weakref import WeakKeyDictionary
-from matplotlib.backend_bases import ResizeEvent
-from matplotlib import cbook
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from kivy.vector import Vector
-from kivy.uix.widget import Widget
+
+import numpy as np
+from kivy.graphics.texture import Texture
+from kivy.graphics.transformation import Matrix
+from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
-    ObjectProperty,
-    ListProperty,
-    BooleanProperty,
     AliasProperty,
-    NumericProperty,
-    OptionProperty,
+    BooleanProperty,
     BoundedNumericProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    OptionProperty,
     StringProperty,
 )
-from kivy.lang import Builder
-from kivy.graphics.transformation import Matrix
-from kivy.graphics.texture import Texture
+from kivy.uix.widget import Widget
+from kivy.vector import Vector
+from matplotlib import cbook
+from matplotlib.backend_bases import ResizeEvent
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 __all__ = ("MatplotFigureCropFactor",)
 
-import math
 import copy
+import math
 
 import matplotlib
 

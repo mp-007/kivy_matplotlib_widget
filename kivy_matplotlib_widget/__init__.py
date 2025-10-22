@@ -1,8 +1,7 @@
-from kivy.core.text import LabelBase
 import os
 
 import kivy
-
+from kivy.core.text import LabelBase
 
 kivy.require("2.3.0")
 

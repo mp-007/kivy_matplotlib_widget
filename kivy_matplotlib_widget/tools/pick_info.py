@@ -9,18 +9,19 @@ https://github.com/anntzer/mplcursors
 # have a `format_coord`-like method); PolyCollection (picking is not well
 # defined).
 
-from collections import namedtuple
-from contextlib import suppress
 import copy
 import functools
 import inspect
-from inspect import Signature
 import itertools
-from numbers import Integral
 import re
 import warnings
+from collections import namedtuple
+from contextlib import suppress
+from inspect import Signature
+from numbers import Integral
 from weakref import WeakSet
 
+import numpy as np
 from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import RendererBase
@@ -37,7 +38,6 @@ from matplotlib.patches import Patch, PathPatch, Polygon, Rectangle, Wedge
 from matplotlib.quiver import Barbs, Quiver
 from matplotlib.text import Text
 from matplotlib.transforms import Affine2D
-import numpy as np
 
 
 def _register_scatter():

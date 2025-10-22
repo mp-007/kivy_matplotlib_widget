@@ -5,10 +5,10 @@ mplcursors project
 https://github.com/anntzer/mplcursors
 """
 
-from collections.abc import Iterable
-from contextlib import suppress
 import copy
 import weakref
+from collections.abc import Iterable
+from contextlib import suppress
 from weakref import WeakKeyDictionary
 
 import matplotlib as mpl

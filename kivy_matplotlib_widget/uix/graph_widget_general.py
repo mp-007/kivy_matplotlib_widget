@@ -2,31 +2,30 @@
 and kivy scatter
 """
 
-from kivy.factory import Factory
-from kivy.base import EventLoop
-import numpy as np
-from kivy.metrics import dp
-from matplotlib.backend_bases import MouseEvent
-from matplotlib.backend_bases import ResizeEvent
-from matplotlib.transforms import Bbox
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from kivy.vector import Vector
-from kivy.uix.widget import Widget
-from kivy.properties import (
-    ObjectProperty,
-    ListProperty,
-    BooleanProperty,
-    BoundedNumericProperty,
-    AliasProperty,
-    NumericProperty,
-)
-from kivy.lang import Builder
-from kivy.graphics.transformation import Matrix
-from kivy.graphics.texture import Texture
-import math
 import copy
+import math
 
 import matplotlib
+import numpy as np
+from kivy.base import EventLoop
+from kivy.factory import Factory
+from kivy.graphics.texture import Texture
+from kivy.graphics.transformation import Matrix
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.properties import (
+    AliasProperty,
+    BooleanProperty,
+    BoundedNumericProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+)
+from kivy.uix.widget import Widget
+from kivy.vector import Vector
+from matplotlib.backend_bases import MouseEvent, ResizeEvent
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.transforms import Bbox
 
 matplotlib.use("Agg")
 

@@ -1,19 +1,17 @@
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.textinput import TextInput
-
+from kivy.clock import Clock
+from kivy.core import text as coretext
+from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
-    ObjectProperty,
-    NumericProperty,
-    StringProperty,
     BooleanProperty,
     ColorProperty,
     DictProperty,
+    NumericProperty,
+    ObjectProperty,
+    StringProperty,
 )
-
-from kivy.lang import Builder
-from kivy.metrics import dp
-from kivy.clock import Clock
-from kivy.core import text as coretext
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.textinput import TextInput
 
 
 def add_minmax(

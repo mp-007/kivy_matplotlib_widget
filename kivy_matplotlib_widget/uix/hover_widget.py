@@ -1,19 +1,17 @@
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-
+import numpy as np
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
-    ObjectProperty,
-    OptionProperty,
-    NumericProperty,
-    StringProperty,
     BooleanProperty,
     ColorProperty,
+    NumericProperty,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
 )
-
-from kivy.lang import Builder
-from kivy.core.window import Window
-from kivy.metrics import dp
-import numpy as np
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 
 
 def add_hover(

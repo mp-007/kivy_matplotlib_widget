@@ -1,26 +1,28 @@
-from kivy_matplotlib_widget.uix.hover_widget import (
-    add_hover,
-    BaseHoverFloatLayout,
-    TagCompareHover,
-    PlotlyHover,
-)
+import multiprocessing as mp
+
+import matplotlib.pyplot as plt
+from kivy.app import App
+from kivy.config import Config
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
+    BooleanProperty,
     ColorProperty,
     NumericProperty,
     StringProperty,
-    BooleanProperty,
 )
-import multiprocessing as mp
-from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
+
+from kivy_matplotlib_widget.uix.hover_widget import (
+    BaseHoverFloatLayout,
+    PlotlyHover,
+    TagCompareHover,
+    add_hover,
+)
 from kivy_matplotlib_widget.uix.legend_widget import (
     MatplotlibInteractiveLegend,
 )
-import matplotlib.pyplot as plt
-from kivy.core.window import Window
-from kivy.metrics import dp
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.config import Config
+from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
 
 # avoid double-click on touch device
 Config.set("input", "mouse", "mouse,disable_on_activity")

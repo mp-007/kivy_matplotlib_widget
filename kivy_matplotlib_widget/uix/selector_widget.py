@@ -1,43 +1,40 @@
-from kivy.lang import Builder
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.properties import (
-    ColorProperty,
-    ObjectProperty,
-    OptionProperty,
-    BooleanProperty,
-    ListProperty,
-    NumericProperty,
-)
-from kivy.metrics import dp
-from kivy.core.window import Window
-from kivy.utils import platform
-
-import numpy as np
-from matplotlib.path import Path
-from matplotlib.patches import Ellipse as Ellipse_mpl
-import matplotlib.colors as mcolors
-
+import copy
 from functools import partial
-from math import cos, sin, atan2, pi
+from math import atan2, cos, pi, sin
 from typing import List, Optional
 
+import matplotlib.colors as mcolors
+import numpy as np
 from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.event import EventDispatcher
 from kivy.graphics import (
-    Ellipse,
-    Line,
     Color,
-    Point,
-    Mesh,
-    PushMatrix,
-    PopMatrix,
-    Rotate,
+    Ellipse,
     InstructionGroup,
+    Line,
+    Mesh,
+    Point,
+    PopMatrix,
+    PushMatrix,
+    Rotate,
 )
 from kivy.graphics.tesselator import Tesselator
-from kivy.event import EventDispatcher
-import copy
-
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.properties import (
+    BooleanProperty,
+    ColorProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    OptionProperty,
+)
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.utils import platform
+from matplotlib.patches import Ellipse as Ellipse_mpl
+from matplotlib.path import Path
 
 kv = """
 <ResizeSelect>:

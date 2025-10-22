@@ -1,20 +1,21 @@
-from matplotlib.backend_bases import NavigationToolbar2
+from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.factory import Factory
+from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
+    BooleanProperty,
+    ListProperty,
+    NumericProperty,
     ObjectProperty,
     OptionProperty,
-    ListProperty,
-    BooleanProperty,
-    NumericProperty,
     StringProperty,
 )
-from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.clock import Clock
-from kivy.factory import Factory
+from matplotlib.backend_bases import NavigationToolbar2
+
 from kivy_matplotlib_widget.uix.hover_widget import add_hover
-from kivy.core.window import Window
-from kivy.metrics import dp
 
 
 class MatplotNavToolbar(BoxLayout):

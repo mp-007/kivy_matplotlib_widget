@@ -1,26 +1,27 @@
 """Custom MatplotFigure"""
 
-from kivy_matplotlib_widget.uix.graph_widget import (
-    _FigureCanvas,
-    MatplotFigure,
-    MatplotlibEvent,
-)
-from kivy.properties import NumericProperty, BooleanProperty, OptionProperty
-from matplotlib.container import BarContainer
-import matplotlib.transforms as mtransforms
-import matplotlib.patches as mpatches
-import matplotlib.lines as mlines
-import matplotlib.image as mimage
-from kivy.graphics.texture import Texture
-from kivy_matplotlib_widget.tools.cursors import cursor
-from kivy.metrics import dp
-from matplotlib.colors import to_hex
-from kivy.utils import get_color_from_hex
-import math
 import copy
+import math
 import time
 
 import matplotlib
+import matplotlib.image as mimage
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+import matplotlib.transforms as mtransforms
+from kivy.graphics.texture import Texture
+from kivy.metrics import dp
+from kivy.properties import BooleanProperty, NumericProperty, OptionProperty
+from kivy.utils import get_color_from_hex
+from matplotlib.colors import to_hex
+from matplotlib.container import BarContainer
+
+from kivy_matplotlib_widget.tools.cursors import cursor
+from kivy_matplotlib_widget.uix.graph_widget import (
+    MatplotFigure,
+    MatplotlibEvent,
+    _FigureCanvas,
+)
 
 matplotlib.use("Agg")
 
