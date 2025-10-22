@@ -1,3 +1,4 @@
+from kivy.core.text import LabelBase
 import os
 
 import kivy
@@ -10,8 +11,10 @@ path = os.path.dirname(__file__)
 
 fonts_path = os.path.join(path, f"fonts{os.sep}")
 """Path to fonts directory."""
-from kivy.core.text import LabelBase
-LabelBase.register(name="NavigationIcons",fn_regular= fonts_path + "NavigationIcons.ttf")
+LabelBase.register(
+    name="NavigationIcons",
+    fn_regular=fonts_path +
+    "NavigationIcons.ttf")
 
 import kivy_matplotlib_widget.factory_registers  # NOQA
 
