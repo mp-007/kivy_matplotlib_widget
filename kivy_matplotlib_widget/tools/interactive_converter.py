@@ -1,21 +1,27 @@
 
 from kivy.config import Config
+
 Config.set('input', 'mouse', 'mouse,disable_on_activity') #avoid double-click on touch device
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand') #disable red dot (user use mouse scroll for zooming)
 Config.set('kivy', 'keyboard_mode', '') #disable keyboard mode
 
-from kivy.lang import Builder
-from kivy.app import App
-from kivy.properties import ColorProperty,NumericProperty,StringProperty,BooleanProperty
-from kivy.metrics import dp
-from kivy.core.window import Window
+import multiprocessing as mp
 
 import matplotlib.pyplot as plt
-import multiprocessing as mp   
+from kivy.app import App
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.properties import (BooleanProperty, ColorProperty, NumericProperty,
+                             StringProperty)
 
-from kivy_matplotlib_widget.uix.legend_widget import MatplotlibInteractiveLegend
+from kivy_matplotlib_widget.uix.hover_widget import (BaseHoverFloatLayout,
+                                                     PlotlyHover,
+                                                     TagCompareHover,
+                                                     add_hover)
+from kivy_matplotlib_widget.uix.legend_widget import \
+    MatplotlibInteractiveLegend
 from kivy_matplotlib_widget.uix.minmax_widget import add_minmax
-from kivy_matplotlib_widget.uix.hover_widget import add_hover,BaseHoverFloatLayout,TagCompareHover,PlotlyHover
 
 KV = '''
 Screen

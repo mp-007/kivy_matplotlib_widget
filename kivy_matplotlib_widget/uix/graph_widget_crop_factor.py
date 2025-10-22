@@ -3,26 +3,29 @@ __all__ = (
     'MatplotFigureCropFactor',
 )
 
-import math
 import copy
+import math
 
 import matplotlib
+
 matplotlib.use('Agg')
 
+from weakref import WeakKeyDictionary
+
+import numpy as np
 from kivy.graphics.texture import Texture
 from kivy.graphics.transformation import Matrix
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, AliasProperty, \
-    NumericProperty, OptionProperty, BoundedNumericProperty, StringProperty
+from kivy.metrics import dp
+from kivy.properties import (AliasProperty, BooleanProperty,
+                             BoundedNumericProperty, ListProperty,
+                             NumericProperty, ObjectProperty, OptionProperty,
+                             StringProperty)
 from kivy.uix.widget import Widget
 from kivy.vector import Vector
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib import cbook
 from matplotlib.backend_bases import ResizeEvent
-from weakref import WeakKeyDictionary
-from kivy.metrics import dp
-import numpy as np
-
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 
 class MatplotFigureCropFactor(Widget):
