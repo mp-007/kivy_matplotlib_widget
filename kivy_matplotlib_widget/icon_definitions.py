@@ -23,7 +23,7 @@ nav_icons = {
     "cursor": "\U0000067a",
     "autoscale": "\U00000511",
     "capture": "\U000011d5",
-    "magnify":"\U0000080e",
-    "axis-z-rotate-clockwise":"\U000011cf",
+    "magnify": "\U0000080e",
+    "axis-z-rotate-clockwise": "\U000011cf",
     "blank": " ",
 }
