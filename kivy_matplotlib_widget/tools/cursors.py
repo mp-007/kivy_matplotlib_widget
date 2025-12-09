@@ -1,14 +1,14 @@
-"""This file is based on mplcursors project. Some changes as been made to 
+"""This file is based on mplcursors project. Some changes as been made to
 worked with kivy and my project
 
 mplcursors project
 https://github.com/anntzer/mplcursors
 """
 
-from collections.abc import Iterable
-from contextlib import suppress
 import copy
 import weakref
+from collections.abc import Iterable
+from contextlib import suppress
 from weakref import WeakKeyDictionary
 
 import matplotlib as mpl
@@ -17,6 +17,7 @@ from matplotlib.container import Container
 from matplotlib.figure import Figure
 
 import kivy_matplotlib_widget.tools.pick_info as pick_info
+
 
 def _get_rounded_intersection_area(bbox_1, bbox_2):
     """Compute the intersection area between two bboxes rounded to 8 digits."""
@@ -41,17 +42,23 @@ def _is_alive(artist):
         and artist.axes
         # `cla()` clears `.axes` since matplotlib/matplotlib#24627 (3.7);
         # iterating over subartists can be very slow.
-        and (getattr(mpl, "__version_info__", ()) >= (3, 7)
-             or (artist.container in artist.axes.containers
-                 if isinstance(artist, pick_info.ContainerArtist) else
-                 artist in _iter_axes_subartists(artist.axes))))
+        and (
+            getattr(mpl, "__version_info__", ()) >= (3, 7)
+            or (
+                artist.container in artist.axes.containers
+                if isinstance(artist, pick_info.ContainerArtist)
+                else artist in _iter_axes_subartists(artist.axes)
+            )
+        )
+    )
 
 
 def _reassigned_axes_event(event, ax):
     """Reassign *event* to *ax*."""
     event = copy.copy(event)
-    event.xdata, event.ydata = (
-        ax.transData.inverted().transform((event.x, event.y)))
+    event.xdata, event.ydata = ax.transData.inverted().transform(
+        (event.x, event.y)
+    )
     return event
 
 
@@ -67,11 +74,7 @@ class Cursor:
 
     _keep_alive = WeakKeyDictionary()
 
-    def __init__(self,
-                 artists,
-                 *,
-                 multiple=False,
-                 highlight=False):
+    def __init__(self, artists, *, multiple=False, highlight=False):
         """
         Construct a cursor.
 
@@ -103,8 +106,7 @@ class Cursor:
 
         self._multiple = multiple
         self._highlight = highlight
-        self._selections=[]
-
+        self._selections = []
 
     @property
     def artists(self):
@@ -125,17 +127,22 @@ class Cursor:
         r"""The tuple of current `Selection`\s."""
         for sel in self._selections:
             if sel.annotation.axes is None:
-                raise RuntimeError("Annotation unexpectedly removed; "
-                                   "use 'cursor.remove_selection' instead")
+                raise RuntimeError(
+                    "Annotation unexpectedly removed; "
+                    "use 'cursor.remove_selection' instead"
+                )
         return tuple(self._selections)
 
     def _get_figure(self, aoc):
         """Return the parent figure of artist-or-container *aoc*."""
         if isinstance(aoc, Container):
             try:
-                ca, = {artist for artist in (ref() for ref in self._artists)
-                       if isinstance(artist, pick_info.ContainerArtist)
-                          and artist.container is aoc}
+                (ca,) = {
+                    artist
+                    for artist in (ref() for ref in self._artists)
+                    if isinstance(artist, pick_info.ContainerArtist)
+                    and artist.container is aoc
+                }
             except ValueError:
                 raise ValueError(f"Cannot find parent figure of {aoc}")
             return ca.figure
@@ -146,9 +153,12 @@ class Cursor:
         """Return the parent axes of artist-or-container *aoc*."""
         if isinstance(aoc, Container):
             try:
-                ca, = {artist for artist in (ref() for ref in self._artists)
-                       if isinstance(artist, pick_info.ContainerArtist)
-                          and artist.container is aoc}
+                (ca,) = {
+                    artist
+                    for artist in (ref() for ref in self._artists)
+                    if isinstance(artist, pick_info.ContainerArtist)
+                    and artist.container is aoc
+                }
             except ValueError:
                 raise ValueError(f"Cannot find parent axes of {aoc}")
             return ca.axes
@@ -167,15 +177,16 @@ class Cursor:
         method) in order to ensure cleanup upon deselection.
         """
         hl = pick_info.make_highlight(
-            artist, *args,
-            **{"highlight_kwargs": self.highlight_kwargs, **kwargs})
+            artist,
+            *args,
+            **{"highlight_kwargs": self.highlight_kwargs, **kwargs},
+        )
         if hl:
             artist.axes.add_artist(hl)
             return hl
 
     # def _on_select_event(self, event):
-        
-        
+
     #     if (not self._filter_mouse_event(event)
     #             # See _on_pick.  (We only suppress selects, not deselects.)
     #             or event in self._suppressed_events):
@@ -209,14 +220,18 @@ class Cursor:
     #         pass
 
     def xy_event(self, event):
-        
+
         # Work around lack of support for twinned axes.
-        per_axes_event = {ax: _reassigned_axes_event(event, ax)
-                          for ax in {artist.axes for artist in self.artists}}
+        per_axes_event = {
+            ax: _reassigned_axes_event(event, ax)
+            for ax in {artist.axes for artist in self.artists}
+        }
         pis = []
         for artist in self.artists:
-            if (artist.axes is None  # Removed or figure-level artist.
-                    or not artist.get_visible()):
+            if (
+                artist.axes is None  # Removed or figure-level artist.
+                or not artist.get_visible()
+            ):
                 continue
             pi = pick_info.compute_pick(artist, per_axes_event[artist.axes])
             if pi:
@@ -226,31 +241,41 @@ class Cursor:
         # rather than not adding the pick_info to pis at all, because in
         # transient hover mode, selections should be cleared out only when no
         # candidate picks (including such duplicates) exist at all.
-        pi = min((pi for pi in pis
-                  if not any((pi.artist, tuple(pi.target))
-                             == (other.artist, tuple(other.target))
-                             for other in self._selections)),
-                 key=lambda pi: pi.dist, default=None)
-            
+        pi = min(
+            (
+                pi
+                for pi in pis
+                if not any(
+                    (pi.artist, tuple(pi.target))
+                    == (other.artist, tuple(other.target))
+                    for other in self._selections
+                )
+            ),
+            key=lambda pi: pi.dist,
+            default=None,
+        )
+
         if pi:
             if event.compare_xdata:
-                min_distance=pi.dist
+                min_distance = pi.dist
                 # print(pi)
-                pi_list=[]
+                pi_list = []
                 for pi in pis:
-                    if not any((pi.artist, tuple(pi.target))
-                               == (other.artist, tuple(other.target))
-                               for other in self._selections):
-                        if pi.dist==min_distance:
+                    if not any(
+                        (pi.artist, tuple(pi.target))
+                        == (other.artist, tuple(other.target))
+                        for other in self._selections
+                    ):
+                        if pi.dist == min_distance:
                             pi_list.append(pi)
                 return pi_list
 
-            #do kivy stuff
+            # do kivy stuff
             # self.add_selection(pi)
             return pi
 
 
-def cursor(pltfig,pickables=None,remove_artists=[], **kwargs):
+def cursor(pltfig, pickables=None, remove_artists=[], **kwargs):
     """
     Create a `Cursor` for a list of artists, containers, and axes.
 
@@ -274,12 +299,14 @@ def cursor(pltfig,pickables=None,remove_artists=[], **kwargs):
     # "TypeError: Cursor.__init__() got multiple values for argument 'artists'"
     if "artists" in kwargs:
         raise TypeError(
-            "cursor() got an unexpected keyword argument 'artists'")
+            "cursor() got an unexpected keyword argument 'artists'"
+        )
 
     if pickables is None:
         pickables = [pltfig]
-    elif (isinstance(pickables, Container)
-          or not isinstance(pickables, Iterable)):
+    elif isinstance(pickables, Container) or not isinstance(
+        pickables, Iterable
+    ):
         pickables = [pickables]
 
     def iter_unpack_figures(pickables):

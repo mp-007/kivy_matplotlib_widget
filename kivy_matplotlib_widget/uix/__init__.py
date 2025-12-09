@@ -1,3 +1,4 @@
-#remove font_manager "debug" from matplotib
+# remove font_manager "debug" from matplotib
 import logging
-logging.getLogger('matplotlib.font_manager').disabled = True
+
+logging.getLogger("matplotlib.font_manager").disabled = True

@@ -1,0 +1,5 @@
+[flake8]
+# E203: whitespace before ':' - Black formatter adds this for slices, which is PEP8 compliant
+# This is a known flake8 false positive when using Black
+extend-ignore = E203
+max-line-length = 79
